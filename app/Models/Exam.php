@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 class Exam extends Model
 {
     use HasFactory, HashID;
+    public $guarded = [];
 
     public function topics()
     {

@@ -3,6 +3,9 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Admin\IncomingExamsController;
+use App\Http\Controllers\Admin\ExamController;
+use App\Http\Controllers\Admin\TopicController;
+use App\Http\Controllers\Admin\QuestionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,6 +30,11 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
         Route::get('/incoming-exams/{incomingExam}', [IncomingExamsController::class, 'show']);
         Route::post('/incoming-exams', [IncomingExamsController::class, 'store']);
 
-        Route::get('/exams', [Admin\ExamsController::class, 'index']);
+        Route::get('/exams', [ExamController::class, 'index']);
+        Route::post('/exams', [ExamController::class, 'store']);
+        Route::post('/exams/{exam}/topics', [TopicController::class, 'store']);
+
+        // Route::put('/topics/{topic}', [TopicController::class, 'update']);
+        Route::post('topics/{topic}/questions', [QuestionController::class, 'store']);
     });
 });
