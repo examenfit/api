@@ -18,6 +18,7 @@ return [
     'paths' => [
         'api/*',
         'sanctum/*',
+        'storage/*',
     ],
 
     'allowed_methods' => ['*'],

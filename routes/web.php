@@ -17,6 +17,9 @@ Route::get('/', function () {
     dump('test');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth'])->name('dashboard');
+Route::get('/storage/{path}', function ($file) {
+    $path = storage_path('app/public/'.$file);
+
+    return response(file_get_contents($path), 200)
+            ->header('Content-Type', mime_content_type($path));
+})->where('path', '(.*)');

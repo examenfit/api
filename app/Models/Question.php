@@ -13,4 +13,9 @@ class Question extends Model
     {
         return $this->belongsTo(Topic::class);
     }
+
+    public function attachments()
+    {
+        return $this->morphToMany(Attachment::class, 'attachable');
+    }
 }

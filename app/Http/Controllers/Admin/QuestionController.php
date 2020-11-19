@@ -6,6 +6,8 @@ use App\Models\Topic;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\QuestionResource;
+use App\Models\Question;
+use App\Rules\HashIdExists;
 
 class QuestionController extends Controller
 {
@@ -16,17 +18,20 @@ class QuestionController extends Controller
             'points' => 'required|integer',
             'introduction' => 'required|string',
             'text' => 'required|string',
-            'answer' => 'array',
-            'answer.*.text' => 'required|string',
+            'answers' => 'array',
+            'answers.*.text' => 'required|string',
+            'answers.*.points' => 'required|number',
             'attachments' => 'array',
-            'attachments.*.id' => 'required',
+            'attachments.*.id' => ['required', new HashIdExists('attachments')],
         ]);
 
-        // dd($data);
+        $question = $topic->questions()->create($data);
 
-        // Create Question
+        if ($data['attachments']) {
+            $question->addAttachments($data['attachments']);
+        }
 
-        // Create answer
+
 
         // Attach attachments
 

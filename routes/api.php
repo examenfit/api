@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\IncomingExamsController;
 use App\Http\Controllers\Admin\ExamController;
 use App\Http\Controllers\Admin\TopicController;
 use App\Http\Controllers\Admin\QuestionController;
+use App\Http\Controllers\Admin\AttachmentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,5 +37,7 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
 
         // Route::put('/topics/{topic}', [TopicController::class, 'update']);
         Route::post('topics/{topic}/questions', [QuestionController::class, 'store']);
+
+        Route::post('attachments', [AttachmentController::class, 'store']);
     });
 });

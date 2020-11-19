@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\Exam;
 use App\Models\Topic;
+use App\Rules\HashIdExists;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ExamResource;
@@ -16,9 +17,15 @@ class TopicController extends Controller
         $data = $request->validate([
             'name' => 'required|string',
             'introduction' => 'nullable|string',
+            'attachments' => 'array',
+            'attachments.*.id' => ['required', new HashIdExists('attachments')],
         ]);
 
         $topic = $exam->topics()->create($data);
+
+        if ($data['attachments']) {
+            $topic->addAttachments($data['attachments']);
+        }
 
         return new TopicResource($topic);
     }
