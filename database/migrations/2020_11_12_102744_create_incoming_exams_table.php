@@ -15,6 +15,7 @@ class CreateIncomingExamsTable extends Migration
     {
         Schema::create('incoming_exams', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('exam_id')->nullable()->constrained('exams')->onDelete('set null');
             $table->string('level')->nullable();
             $table->integer('year')->nullable();
             $table->integer('term')->nullable();

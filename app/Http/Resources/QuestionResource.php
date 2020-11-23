@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use Vinkla\Hashids\Facades\Hashids;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class QuestionResource extends JsonResource
@@ -14,6 +15,13 @@ class QuestionResource extends JsonResource
      */
     public function toArray($request)
     {
-        return parent::toArray($request);
+        return [
+            'id' => $this->hash_id,
+            'topic_id' => Hashids::encode($this->topic_id),
+            'number' => $this->number,
+            'points' => $this->points,
+            'introduction' => $this->introduction,
+            'text' => $this->text,
+        ];
     }
 }

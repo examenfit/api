@@ -23,21 +23,28 @@ class TopicController extends Controller
 
         $topic = $exam->topics()->create($data);
 
-        if ($data['attachments']) {
+        if (isset($data['attachments'])) {
             $topic->addAttachments($data['attachments']);
         }
 
-        return new TopicResource($topic);
+        $exam->load('topics.questions');
+
+        return new ExamResource($exam);
     }
 
     public function update(Request $request, Topic $topic)
     {
+
         $data = $request->validate([
+            'name' => 'nullable|string',
             'introduction' => 'nullable|string',
+            'attachments' => 'nullable|array',
+            'attachments.*.id' => ['required', new HashIdExists('attachments')],
         ]);
 
         $topic->update($data);
-        $exam = $topic->exam->load('topics');
+
+        $exam = $topic->exam->load('topics.questions');
 
         return new ExamResource($exam);
     }

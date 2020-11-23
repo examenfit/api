@@ -14,6 +14,7 @@ class Topic extends Model
         'name',
         'introduction',
     ];
+    public $with = ['attachments'];
 
     public function exam()
     {

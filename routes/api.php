@@ -35,6 +35,8 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
         Route::post('/exams', [ExamController::class, 'store']);
         Route::post('/exams/{exam}/topics', [TopicController::class, 'store']);
 
+        Route::put('/topics/{topic}', [TopicController::class, 'update']);
+
         // Route::put('/topics/{topic}', [TopicController::class, 'update']);
         Route::post('topics/{topic}/questions', [QuestionController::class, 'store']);
 

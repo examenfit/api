@@ -16,7 +16,7 @@ class CreateAnswerSectionsTable extends Migration
         Schema::create('answer_sections', function (Blueprint $table) {
             $table->id();
             $table->foreignId('answer_id')->constrained('answers')->onDelete('cascade');
-            $table->text('contents');
+            $table->text('text');
             $table->integer('points')->nullable();
             $table->timestamps();
         });
