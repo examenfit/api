@@ -22,6 +22,8 @@ class QuestionResource extends JsonResource
             'points' => $this->points,
             'introduction' => $this->introduction,
             'text' => $this->text,
+            'attachments' => AttachmentResource::collection($this->whenLoaded('attachments')),
+            'answers' => AnswerResource::collection($this->whenLoaded('answers'))
         ];
     }
 }

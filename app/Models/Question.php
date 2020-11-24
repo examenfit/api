@@ -17,6 +17,7 @@ class Question extends Model
         'introduction',
         'text',
     ];
+    public $with = ['attachments'];
 
     public function topic()
     {
@@ -33,10 +34,10 @@ class Question extends Model
         return $this->morphToMany(Attachment::class, 'attachable');
     }
 
-    // public function addAnswers($answers, $type)
-    // {
-    //     return $this->
-    // }
+    public function facets()
+    {
+        return $this->morphToMany(Facet::class, 'facetable');
+    }
 
     public function addAttachments($attachments)
     {

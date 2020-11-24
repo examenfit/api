@@ -10,6 +10,7 @@ class Exam extends Model
 {
     use HasFactory, HashID;
     public $fillable = [
+        'course_id',
         'level',
         'year',
         'term',

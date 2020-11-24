@@ -47,6 +47,8 @@ class IncomingExamsController extends Controller
 
     public function show(IncomingExam $incomingExam)
     {
+        $incomingExam->load('exam.topics.questions');
+
         return new IncomingExamResource(
             $incomingExam
         );

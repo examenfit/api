@@ -14,4 +14,9 @@ class IncomingExam extends Model
     public $casts = [
         'assignment_contents' => 'array',
     ];
+
+    public function exam()
+    {
+        return $this->belongsTo(Exam::class);
+    }
 }

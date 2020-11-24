@@ -20,6 +20,7 @@ class ExamController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
+            'course_id' => 'required',
             'level' => 'required|in:havo,vwo',
             'year' => 'required|integer|min:2010',
             'term' => 'required|integer|in:1,2',

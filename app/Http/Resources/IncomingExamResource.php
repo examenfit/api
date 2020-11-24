@@ -25,6 +25,7 @@ class IncomingExamResource extends JsonResource
             'correction_requirement_file_url' => Storage::disk('public')->url($this->correction_requirement_file_path),
             'standardization_url' => $this->standardization_url,
             'assignment_contents' => $this->assignment_contents,
+            'exam' => new ExamResource($this->whenLoaded('exam')),
         ];
     }
 }
