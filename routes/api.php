@@ -1,12 +1,13 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Auth\AuthenticatedSessionController;
-use App\Http\Controllers\Admin\IncomingExamsController;
 use App\Http\Controllers\Admin\ExamController;
 use App\Http\Controllers\Admin\TopicController;
+use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\Admin\QuestionController;
 use App\Http\Controllers\Admin\AttachmentController;
+use App\Http\Controllers\Admin\IncomingExamsController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,6 +32,10 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
         Route::get('/incoming-exams/{incomingExam}', [IncomingExamsController::class, 'show']);
         Route::post('/incoming-exams', [IncomingExamsController::class, 'store']);
 
+        Route::get('/courses', [CourseController::class, 'index']);
+        Route::get('/courses/{course}', [CourseController::class, 'show']);
+        Route::get('courses/{course}/facets', [CourseController::class, 'showFacets']);
+
         Route::get('/exams', [ExamController::class, 'index']);
         Route::post('/exams', [ExamController::class, 'store']);
         Route::post('/exams/{exam}/topics', [TopicController::class, 'store']);
@@ -39,6 +44,7 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
         Route::put('/topics/{topic}', [TopicController::class, 'update']);
 
         Route::post('topics/{topic}/questions', [QuestionController::class, 'store']);
+
 
         Route::post('attachments', [AttachmentController::class, 'store']);
     });

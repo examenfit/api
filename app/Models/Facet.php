@@ -2,12 +2,17 @@
 
 namespace App\Models;
 
+use App\Support\HashID;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Facet extends Model
 {
-    use HasFactory;
+    use HasFactory, HashID;
+
+    public $casts = [
+        'is_singular' => 'boolean',
+    ];
 
     public function course()
     {

@@ -41,12 +41,19 @@ class Question extends Model
 
     public function addAttachments($attachments)
     {
-        return $this->attachments()->sync(
-            collect($attachments)
-                ->pluck('id')
-                ->transform(function ($id) {
-                    return Hashids::decode($id)[0];
-                })
-        , false);
+        $collection = collect($attachments)
+            ->pluck('id')
+            ->transform(fn ($id) => Hashids::decode($id)[0]);
+
+        return $this->attachments()->sync($collection, false);
+    }
+
+    public function addFacets($facets)
+    {
+        $collection = collect($facets)
+            ->pluck('id')
+            ->transform(fn ($id) => Hashids::decode($id)[0]);
+
+        return $this->facets()->sync($collection, false);
     }
 }

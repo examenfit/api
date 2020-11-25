@@ -21,6 +21,8 @@ class QuestionController extends Controller
             'answerSteps' => 'array',
             'answerSteps.*.text' => 'required|string',
             'answerSteps.*.points' => 'required|integer',
+            'facets' => 'array',
+            'facets.*.id' => ['required', new HashIdExists('facets')],
             'attachments' => 'array',
             'attachments.*.id' => ['required', new HashIdExists('attachments')],
         ]);
@@ -37,6 +39,10 @@ class QuestionController extends Controller
             ]);
 
             $answer->sections()->createMany($data['answerSteps']);
+        }
+
+        if (isset($data['facets'])) {
+            $question->addFacets($data['facets']);
         }
 
         $exam = $topic->exam;

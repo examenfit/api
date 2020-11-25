@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use Illuminate\Support\Arr;
 use Vinkla\Hashids\Facades\Hashids;
 
 trait HashID
@@ -13,7 +14,13 @@ trait HashID
 
     public function hashToId($hashid)
     {
-        return Hashids::decode($hashid)[0];
+        $decodedValue = Arr::first(Hashids::decode($hashid));
+
+        if (!is_int($decodedValue)) {
+            return false;
+        }
+
+        return $decodedValue;
     }
 
     /**

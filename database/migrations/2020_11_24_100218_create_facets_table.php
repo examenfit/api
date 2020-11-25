@@ -18,6 +18,7 @@ class CreateFacetsTable extends Migration
             $table->foreignId('course_id')->nullable()->constrained('courses')->onDelete('cascade');
             $table->foreignId('parent_id')->nullable()->constrained('facets')->onDelete('cascade');
             $table->string('name');
+            $table->boolean('is_singular')->default(true);
             $table->timestamps();
         });
     }

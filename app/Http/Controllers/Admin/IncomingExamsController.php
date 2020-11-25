@@ -12,7 +12,7 @@ class IncomingExamsController extends Controller
     public function index()
     {
         return IncomingExamResource::collection(
-            IncomingExam::all()
+            IncomingExam::with('exam')->get()
         );
     }
 
