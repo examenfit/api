@@ -16,9 +16,11 @@ class CreateExamsTable extends Migration
         Schema::create('exams', function (Blueprint $table) {
             $table->id();
             $table->foreignId('course_id')->constrained('courses')->onDelete('cascade');
+            $table->string('status')->default('concept');
             $table->string('level');
             $table->integer('year');
             $table->integer('term');
+            $table->json('assignment_contents')->nullable();
             $table->timestamps();
         });
     }

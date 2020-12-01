@@ -20,6 +20,7 @@ class QuestionResource extends JsonResource
             'topic_id' => Hashids::encode($this->topic_id),
             'number' => $this->number,
             'points' => $this->points,
+            'proportion_value' => $this->proportion_value,
             'introduction' => $this->introduction,
             'text' => $this->text,
             'attachments' => AttachmentResource::collection($this->whenLoaded('attachments')),

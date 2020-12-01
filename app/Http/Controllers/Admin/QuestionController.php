@@ -16,6 +16,7 @@ class QuestionController extends Controller
         $data = $request->validate([
             'number' => 'required|integer',
             'points' => 'required|integer',
+            'proportion_value' => 'required|integer',
             'introduction' => 'required|string',
             'text' => 'required|string',
             'answerSteps' => 'array',
@@ -46,7 +47,7 @@ class QuestionController extends Controller
         }
 
         $exam = $topic->exam;
-        $exam->load('topics.questions');
+        $exam->load('topics.questions', 'files');
 
         return new ExamResource($exam);
     }
@@ -80,7 +81,7 @@ class QuestionController extends Controller
         $question->update($data);
 
         $exam = $question->topic->exam;
-        $exam->load('topics.questions');
+        $exam->load('topics.questions', 'files');
 
         return new ExamResource($exam);
     }

@@ -14,27 +14,59 @@ class ExamController extends Controller
     {
         $exams = Exam::all();
 
-        return ExamResource($exams);
+        return ExamResource::collection($exams);
+    }
+
+    public function show(Exam $exam)
+    {
+        $exam->load('topics.questions', 'files');
+
+        return new ExamResource($exam);
     }
 
     public function store(Request $request)
+    {
+        $data = $request->validate([
+            'course_id' => 'required|exists:courses,id',
+            'level' => 'required|string|in:havo,vwo',
+            'year' => 'required|integer|min:2010',
+            'term' => 'required|integer|in:1,2',
+            'files' => 'required|min:1',
+            'files.*.name' => 'required|string',
+            'files.*.file' => 'required|file|mimes:pdf',
+        ]);
+
+        $exam = Exam::create([
+            'course_id' => $data['course_id'],
+            'status' => 'prepared',
+            'level' => $data['level'],
+            'year' => $data['year'],
+            'term' => $data['term'],
+        ]);
+
+        foreach ($data['files'] as $file) {
+            $exam->files()->create([
+                'name' => $file['name'],
+                'path' => $file['file']->store('cito_files', 'public'),
+            ]);
+        }
+
+        // Process to queue
+
+        return response(200);
+    }
+
+    public function update(Request $request, Exam $exam)
     {
         $data = $request->validate([
             'course_id' => 'required',
             'level' => 'required|in:havo,vwo',
             'year' => 'required|integer|min:2010',
             'term' => 'required|integer|in:1,2',
-            'incomingExam_id' => 'nullable',
         ]);
 
-        $exam = Exam::create($data);
-        $exam->load('topics');
-
-        if (isset($data['incomingExam_id']) && strlen($data['incomingExam_id'])) {
-            IncomingExam::findByHashId($data['incomingExam_id'])->update([
-                'exam_id' => $exam->id,
-            ]);
-        }
+        $exam->update($data);
+        $exam->load('topics.questions', 'files');
 
         return new ExamResource($exam);
     }

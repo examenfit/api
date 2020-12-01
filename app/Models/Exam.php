@@ -11,9 +11,11 @@ class Exam extends Model
     use HasFactory, HashID;
     public $fillable = [
         'course_id',
+        'status',
         'level',
         'year',
         'term',
+        'status'
     ];
 
     public function topics()
@@ -24,5 +26,10 @@ class Exam extends Model
     public function questions()
     {
         return $this->hasManyThrough(Question::class, Topic::class);
+    }
+
+    public function files()
+    {
+        return $this->hasMany(ExamSourceFile::class);
     }
 }

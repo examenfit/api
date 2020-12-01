@@ -16,10 +16,13 @@ class ExamResource extends JsonResource
     {
         return [
             'id' => $this->hash_id,
+            'status' => $this->status,
             'level' => $this->level,
             'year' => $this->year,
             'term' => $this->term,
             'topics' => TopicResource::collection($this->whenLoaded('topics')),
+            'files' => ExamSourceFileResource::collection($this->whenLoaded('files')),
+            'assignment_contents' => $this->assignment_contents,
         ];
     }
 }

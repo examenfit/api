@@ -6,17 +6,9 @@ use App\Support\HashID;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class IncomingExam extends Model
+class ExamSourceFile extends Model
 {
     use HasFactory, HashID;
 
     public $guarded = [];
-    public $casts = [
-        'assignment_contents' => 'array',
-    ];
-
-    public function exam()
-    {
-        return $this->belongsTo(Exam::class);
-    }
 }

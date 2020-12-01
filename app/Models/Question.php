@@ -14,6 +14,7 @@ class Question extends Model
     public $fillable = [
         'number',
         'points',
+        'proportion_value',
         'introduction',
         'text',
     ];

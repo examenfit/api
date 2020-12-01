@@ -18,6 +18,7 @@ class CreateQuestionsTable extends Migration
             $table->foreignId('topic_id');
             $table->integer('number');
             $table->integer('points');
+            $table->decimal('proportion_value')->nullable();
             $table->text('introduction');
             $table->text('text');
             $table->timestamps();

@@ -13,7 +13,7 @@ class ProcessCitoPDF extends Command
      *
      * @var string
      */
-    protected $signature = 'ef:processPDF {incomingExam}';
+    protected $signature = 'ef:processPDF {exam}';
 
     /**
      * The console command description.
@@ -39,8 +39,14 @@ class ProcessCitoPDF extends Command
      */
     public function handle()
     {
-        $incomingExam = IncomingExam::findOrFail($this->argument('incomingExam'));
-        $pdfPath = storage_path('app/public/'.$incomingExam->assignment_file_path);
+        $exam = Exam::findOrFail($this->argument('exam'));
+        $file = storage_path('app/public/'.$exam->files()->where('name', 'Opgaven')->first());
+
+        if (!$file) {
+            $this->error("Could not find exam 'Opgaven'.");
+        }
+
+        $pdfPath = storage_path('app/public/'.$file->path);
 
         $sectionTitles = $this->getSectionsSubjectTitles($pdfPath);
 
@@ -59,7 +65,6 @@ class ProcessCitoPDF extends Command
                 preg_match('/'.$searchTitle.'(.+)lees verdereinde/s', $text, $sectionContent);
             } else {
                 $nextSectionTitle = preg_quote($sectionTitles[$key + 1]);
-                // dump($sectionTitle, '/'.$sectionTitle.'(.+)'.$nextSectionTitle.'/s');
                 preg_match('/'.$searchTitle.'(.+)'.$nextSectionTitle.'/s', $text, $sectionContent);
             }
 
