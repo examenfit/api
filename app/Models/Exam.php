@@ -9,13 +9,19 @@ use Illuminate\Database\Eloquent\Model;
 class Exam extends Model
 {
     use HasFactory, HashID;
+
     public $fillable = [
         'course_id',
         'status',
         'level',
         'year',
         'term',
-        'status'
+        'status',
+        'assignment_contents',
+    ];
+
+    public $casts = [
+        'assignment_contents' => 'array'
     ];
 
     public function topics()

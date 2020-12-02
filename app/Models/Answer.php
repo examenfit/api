@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Support\HashID;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Answer extends Model
 {
-    use HasFactory;
+    use HasFactory, HashID;
 
     public $fillable = [
         'type'

@@ -27,7 +27,7 @@ class TopicController extends Controller
             $topic->addAttachments($data['attachments']);
         }
 
-        $exam->load('topics.questions', 'files');
+        $exam->load('topics.questions.answers.sections', 'files');
 
         return new ExamResource($exam);
     }
@@ -44,7 +44,7 @@ class TopicController extends Controller
 
         $topic->update($data);
 
-        $exam = $topic->exam->load('topics.questions', 'files');
+        $exam = $topic->exam->load('topics.questions.answers.sections', 'files');
 
         return new ExamResource($exam);
     }

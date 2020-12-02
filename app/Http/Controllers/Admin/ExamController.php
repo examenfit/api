@@ -19,7 +19,7 @@ class ExamController extends Controller
 
     public function show(Exam $exam)
     {
-        $exam->load('topics.questions', 'files');
+        $exam->load('topics.questions.answers.sections', 'files');
 
         return new ExamResource($exam);
     }
@@ -66,7 +66,7 @@ class ExamController extends Controller
         ]);
 
         $exam->update($data);
-        $exam->load('topics.questions', 'files');
+        $exam->load('topics.questions.answers.sections', 'files');
 
         return new ExamResource($exam);
     }

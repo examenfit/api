@@ -13,7 +13,7 @@ class AttachmentController extends Controller
     {
         $data = $request->validate([
             'name' => 'required',
-            'file' => 'required|file|mimes:jpeg',
+            'file' => 'required|file',
         ]);
 
         $attachment = Attachment::create([

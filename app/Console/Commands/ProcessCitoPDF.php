@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Models\IncomingExam;
+use App\Models\Exam;
 use Spatie\PdfToText\Pdf;
 use Illuminate\Console\Command;
 
@@ -40,7 +40,7 @@ class ProcessCitoPDF extends Command
     public function handle()
     {
         $exam = Exam::findOrFail($this->argument('exam'));
-        $file = storage_path('app/public/'.$exam->files()->where('name', 'Opgaven')->first());
+        $file = $exam->files()->where('name', 'Opgaven')->first();
 
         if (!$file) {
             $this->error("Could not find exam 'Opgaven'.");
@@ -81,7 +81,7 @@ class ProcessCitoPDF extends Command
             $sections[$index]['contents'] = null;
         }
 
-        $incomingExam->update([
+        $exam->update([
             'assignment_contents' => $sections,
         ]);
     }

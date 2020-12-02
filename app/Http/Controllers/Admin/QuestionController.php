@@ -19,9 +19,9 @@ class QuestionController extends Controller
             'proportion_value' => 'required|integer',
             'introduction' => 'required|string',
             'text' => 'required|string',
-            'answerSteps' => 'array',
-            'answerSteps.*.text' => 'required|string',
-            'answerSteps.*.points' => 'required|integer',
+            'answerSections' => 'array',
+            'answerSections.*.text' => 'required|string',
+            'answerSections.*.points' => 'required|integer',
             'facets' => 'array',
             'facets.*.id' => ['required', new HashIdExists('facets')],
             'attachments' => 'array',
@@ -34,12 +34,12 @@ class QuestionController extends Controller
             $question->addAttachments($data['attachments']);
         }
 
-        if (isset($data['answerSteps'])) {
+        if (isset($data['answerSections'])) {
             $answer = $question->answers()->create([
                 'type' => 'correction',
             ]);
 
-            $answer->sections()->createMany($data['answerSteps']);
+            $answer->sections()->createMany($data['answerSections']);
         }
 
         if (isset($data['facets'])) {
@@ -47,7 +47,7 @@ class QuestionController extends Controller
         }
 
         $exam = $topic->exam;
-        $exam->load('topics.questions', 'files');
+        $exam->load('topics.questions.answers.sections', 'files');
 
         return new ExamResource($exam);
     }
@@ -59,9 +59,9 @@ class QuestionController extends Controller
             'points' => 'required|integer',
             'introduction' => 'required|string',
             'text' => 'required|string',
-            'answerSteps' => 'array',
-            'answerSteps.*.text' => 'required|string',
-            'answerSteps.*.points' => 'required|integer',
+            'answerSections' => 'array',
+            'answerSections.*.text' => 'required|string',
+            'answerSections.*.points' => 'required|integer',
             'attachments' => 'array',
             'attachments.*.id' => ['required', new HashIdExists('attachments')],
         ]);
@@ -70,18 +70,20 @@ class QuestionController extends Controller
             $question->addAttachments($data['attachments']);
         }
 
-        if (isset($data['answerSteps'])) {
+        if (isset($data['answerSections'])) {
+            $question->answers()->delete();
+
             $answer = $question->answers()->create([
                 'type' => 'correction',
             ]);
 
-            $answer->sections()->createMany($data['answerSteps']);
+            $answer->sections()->createMany($data['answerSections']);
         }
 
         $question->update($data);
 
         $exam = $question->topic->exam;
-        $exam->load('topics.questions', 'files');
+        $exam->load('topics.questions.answers.sections', 'files');
 
         return new ExamResource($exam);
     }
