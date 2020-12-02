@@ -23,7 +23,9 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['http://localhost:3000'],
+    'allowed_origins' => [
+        explode(',', env('CORS_ALLOWED_DOMAINS', 'http://localhost:3000')),
+    ],
 
     'allowed_origins_patterns' => [],
 
