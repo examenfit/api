@@ -24,7 +24,8 @@
         "laravel/tinker": "^2.5",
         "phpoffice/phpword": "^0.17.0",
         "spatie/pdf-to-text": "^1.3",
-        "vinkla/hashids": "^9.0"
+        "vinkla/hashids": "^9.0",
+        "league/flysystem-aws-s3-v3": "~1.0"
     },
     "require-dev": {
         "beyondcode/laravel-dump-server": "dev-set-correct-dumper-connection",

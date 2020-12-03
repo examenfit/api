@@ -47,7 +47,7 @@ class ExamController extends Controller
         foreach ($data['files'] as $file) {
             $exam->files()->create([
                 'name' => $file['name'],
-                'path' => $file['file']->store('cito_files', 'public'),
+                'path' => $file['file']->store('exams', 'cloud'),
             ]);
         }
 
