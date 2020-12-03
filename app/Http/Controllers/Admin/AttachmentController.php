@@ -18,7 +18,7 @@ class AttachmentController extends Controller
 
         $attachment = Attachment::create([
             'name' => $data['name'],
-            'path' => $data['file']->store('attachments', 'cloud'),
+            'path' => $data['file']->store('attachments'),
         ]);
 
         return new AttachmentResource($attachment);
