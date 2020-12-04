@@ -52,7 +52,11 @@ class ProcessCitoPDF extends Command
 
         // dd($sectionTitles);
 
-        $text = (new Pdf('/usr/local/bin/pdftotext'))
+        $text = (new Pdf(
+            config('app.env') === 'production'
+                ? '/usr/bin/pdftotext'
+                : '/usr/local/bin/pdftotext'
+            ))
             ->setPdf($pdfPath)
             ->setOptions(['layout'])
             ->text();

@@ -21,6 +21,10 @@ class TopicController extends Controller
             'attachments.*.id' => ['required', new HashIdExists('attachments')],
         ]);
 
+        if ($exam->topics()->count() === 0) {
+            $exam->update(['status' => 'processing']);
+        }
+
         $topic = $exam->topics()->create($data);
 
         if (isset($data['attachments'])) {

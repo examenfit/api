@@ -6,7 +6,7 @@ use App\Models\Exam;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ExamResource;
-use App\Models\IncomingExam;
+use Illuminate\Support\Facades\Artisan;
 
 class ExamController extends Controller
 {
@@ -52,6 +52,9 @@ class ExamController extends Controller
         }
 
         // Process to queue
+        Artisan::queue('ef:processPDF', [
+            'exam' => $exam->id,
+        ]);
 
         return response(200);
     }
