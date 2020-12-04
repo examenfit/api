@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\Exam;
 use Spatie\PdfToText\Pdf;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Storage;
 
 class ProcessCitoPDF extends Command
 {
@@ -30,6 +31,9 @@ class ProcessCitoPDF extends Command
     public function __construct()
     {
         parent::__construct();
+        $this->pdftotextPath = config('app.env') === 'production'
+            ? '/usr/bin/pdftotext'
+            : '/usr/local/bin/pdftotext';
     }
 
     /**
@@ -46,18 +50,16 @@ class ProcessCitoPDF extends Command
             $this->error("Could not find exam 'Opgaven'.");
         }
 
-        $pdfPath = storage_path('app/public/'.$file->path);
+        // Store as a temp file, because the files are stored
+        // in a S3-bucket on production.
+        $tempFile = tmpfile();
+        fwrite($tempFile, file_get_contents(Storage::url($file->path)));
+        $tempFilePath = stream_get_meta_data($tempFile)['uri'];
 
-        $sectionTitles = $this->getSectionsSubjectTitles($pdfPath);
+        $sectionTitles = $this->getSectionsSubjectTitles($tempFilePath);
 
-        // dd($sectionTitles);
-
-        $text = (new Pdf(
-            config('app.env') === 'production'
-                ? '/usr/bin/pdftotext'
-                : '/usr/local/bin/pdftotext'
-            ))
-            ->setPdf($pdfPath)
+        $text = (new Pdf($this->pdftotextPath))
+            ->setPdf($tempFilePath)
             ->setOptions(['layout'])
             ->text();
 
@@ -78,8 +80,6 @@ class ProcessCitoPDF extends Command
             ];
         }
 
-        // dd($sections[1]);
-
         foreach ($sections as $index => $section) {
             $sections[$index]['questions'] = $this->getQuestionsFromContent($section['contents']);
             $sections[$index]['contents'] = null;
@@ -88,6 +88,9 @@ class ProcessCitoPDF extends Command
         $exam->update([
             'assignment_contents' => $sections,
         ]);
+
+        // Delete file
+        fclose($tempFile);
     }
 
     public function getQuestionsFromContent($content)
@@ -115,7 +118,7 @@ class ProcessCitoPDF extends Command
     {
         $sections = [];
 
-        $layout = (new Pdf('/usr/local/bin/pdftotext'))
+        $layout = (new Pdf($this->pdftotextPath))
             ->setPdf($pdfPath)
             ->setOptions(['bbox-layout'])
             ->text();
