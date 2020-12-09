@@ -12,6 +12,12 @@ use App\Http\Resources\TopicResource;
 
 class TopicController extends Controller
 {
+    public function show(Topic $topic)
+    {
+        $topic->load('exam', 'questions');
+        return new TopicResource($topic);
+    }
+
     public function store(Request $request, Exam $exam)
     {
         $data = $request->validate([
@@ -31,9 +37,12 @@ class TopicController extends Controller
             $topic->addAttachments($data['attachments']);
         }
 
-        $exam->load('topics.questions.answers.sections', 'files');
+        if ($request->has('withExamWrapper')) {
+            return app('App\Http\Controllers\Admin\ExamController')
+                ->show($exam);
+        }
 
-        return new ExamResource($exam);
+        return $this->show($topic);
     }
 
     public function update(Request $request, Topic $topic)
@@ -48,8 +57,22 @@ class TopicController extends Controller
 
         $topic->update($data);
 
-        $exam = $topic->exam->load('topics.questions.answers.sections', 'files');
+        if (isset($data['attachments'])) {
+            $topic->addAttachments($data['attachments']);
+        }
 
-        return new ExamResource($exam);
+        if ($request->has('withExamWrapper')) {
+            return app('App\Http\Controllers\Admin\ExamController')
+                ->show($topic->exam);
+        }
+
+        return $this->show($topic->fresh());
+    }
+
+    public function destroy(Topic $topic)
+    {
+        $topic->delete();
+
+        return response(null, 200);
     }
 }

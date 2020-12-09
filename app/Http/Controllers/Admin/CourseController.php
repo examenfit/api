@@ -22,10 +22,10 @@ class CourseController extends Controller
         return new CourseResource($course);
     }
 
-    public function showFacets(Course $course)
+    public function showMeta(Course $course)
     {
-        $course->load('facets.children');
+        $course->load('tags', 'domains', 'questionTypes');
 
-        return FacetResource::collection($course->facets);
+        return new CourseResource($course);
     }
 }

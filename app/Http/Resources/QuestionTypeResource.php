@@ -4,7 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class FacetResource extends JsonResource
+class QuestionTypeResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -17,9 +17,6 @@ class FacetResource extends JsonResource
         return [
             'id' => $this->hash_id,
             'name' => $this->name,
-            'is_singular' => $this->is_singular,
-            'children' => FacetResource::collection($this->whenLoaded('children')),
-            'parent' => new FacetResource($this->whenLoaded('parent')),
         ];
     }
 }

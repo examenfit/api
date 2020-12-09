@@ -12,14 +12,18 @@ class ExamController extends Controller
 {
     public function index()
     {
-        $exams = Exam::all();
+        $exams = Exam::with('course')->get();
 
         return ExamResource::collection($exams);
     }
 
     public function show(Exam $exam)
     {
-        $exam->load('topics.questions.answers.sections', 'files');
+        $exam->load([
+            'topics.questions.answers.sections',
+            'topics.questions.tags',
+            'files'
+        ]);
 
         return new ExamResource($exam);
     }
@@ -31,6 +35,7 @@ class ExamController extends Controller
             'level' => 'required|string|in:havo,vwo',
             'year' => 'required|integer|min:2010',
             'term' => 'required|integer|in:1,2',
+            'standardization_value' => 'nullable|numeric',
             'files' => 'required|min:1',
             'files.*.name' => 'required|string',
             'files.*.file' => 'required|file|mimes:pdf',
@@ -63,14 +68,23 @@ class ExamController extends Controller
     {
         $data = $request->validate([
             'course_id' => 'required',
+            'status' => 'nullable|in:concept,published',
             'level' => 'required|in:havo,vwo',
             'year' => 'required|integer|min:2010',
             'term' => 'required|integer|in:1,2',
+            'standardization_value' => 'nullable|numeric',
         ]);
 
         $exam->update($data);
         $exam->load('topics.questions.answers.sections', 'files');
 
         return new ExamResource($exam);
+    }
+
+    public function destroy(Exam $exam)
+    {
+        $exam->delete();
+
+        return response(null, 200);
     }
 }

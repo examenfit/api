@@ -10,13 +10,23 @@ class Course extends Model
 {
     use HasFactory, HashID;
 
-    public function facets()
-    {
-        return $this->hasMany(Facet::class)->whereNull('parent_id');
-    }
-
     public function exams()
     {
         return $this->hasMany(Exam::class);
+    }
+
+    public function domains()
+    {
+        return $this->hasMany(Domain::class);
+    }
+
+    public function tags()
+    {
+        return $this->hasMany(Tag::class);
+    }
+
+    public function questionTypes()
+    {
+        return $this->hasMany(QuestionType::class);
     }
 }

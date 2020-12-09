@@ -11,5 +11,13 @@ class Attachment extends Model
     use HasFactory, HashID;
     public $guarded = [];
 
+    public function topics()
+    {
+        return $this->morphedByMany(Topic::class, 'attachable');
+    }
 
+    public function questions()
+    {
+        return $this->morphedByMany(Question::class, 'attachable');
+    }
 }

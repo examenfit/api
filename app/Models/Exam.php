@@ -16,6 +16,7 @@ class Exam extends Model
         'level',
         'year',
         'term',
+        'standardization_value',
         'status',
         'assignment_contents',
     ];
@@ -23,6 +24,11 @@ class Exam extends Model
     public $casts = [
         'assignment_contents' => 'array'
     ];
+
+    public function course()
+    {
+        return $this->belongsTo(Course::class);
+    }
 
     public function topics()
     {
@@ -37,5 +43,17 @@ class Exam extends Model
     public function files()
     {
         return $this->hasMany(ExamSourceFile::class);
+    }
+
+    public function topicAttachments()
+    {
+        $topics = $this->load('topics');
+        dd($topics);
+        return $this->hasManyThrough(Attachment::class, Topic::class);
+    }
+
+    public function questionAttachments()
+    {
+        return $this->hasManyThrough(Attachment::class, Question::class);
     }
 }

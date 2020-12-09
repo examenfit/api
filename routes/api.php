@@ -22,6 +22,10 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])
     ->middleware('guest');
 
+Route::get('/latex-test', function () {
+    return \App\Models\Question::first();
+});
+
 Route::group(['middleware' => 'auth:sanctum'], function() {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy']);
     Route::get('/user', [AuthenticatedSessionController::class, 'show']);
@@ -29,20 +33,27 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
     Route::group(['prefix' => 'admin', 'middleware' => 'role:admin'], function() {
         Route::get('/courses', [CourseController::class, 'index']);
         Route::get('/courses/{course}', [CourseController::class, 'show']);
-        Route::get('courses/{course}/facets', [CourseController::class, 'showFacets']);
+        Route::get('courses/{course}/meta', [CourseController::class, 'showMeta']);
 
         Route::get('/exams', [ExamController::class, 'index']);
         Route::post('/exams', [ExamController::class, 'store']);
         Route::get('/exams/{exam}', [ExamController::class, 'show']);
         Route::put('/exams/{exam}', [ExamController::class, 'update']);
+        Route::delete('/exams/{exam}', [ExamController::class, 'destroy']);
+
         Route::post('/exams/{exam}/topics', [TopicController::class, 'store']);
 
-        Route::put('/questions/{question}', [QuestionController::class, 'update']);
+        Route::get('/topics/{topic}', [TopicController::class, 'show']);
+        Route::delete('/topics/{topic}', [TopicController::class, 'destroy']);
         Route::put('/topics/{topic}', [TopicController::class, 'update']);
 
         Route::post('topics/{topic}/questions', [QuestionController::class, 'store']);
 
+        Route::get('/questions/{question}', [QuestionController::class, 'show']);
+        Route::put('/questions/{question}', [QuestionController::class, 'update']);
+        Route::delete('/questions/{question}', [QuestionController::class, 'destroy']);
 
+        Route::get('attachments',  [AttachmentController::class, 'index']);
         Route::post('attachments', [AttachmentController::class, 'store']);
     });
 });

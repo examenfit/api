@@ -17,8 +17,10 @@ class CourseResource extends JsonResource
         return [
             'id' => $this->hash_id,
             'name' => $this->name,
-            'facets' => FacetResource::collection($this->whenLoaded('facets')),
             'exams' => ExamResource::collection($this->whenLoaded('exams')),
+            'domains' => DomainResource::collection($this->whenLoaded('domains')),
+            'tags' => TagResource::collection($this->whenLoaded('tags')),
+            'questionTypes' => QuestionTypeResource::collection($this->whenLoaded('questionTypes')),
         ];
     }
 }

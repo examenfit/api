@@ -39,6 +39,6 @@ class Topic extends Model
                 ->transform(function ($id) {
                     return Hashids::decode($id)[0];
                 })
-        , false);
+        );
     }
 }

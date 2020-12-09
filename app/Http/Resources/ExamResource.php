@@ -22,6 +22,7 @@ class ExamResource extends JsonResource
             'term' => $this->term,
             'topics' => TopicResource::collection($this->whenLoaded('topics')),
             'files' => ExamSourceFileResource::collection($this->whenLoaded('files')),
+            'course' => new CourseResource($this->whenLoaded('course')),
             'assignment_contents' => $this->assignment_contents,
         ];
     }

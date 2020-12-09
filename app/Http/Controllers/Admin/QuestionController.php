@@ -8,22 +8,31 @@ use App\Rules\HashIdExists;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ExamResource;
+use App\Http\Resources\QuestionResource;
 
 class QuestionController extends Controller
 {
+    public function show(Question $question)
+    {
+        $question->load('topic', 'attachments', 'answers.sections');
+
+        return new QuestionResource($question);
+    }
+
     public function store(Request $request, Topic $topic)
     {
         $data = $request->validate([
             'number' => 'required|integer',
             'points' => 'required|integer',
-            'proportion_value' => 'required|integer',
+            'proportion_value' => 'nullable|integer',
             'introduction' => 'required|string',
             'text' => 'required|string',
             'answerSections' => 'array',
             'answerSections.*.text' => 'required|string',
             'answerSections.*.points' => 'required|integer',
-            'facets' => 'array',
-            'facets.*.id' => ['required', new HashIdExists('facets')],
+            'domain_id' => ['required', new HashIdExists('domains')],
+            'type_id' => ['required', new HashIdExists('question_types')],
+            'tags.*.id' => ['required', new HashIdExists('tags')],
             'attachments' => 'array',
             'attachments.*.id' => ['required', new HashIdExists('attachments')],
         ]);
@@ -42,14 +51,12 @@ class QuestionController extends Controller
             $answer->sections()->createMany($data['answerSections']);
         }
 
-        if (isset($data['facets'])) {
-            $question->addFacets($data['facets']);
+        if (isset($data['tags'])) {
+            $question->addTags($data['tags']);
         }
 
-        $exam = $topic->exam;
-        $exam->load('topics.questions.answers.sections', 'files');
-
-        return new ExamResource($exam);
+        return app('App\Http\Controllers\Admin\ExamController')
+            ->show($topic->exam);
     }
 
     public function update(Request $request, Question $question)
@@ -57,11 +64,15 @@ class QuestionController extends Controller
         $data = $request->validate([
             'number' => 'required|integer',
             'points' => 'required|integer',
+            'proportion_value' => 'nullable|integer',
             'introduction' => 'required|string',
             'text' => 'required|string',
             'answerSections' => 'array',
             'answerSections.*.text' => 'required|string',
             'answerSections.*.points' => 'required|integer',
+            'domain_id' => ['required', new HashIdExists('domains')],
+            'type_id' => ['required', new HashIdExists('question_types')],
+            'tags.*.id' => ['required', new HashIdExists('tags')],
             'attachments' => 'array',
             'attachments.*.id' => ['required', new HashIdExists('attachments')],
         ]);
@@ -80,11 +91,23 @@ class QuestionController extends Controller
             $answer->sections()->createMany($data['answerSections']);
         }
 
+        if (isset($data['tags'])) {
+            $question->addTags($data['tags']);
+        }
+
         $question->update($data);
 
-        $exam = $question->topic->exam;
-        $exam->load('topics.questions.answers.sections', 'files');
+        if ($request->has('withExamWrapper')) {
+            return app('App\Http\Controllers\Admin\ExamController')
+                ->show($question->fresh()->topic->exam);
+        }
 
-        return new ExamResource($exam);
+        return $this->show($question);
+    }
+
+    public function destroy(Question $question)
+    {
+        $question->delete();
+        return response(null, 200);
     }
 }
