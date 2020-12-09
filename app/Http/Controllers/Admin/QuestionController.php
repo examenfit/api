@@ -24,7 +24,7 @@ class QuestionController extends Controller
         $data = $request->validate([
             'number' => 'required|integer',
             'points' => 'required|integer',
-            'proportion_value' => 'nullable|integer',
+            'proportion_value' => 'nullable|numeric',
             'introduction' => 'required|string',
             'text' => 'required|string',
             'answerSections' => 'array',
@@ -64,7 +64,7 @@ class QuestionController extends Controller
         $data = $request->validate([
             'number' => 'required|integer',
             'points' => 'required|integer',
-            'proportion_value' => 'nullable|integer',
+            'proportion_value' => 'nullable|numeric',
             'introduction' => 'required|string',
             'text' => 'required|string',
             'answerSections' => 'array',
