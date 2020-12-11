@@ -14,7 +14,7 @@ class QuestionController extends Controller
 {
     public function show(Question $question)
     {
-        $question->load('topic', 'attachments', 'answers.sections');
+        $question->load('topic', 'attachments', 'tags', 'answers.sections');
 
         return new QuestionResource($question);
     }

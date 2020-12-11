@@ -2,17 +2,17 @@
 
 namespace Database\Factories;
 
-use App\Models\Facet;
+use App\Models\QuestionType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-class FacetFactory extends Factory
+class QuestionTypeFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
      *
      * @var string
      */
-    protected $model = Facet::class;
+    protected $model = QuestionType::class;
 
     /**
      * Define the model's default state.

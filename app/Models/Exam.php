@@ -45,15 +45,17 @@ class Exam extends Model
         return $this->hasMany(ExamSourceFile::class);
     }
 
-    public function topicAttachments()
-    {
-        $topics = $this->load('topics');
-        dd($topics);
-        return $this->hasManyThrough(Attachment::class, Topic::class);
-    }
-
     public function questionAttachments()
     {
         return $this->hasManyThrough(Attachment::class, Question::class);
+    }
+
+    public function setCourseIdAttribute($value)
+    {
+        $decodedValue = $this->hashToId($value);
+
+        $this->attributes['course_id'] = $decodedValue
+            ? $this->attributes['course_id'] = $decodedValue
+            : $this->attributes['course_id'] = $value;
     }
 }

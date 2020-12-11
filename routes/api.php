@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\ExamController;
 use App\Http\Controllers\Admin\TopicController;
 use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\Admin\QuestionController;
+use App\Http\Controllers\Admin\AnswerController;
 use App\Http\Controllers\Admin\AttachmentController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
@@ -52,6 +53,10 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
         Route::get('/questions/{question}', [QuestionController::class, 'show']);
         Route::put('/questions/{question}', [QuestionController::class, 'update']);
         Route::delete('/questions/{question}', [QuestionController::class, 'destroy']);
+
+        Route::get('/answers/{answer}', [AnswerController::class, 'show']);
+        Route::post('/questions/{question}/answers', [AnswerController::class, 'store']);
+        Route::put('/answers/{answer}', [AnswerController::class, 'update']);
 
         Route::get('attachments',  [AttachmentController::class, 'index']);
         Route::post('attachments', [AttachmentController::class, 'store']);
