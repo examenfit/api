@@ -10,6 +10,12 @@ class Tag extends Model
 {
     use HasFactory, HashID;
 
+    public $with = ['children'];
+
+    public function children()
+    {
+        return $this->hasMany(Self::class, 'parent_id');
+    }
 
     public function question()
     {
