@@ -24,12 +24,13 @@ class QuestionController extends Controller
         $data = $request->validate([
             'number' => 'required|integer',
             'points' => 'required|integer',
-            'proportion_value' => 'nullable|numeric',
+            'proportion_value' => 'nullable|integer|min:0',
             'introduction' => 'required|string',
             'text' => 'required|string',
             'answerSections' => 'array',
             'answerSections.*.text' => 'required|string',
             'answerSections.*.points' => 'required|integer',
+            'answer_remark' => 'nullable|string',
             'domain_id' => ['required', new HashIdExists('domains')],
             'type_id' => ['required', new HashIdExists('question_types')],
             'tags.*.id' => ['required', new HashIdExists('tags')],
@@ -46,6 +47,7 @@ class QuestionController extends Controller
         if (isset($data['answerSections'])) {
             $answer = $question->answers()->create([
                 'type' => 'correction',
+                'remark' => $data['answer_remark'] ?? null,
             ]);
 
             $answer->sections()->createMany($data['answerSections']);
@@ -70,6 +72,7 @@ class QuestionController extends Controller
             'answerSections' => 'array',
             'answerSections.*.text' => 'required|string',
             'answerSections.*.points' => 'required|integer',
+            'answer_remark' => 'nullable|string',
             'domain_id' => ['required', new HashIdExists('domains')],
             'type_id' => ['required', new HashIdExists('question_types')],
             'tags.*.id' => ['required', new HashIdExists('tags')],
@@ -86,6 +89,7 @@ class QuestionController extends Controller
 
             $answer = $question->answers()->create([
                 'type' => 'correction',
+                'remark' => $data['answer_remark'] ?? null,
             ]);
 
             $answer->sections()->createMany($data['answerSections']);

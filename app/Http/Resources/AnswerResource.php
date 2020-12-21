@@ -19,6 +19,7 @@ class AnswerResource extends JsonResource
             'id' => $this->hash_id,
             'question_id' => Hashids::encode($this->question_id),
             'type' => $this->type,
+            'remark' => $this->remark,
             'sections' => AnswerSectionResource::collection($this->whenLoaded('sections')),
         ];
     }
