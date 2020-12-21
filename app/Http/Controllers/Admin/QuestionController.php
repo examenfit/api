@@ -14,7 +14,7 @@ class QuestionController extends Controller
 {
     public function show(Question $question)
     {
-        $question->load('topic', 'attachments', 'tags', 'answers.sections');
+        $question->load('topic', 'attachments', 'tags', 'domains', 'answers.sections');
 
         return new QuestionResource($question);
     }
@@ -31,9 +31,9 @@ class QuestionController extends Controller
             'answerSections.*.text' => 'required|string',
             'answerSections.*.points' => 'required|integer',
             'answer_remark' => 'nullable|string',
-            'domain_id' => ['required', new HashIdExists('domains')],
             'type_id' => ['required', new HashIdExists('question_types')],
             'tags.*.id' => ['required', new HashIdExists('tags')],
+            'domains.*.id' => ['required', new HashIdExists('domains')],
             'attachments' => 'array',
             'attachments.*.id' => ['required', new HashIdExists('attachments')],
         ]);
@@ -57,6 +57,10 @@ class QuestionController extends Controller
             $question->addTags($data['tags']);
         }
 
+        if (isset($data['domains'])) {
+            $question->addDomains($data['domains']);
+        }
+
         return app('App\Http\Controllers\Admin\ExamController')
             ->show($topic->exam);
     }
@@ -73,9 +77,9 @@ class QuestionController extends Controller
             'answerSections.*.text' => 'required|string',
             'answerSections.*.points' => 'required|integer',
             'answer_remark' => 'nullable|string',
-            'domain_id' => ['required', new HashIdExists('domains')],
             'type_id' => ['required', new HashIdExists('question_types')],
             'tags.*.id' => ['required', new HashIdExists('tags')],
+            'domains.*.id' => ['required', new HashIdExists('domains')],
             'attachments' => 'array',
             'attachments.*.id' => ['required', new HashIdExists('attachments')],
         ]);
@@ -97,6 +101,10 @@ class QuestionController extends Controller
 
         if (isset($data['tags'])) {
             $question->addTags($data['tags']);
+        }
+
+        if (isset($data['domains'])) {
+            $question->addDomains($data['domains']);
         }
 
         $question->update($data);

@@ -22,6 +22,7 @@ class ExamController extends Controller
         $exam->load([
             'topics.questions.answers.sections',
             'topics.questions.tags',
+            'topics.questions.domains',
             'files'
         ]);
 

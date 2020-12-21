@@ -13,7 +13,6 @@ class Question extends Model
     use HasFactory, HashID;
 
     public $fillable = [
-        'domain_id',
         'type_id',
         'number',
         'points',
@@ -39,9 +38,9 @@ class Question extends Model
         return $this->morphToMany(Attachment::class, 'attachable');
     }
 
-    public function domain()
+    public function domains()
     {
-        return $this->belongsTo(Domain::class);
+        return $this->belongsToMany(Domain::class);
     }
 
     public function questionType()
@@ -63,13 +62,22 @@ class Question extends Model
         return $this->attachments()->sync($collection, false);
     }
 
-    public function addTags($facets)
+    public function addTags($tags)
     {
-        $collection = collect($facets)
+        $collection = collect($tags)
             ->pluck('id')
             ->transform(fn ($id) => Hashids::decode($id)[0]);
 
         return $this->tags()->sync($collection);
+    }
+
+    public function addDomains($domains)
+    {
+        $collection = collect($domains)
+            ->pluck('id')
+            ->transform(fn ($id) => Hashids::decode($id)[0]);
+
+        return $this->domains()->sync($collection);
     }
 
     public function setDomainIdAttribute($value)

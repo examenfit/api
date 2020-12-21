@@ -27,6 +27,6 @@ class Course extends Model
 
     public function questionTypes()
     {
-        return $this->hasMany(QuestionType::class);
+        return $this->hasMany(QuestionType::class)->orderBy('name', 'ASC');
     }
 }
