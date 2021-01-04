@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Support\HashID;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Attachment extends Model
@@ -19,5 +20,10 @@ class Attachment extends Model
     public function questions()
     {
         return $this->morphedByMany(Question::class, 'attachable');
+    }
+
+    public function getUrlAttribute()
+    {
+        return Storage::url($this->attributes['path']);
     }
 }
