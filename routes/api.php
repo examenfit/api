@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\Admin\QuestionController;
 use App\Http\Controllers\Admin\AnswerController;
 use App\Http\Controllers\Admin\AttachmentController;
+use App\Http\Controllers\Admin\TeacherDocumentController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 
 /*
@@ -60,5 +61,7 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
 
         Route::get('attachments',  [AttachmentController::class, 'index']);
         Route::post('attachments', [AttachmentController::class, 'store']);
+
+        Route::get('/teacher-document/{exam}', [TeacherDocumentController::class, 'index']);
     });
 });
