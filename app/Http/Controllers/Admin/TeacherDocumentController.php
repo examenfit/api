@@ -13,7 +13,7 @@ class TeacherDocumentController extends Controller
     {
         Artisan::call('ef:questioncorrection', ['exam' => $exam->id]);
 
-        $path = storage_path("app/public/question-correction/{$this->exam->hash_id}.docx");
+        $path = storage_path("app/public/question-correction/{$exam->hash_id}.docx");
 
         if (file_exists($path)) {
             return response()->download($path);
