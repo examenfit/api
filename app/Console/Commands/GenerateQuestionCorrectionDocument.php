@@ -237,7 +237,7 @@ class GenerateQuestionCorrectionDocument extends Command
         // Question type
         $textRun->addTextBreak(2);
         $textRun->addText('Vraagtype: ', ['bold' => true]);
-        $textRun->addText(implode(', ', $question->questionType->name));
+        $textRun->addText($question->questionType->name);
 
         // Domains
         $textRun->addTextBreak(1);
