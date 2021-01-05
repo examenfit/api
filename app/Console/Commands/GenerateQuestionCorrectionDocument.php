@@ -77,6 +77,7 @@ class GenerateQuestionCorrectionDocument extends Command
             'topics.questions.answers',
             'topics.questions.domains.parent',
             'topics.questions.tags',
+            'topics.questions.questionType',
         ])->findOrFail($id);
     }
 
@@ -136,6 +137,9 @@ class GenerateQuestionCorrectionDocument extends Command
                 $this->addQuestion($question);
 
                 $this->addAnswer($question->answers);
+
+                // Increase question number
+                $this->questionNumber++;
             }
         }
     }
@@ -230,16 +234,17 @@ class GenerateQuestionCorrectionDocument extends Command
         // Question text
         $this->formatText($question->text, $textRun);
 
-        // Domains
+        // Question type
         $textRun->addTextBreak(2);
+        $textRun->addText('Vraagtype: ', ['bold' => true]);
+        $textRun->addText(implode(', ', $question->questionType->name));
+
+        // Domains
+        $textRun->addTextBreak(1);
         $textRun->addText('Domeinen: ', ['bold' => true]);
 
         $domains = [];
         foreach ($question->domains as $domain) {
-            if ($domain->parent) {
-                $domains[] = $domain->parent->name;
-            }
-
             $domains[] = $domain->name;
         }
 
@@ -252,15 +257,16 @@ class GenerateQuestionCorrectionDocument extends Command
 
         // Add break
         $this->currentSection()->addTextBreak(1);
-
-
-        // Increase question number
-        $this->questionNumber++;
     }
 
     public function addAnswer($answer)
     {
         $answer = $answer[0];
+
+        $textRun = $this->currentSection()->addTextRun();
+        $textRun->addText("Tips vraag {$this->questionNumber}:", ['bold' => true]);
+
+        $this->currentSection()->addTextBreak(1);
 
         $textRun = $this->currentSection()->addTextRun();
         $textRun->addText("Antwoord vraag {$this->questionNumber}:", ['bold' => true]);
@@ -282,9 +288,9 @@ class GenerateQuestionCorrectionDocument extends Command
 
         $this->currentSection()->addTextBreak(1);
         $textRun = $this->currentSection()->addTextRun();
-        $textRun->addText("Uitwerking vraag {$this->questionNumber}:", ['bold' => true]);
+        $textRun->addText("Modeluitwerking vraag {$this->questionNumber}:", ['bold' => true]);
         $textRun->addTextBreak(2);
-        $textRun->addText("Toelichting uitwerking vraag {$this->questionNumber}:", ['bold' => true]);
+        $textRun->addText("Aanpak, Strategie, Visualisatie vraag {$this->questionNumber}:", ['bold' => true]);
 
         $this->addSection();
     }
