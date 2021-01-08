@@ -49,6 +49,7 @@ class TopicController extends Controller
     {
 
         $data = $request->validate([
+            'complexity' => 'required|in:low,average,high',
             'name' => 'nullable|string',
             'introduction' => 'nullable|string',
             'attachments' => 'nullable|array',

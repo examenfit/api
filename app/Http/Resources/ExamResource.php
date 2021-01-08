@@ -2,8 +2,9 @@
 
 namespace App\Http\Resources;
 
-use Illuminate\Http\Resources\Json\JsonResource;
 use Vinkla\Hashids\Facades\Hashids;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 class ExamResource extends JsonResource
 {
@@ -26,7 +27,7 @@ class ExamResource extends JsonResource
             'topics' => TopicResource::collection($this->whenLoaded('topics')),
             'files' => ExamSourceFileResource::collection($this->whenLoaded('files')),
             'course' => new CourseResource($this->whenLoaded('course')),
-            'assignment_contents' => $this->assignment_contents,
+            'assignment_contents' => $this->when(Auth::user()->isAdmin(), $this->assignment_contents),
         ];
     }
 }

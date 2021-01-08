@@ -4,7 +4,7 @@ namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class DomainResource extends JsonResource
+class CartResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -17,8 +17,8 @@ class DomainResource extends JsonResource
         return [
             'id' => $this->hash_id,
             'name' => $this->name,
-            'parent' => new DomainResource($this->whenLoaded('parent')),
-            'children' => DomainResource::collection($this->whenLoaded('children')),
+            'introduction' => $this->introduction,
+            'questions' => QuestionResource::collection($this->questions),
         ];
     }
 }

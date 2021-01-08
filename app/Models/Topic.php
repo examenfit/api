@@ -13,6 +13,7 @@ class Topic extends Model
     public $fillable = [
         'name',
         'introduction',
+        'complexity'
     ];
     public $with = ['attachments'];
 

@@ -70,6 +70,8 @@ class QuestionController extends Controller
         $data = $request->validate([
             'number' => 'required|integer',
             'points' => 'required|integer',
+            'time_in_minutes' => 'required|integer',
+            'complexity' => 'required|in:low,average,high',
             'proportion_value' => 'nullable|numeric',
             'introduction' => 'nullable|string',
             'text' => 'required|string',

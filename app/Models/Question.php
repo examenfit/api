@@ -16,6 +16,8 @@ class Question extends Model
         'type_id',
         'number',
         'points',
+        'time_in_minutes',
+        'complexity',
         'proportion_value',
         'introduction',
         'text',
