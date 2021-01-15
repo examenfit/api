@@ -39,10 +39,9 @@ class GenerateQuestionCorrectionDocument extends Command
         $this->processor->addTitleStyle(1, ['bold' => true, 'size' => 14]);
 
         $this->processor->addTableStyle('questionTableStyle', [
-            'borderColor' => 'ffffff',
-            // 'borderColor' => '000000', // Debug
-            'borderSize'  => 0,
-            'cellMargin'  => 0,
+            'borderColor' => 'D3DAE6',
+            'borderSize'  => 1,
+            'cellMargin'  => 75
         ]);
 
         // MathML to OMML (Office Math Markup Language) processors
@@ -131,7 +130,7 @@ class GenerateQuestionCorrectionDocument extends Command
         $topics = $this->exam->topics;
 
         foreach ($topics as $topic) {
-            $this->addTopic ($topic);
+            $this->addTopic($topic);
 
             foreach ($topic->questions as $question) {
                 $this->addQuestion($question);
@@ -220,6 +219,9 @@ class GenerateQuestionCorrectionDocument extends Command
 
     public function addQuestion($question)
     {
+        // Title
+        $this->currentSection()->addTitle('Vraag '.$this->questionNumber);
+
         // Create TextRun
         $textRun = $this->currentSection()->addTextRun(['alignment' => 'left']);
 
@@ -236,24 +238,24 @@ class GenerateQuestionCorrectionDocument extends Command
 
         // Question type
         $textRun->addTextBreak(2);
-        $textRun->addText('Vraagtype: ', ['bold' => true]);
-        $textRun->addText($question->questionType->name);
+        $textRun->addText('Vraagtype: ', ['bold' => true, 'color' => '0070C0']);
+        $textRun->addText($question->questionType->name, ['color' => '0070C0']);
 
         // Domains
         $textRun->addTextBreak(1);
-        $textRun->addText('Domeinen: ', ['bold' => true]);
+        $textRun->addText('Domeinen: ', ['bold' => true, 'color' => '0070C0']);
 
         $domains = [];
         foreach ($question->domains as $domain) {
             $domains[] = $domain->name;
         }
 
-        $textRun->addText(implode(', ', $domains));
+        $textRun->addText(implode(', ', $domains), ['color' => '0070C0']);
 
         // Tags
         $textRun->addTextBreak(1);
-        $textRun->addText('Trefwoorden: ', ['bold' => true]);
-        $textRun->addText(implode(', ', $question->tags->pluck('name')->toArray()));
+        $textRun->addText('Trefwoorden: ', ['bold' => true, 'color' => '0070C0']);
+        $textRun->addText(implode(', ', $question->tags->pluck('name')->toArray()), ['color' => '0070C0']);
 
         // Add break
         $this->currentSection()->addTextBreak(1);
@@ -262,11 +264,6 @@ class GenerateQuestionCorrectionDocument extends Command
     public function addAnswer($answer)
     {
         $answer = $answer[0];
-
-        $textRun = $this->currentSection()->addTextRun();
-        $textRun->addText("Tips vraag {$this->questionNumber}:", ['bold' => true]);
-
-        $this->currentSection()->addTextBreak(1);
 
         $textRun = $this->currentSection()->addTextRun();
         $textRun->addText("Antwoord vraag {$this->questionNumber}:", ['bold' => true]);
@@ -288,14 +285,100 @@ class GenerateQuestionCorrectionDocument extends Command
 
         $this->currentSection()->addTextBreak(1);
         $textRun = $this->currentSection()->addTextRun();
-        $textRun->addText("Modeluitwerking vraag {$this->questionNumber}:", ['bold' => true]);
-        $textRun->addTextBreak(2);
-        $textRun->addText("Aanpak, Strategie, Visualisatie vraag {$this->questionNumber}:", ['bold' => true]);
+
+        foreach ($answer->sections as $index => $section) {
+            $textRun = $this->currentSection()->addTextRun();
+            $stepNumber = $index + 1;
+
+            $textRun->addText(
+                "Tussenantwoord {$stepNumber} – Vraag {$this->questionNumber}:",
+                ['bold' => true, 'color' => '0070C0']
+            );
+            $textRun->addTextBreak(1);
+            $this->formatText($section->text, $textRun);
+            $textRun->addTextBreak(3);
+
+            $textRun->addText(
+                "Tip {$stepNumber} – Vraag {$this->questionNumber}:",
+                ['bold' => true, 'color' => '0070C0']
+            );
+            $textRun->addTextBreak(1);
+            $textRun->addText(
+                "Tip voor tussenuitwerking. Optioneel zelf nog een tip toevoegen.",
+                ['color' => '0070C0']
+            );
+            $textRun->addTextBreak(3);
+
+            $textRun->addText(
+                "Modeluitwerking {$stepNumber} – Vraag {$this->questionNumber}:",
+                ['bold' => true, 'color' => '0070C0']
+            );
+            $textRun->addTextBreak(3);
+
+            $textRun->addText(
+                "Didactische uitwerking {$stepNumber} – Vraag {$this->questionNumber}:",
+                ['bold' => true, 'color' => '0070C0']
+            );
+            $textRun->addTextBreak(3);
+        }
+
+        $textRun->addText(
+            "Verwijzing naar lesmethodes:",
+            ['bold' => true, 'color' => '0070C0']
+        );
+
+         // Create table
+         $table = $this->currentSection()->addTable('questionTableStyle');
+
+         // Row
+         $table->addRow();
+
+         $cell = $table->addCell(3000);
+         $textRun = $cell->addTextRun();
+         $textRun->addText('Methode', ['bold' => true]);
+
+         $cell = $table->addCell(3000);
+         $textRun = $cell->addTextRun();
+         $textRun->addText('Deel / Jaar', ['bold' => true]);
+
+         $cell = $table->addCell(3000);
+         $textRun = $cell->addTextRun();
+         $textRun->addText('Hoofdstuk', ['bold' => true]);
+
+         // Row
+         $table->addRow();
+
+         $cell = $table->addCell();
+         $textRun = $cell->addTextRun();
+         $textRun->addText('Moderne wiskunde', ['bold' => true]);
+
+         $cell = $table->addCell();
+         $textRun = $cell->addTextRun();
+         $textRun->addText(' ', ['color' => 'FF0000']);
+
+         $cell = $table->addCell();
+         $textRun = $cell->addTextRun();
+         $textRun->addText(' ', ['color' => 'FF0000']);
+
+         // Row
+         $table->addRow();
+
+         $cell = $table->addCell();
+         $textRun = $cell->addTextRun();
+         $textRun->addText("Getal en Ruimte", ['bold' => true]);
+
+         $cell = $table->addCell();
+         $textRun = $cell->addTextRun();
+         $textRun->addText(' ', ['color' => 'FF0000']);
+
+         $cell = $table->addCell();
+         $textRun = $cell->addTextRun();
+         $textRun->addText(' ', ['color' => 'FF0000']);
 
         $this->addSection();
     }
 
-    public function formatText($text, &$textRun = null)
+    public function formatText($text, &$textRun = null, $textStyle = null)
     {
         // Convert individual lines into seperate elements
         $lines = explode(PHP_EOL, $text);
@@ -342,7 +425,7 @@ class GenerateQuestionCorrectionDocument extends Command
                 if (is_array($chunk)) {
                     switch ($chunk['type']) {
                         case 'formula':
-                            $textRun->addText($chunk['result'], null, ['alignment' => 'left']);
+                            $textRun->addText($chunk['result'], $textStyle, ['alignment' => 'left']);
 
                             // Add space if the chunk only has a formula
                             // Otherwise the formula is shown centered.
@@ -351,11 +434,14 @@ class GenerateQuestionCorrectionDocument extends Command
                             // }
                             break;
                         case 'boldStyle':
-                            $textRun->addText($chunk['result'], ['bold' => true]);
+                            $textRun->addText(
+                                $chunk['result'],
+                                array_merge(['bold' => true], $textStyle ?? [])
+                            );
                         break;
                     }
                 } else {
-                    $textRun->addText($chunk);
+                    $textRun->addText($chunk, $textStyle);
                 }
             }
 
