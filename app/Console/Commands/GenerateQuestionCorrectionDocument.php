@@ -311,7 +311,7 @@ class GenerateQuestionCorrectionDocument extends Command
             $textRun->addTextBreak(3);
 
             $textRun->addText(
-                "Didactische uitwerking {$stepNumber} – Vraag {$this->questionNumber}:",
+                "Toelichting op modeluitwerking {$stepNumber} – Vraag {$this->questionNumber}:",
                 ['bold' => true, 'color' => '0070C0']
             );
             $textRun->addTextBreak(6);
