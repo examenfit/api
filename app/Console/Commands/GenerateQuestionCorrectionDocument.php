@@ -302,11 +302,6 @@ class GenerateQuestionCorrectionDocument extends Command
                 "Tip {$stepNumber} – Vraag {$this->questionNumber}:",
                 ['bold' => true, 'color' => '0070C0']
             );
-            $textRun->addTextBreak(1);
-            $textRun->addText(
-                "Tip voor tussenuitwerking. Optioneel zelf nog een tip toevoegen.",
-                ['color' => '0070C0']
-            );
             $textRun->addTextBreak(3);
 
             $textRun->addText(
