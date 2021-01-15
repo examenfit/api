@@ -11,6 +11,10 @@
         {
             "type": "vcs",
             "url": "https://github.com/BertvanHoekelen/laravel-dump-server.git"
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/verwer/PHPWord.git"
         }
     ],
     "require": {
@@ -23,8 +27,9 @@
         "laravel/sanctum": "^2.8",
         "laravel/tinker": "^2.5",
         "league/flysystem-aws-s3-v3": "~1.0",
-        "phpoffice/phpword": "^0.17.0",
+        "phpoffice/phpword": "dev-develop",
         "predis/predis": "^1.1",
+        "simplesoftwareio/simple-qrcode": "~4",
         "spatie/pdf-to-text": "^1.3",
         "vinkla/hashids": "^9.0"
     },

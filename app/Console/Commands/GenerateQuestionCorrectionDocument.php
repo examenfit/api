@@ -102,16 +102,16 @@ class GenerateQuestionCorrectionDocument extends Command
     {
         if (count($this->sections)) {
             $this->currentSection()->addPageBreak();
+        } else {
+            $section = $this->processor->addSection([
+                'marginTop' => 1200,
+                'marginRight' => 1200,
+                'marginBottom' => 1200,
+                'marginLeft' => 1200,
+            ]);
+
+            $this->sections[] = $section;
         }
-
-        $section = $this->processor->addSection([
-            'marginTop' => 1200,
-            'marginRight' => 1200,
-            'marginBottom' => 1200,
-            'marginLeft' => 1200,
-        ]);
-
-        $this->sections[] = $section;
     }
 
     public function setHeader()
@@ -129,6 +129,8 @@ class GenerateQuestionCorrectionDocument extends Command
     {
         $topics = $this->exam->topics;
 
+        $this->addSection();
+
         foreach ($topics as $topic) {
             $this->addTopic($topic);
 
@@ -145,8 +147,6 @@ class GenerateQuestionCorrectionDocument extends Command
 
     public function addTopic($topic)
     {
-        $this->addSection();
-
         // Title
         $this->currentSection()->addTitle($topic->name);
 
@@ -314,7 +314,7 @@ class GenerateQuestionCorrectionDocument extends Command
                 "Didactische uitwerking {$stepNumber} – Vraag {$this->questionNumber}:",
                 ['bold' => true, 'color' => '0070C0']
             );
-            $textRun->addTextBreak(3);
+            $textRun->addTextBreak(6);
         }
 
         $textRun->addText(
@@ -370,7 +370,7 @@ class GenerateQuestionCorrectionDocument extends Command
          $textRun = $cell->addTextRun();
          $textRun->addText(' ', ['color' => 'FF0000']);
 
-        $this->addSection();
+         $this->addSection();
     }
 
     public function formatText($text, &$textRun = null, $textStyle = null)
