@@ -61,7 +61,7 @@ class Question extends Model
             ->pluck('id')
             ->transform(fn ($id) => Hashids::decode($id)[0]);
 
-        return $this->attachments()->sync($collection, false);
+        return $this->attachments()->sync($collection);
     }
 
     public function addTags($tags)
