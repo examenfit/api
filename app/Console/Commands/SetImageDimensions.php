@@ -38,7 +38,10 @@ class SetImageDimensions extends Command
      */
     public function handle()
     {
-        $images = Attachment::orderBy('created_at', 'DESC')->get();
+        $images = Attachment::whereNull('image_width')
+            ->whereNull('image_height')
+            ->orderBy('created_at', 'DESC')
+            ->get();
 
         foreach ($images as $image) {
             $imageSize = @getimagesize($image->url);
