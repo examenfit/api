@@ -3,7 +3,9 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\TopicController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\Admin\ExamController;
+use App\Http\Controllers\CollectionController;
 use App\Http\Controllers\Admin\AnswerController;
 use App\Http\Controllers\Admin\CourseController;
 use App\Http\Controllers\Admin\QuestionController;
@@ -26,15 +28,17 @@ use App\Http\Controllers\Admin\TopicController as AdminTopicController;
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])
     ->middleware('guest');
 
-Route::get('/latex-test', function () {
-    return \App\Models\Question::first();
-});
+Route::get('/collections/{collection}', [CollectionController::class, 'show']);
+Route::post('/collections/{collection}/{question}/elaborations', [CollectionController::class, 'storeElaboration']);
 
 Route::group(['middleware' => 'auth:sanctum'], function() {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy']);
     Route::get('/user', [AuthenticatedSessionController::class, 'show']);
 
     Route::get('/topics/{topic}', [TopicController::class, 'show']);
+
+    Route::get('/courses/{course}/search/', [SearchController::class, 'index']);
+    Route::get('/courses/{course}/search/results', [SearchController::class, 'results']);
 
     Route::get('/cart', [CartController::class, 'index']);
 
