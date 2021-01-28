@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use Closure;
 use App\Models\Topic;
 use App\Models\Course;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Spatie\QueryBuilder\Sorts\Sort;
 use Vinkla\Hashids\Facades\Hashids;
+use Spatie\QueryBuilder\AllowedSort;
 use App\Http\Resources\TopicResource;
 use Spatie\QueryBuilder\QueryBuilder;
 use App\Http\Resources\CourseResource;
@@ -14,6 +17,7 @@ use App\Http\Resources\DomainResource;
 use Spatie\QueryBuilder\AllowedFilter;
 use Illuminate\Database\Eloquent\Builder;
 use App\Http\Resources\QuestionTypeResource;
+use App\Models\Exam;
 
 class SearchController extends Controller
 {
@@ -50,16 +54,13 @@ class SearchController extends Controller
     {
         $topics = QueryBuilder::for(Topic::class)->allowedFilters([
             AllowedFilter::callback('level', function (Builder $query, $value) {
-                $query->whereHas('exam', function (Builder $subQuery) use ($value) {
-                    $subQuery->where('level', $value);
-                });
+                $query->where('cache->level', $value);
             }),
             AllowedFilter::callback('domain', function (Builder $query, $value) {
                 $query->whereHas('questions.domains', function (Builder $subQuery) use ($value) {
-                    $ids = collect($value)
-                        ->map(
-                            fn($item) => Hashids::decode($item)[0]
-                        )->toArray();
+                    $ids = collect($value)->map(
+                        fn($item) => Hashids::decode($item)[0]
+                    )->toArray();
 
                     $subQuery->whereIn(DB::raw('`domains`.`parent_id`'), $ids)
                         ->orWhereIn(DB::raw('`domains`.`id`'), $ids);
@@ -67,38 +68,68 @@ class SearchController extends Controller
             }),
             AllowedFilter::callback('subdomain', function (Builder $query, $value) {
                 $query->whereHas('questions.domains', function (Builder $subQuery) use ($value) {
-                    $ids = collect($value)
-                        ->map(
-                            fn($item) => Hashids::decode($item)[0]
-                        )->toArray();
+                    $ids = collect($value)->map(
+                        fn($item) => Hashids::decode($item)[0]
+                    )->toArray();
                     $subQuery->whereIn(DB::raw('`domains`.`id`'), $ids);
                 });
             }),
             AllowedFilter::callback('year', function (Builder $query, $value) {
-                $query->whereHas('exam', function (Builder $subQuery) use ($value) {
-                    $subQuery->whereIn('year', $value);
-                });
+                $query->where('cache->year', $value);
             }),
             AllowedFilter::callback('term', function (Builder $query, $value) {
-                $query->whereHas('exam', function (Builder $subQuery) use ($value) {
-                    $subQuery->whereIn('term', $value);
-                });
+                $query->where('cache->term', $value);
             }),
             AllowedFilter::callback('questionType', function (Builder $query, $value) {
-                $query->whereHas('questions.questionType', function (Builder $subQuery) use ($value) {
-                    $ids = collect($value)
-                        ->map(
-                            fn($item) => Hashids::decode($item)[0]
-                        )->toArray();
-                    $subQuery->whereIn('id', $ids);
-                });
+                $ids = collect($value)->map(
+                    fn($item) => Hashids::decode($item)[0]
+                )->toArray();
+                $query->whereJsonContains('cache->questionTypesId', $ids);
             }),
             AllowedFilter::callback('complexity', function (Builder $query, $value) {
-                $query->whereHas('questions.questionType', function (Builder $subQuery) use ($value) {
-                    $subQuery->whereIn('complexity', $value);
-                });
+                $query->where('complexity', $value);
             }),
-        ])->with('exam', 'questions')->get();
+            AllowedFilter::callback('tags', function (Builder $query, $value) {
+                $ids = collect($value)->map(
+                    fn($item) => Hashids::decode($item)[0]
+                )->toArray();
+                $query->whereJsonContains('cache->tagsId', $ids);
+            }),
+        ])->allowedSorts([
+            AllowedSort::custom('year', new class implements Sort {
+                public function __invoke(Builder $query, bool $descending, string $property) {
+                    $query->orderByRaw(
+                        "cast(json_unquote(json_extract(`cache`, '$.\"year\"')) as unsigned)".
+                        ($descending ? 'DESC' : 'ASC')
+                    );
+                }
+            }),
+            AllowedSort::custom('question_count', new class implements Sort {
+                public function __invoke(Builder $query, bool $descending, string $property) {
+                    $query->orderByRaw(
+                        "cast(json_unquote(json_extract(`cache`, '$.\"questionCount\"')) as unsigned)".
+                        ($descending ? 'DESC' : 'ASC')
+                    );
+                }
+            }),
+            AllowedSort::custom('time_in_minutes', new class implements Sort {
+                public function __invoke(Builder $query, bool $descending, string $property) {
+                    $query->orderByRaw(
+                        "cast(json_unquote(json_extract(`cache`, '$.\"totalTimeInMinutes\"')) as unsigned)".
+                        ($descending ? 'DESC' : 'ASC')
+                    );
+                }
+            }),
+            AllowedSort::custom('points', new class implements Sort {
+                public function __invoke(Builder $query, bool $descending, string $property) {
+                    $query->orderByRaw(
+                        "cast(json_unquote(json_extract(`cache`, '$.\"totalPoints\"')) as unsigned)".
+                        ($descending ? 'DESC' : 'ASC')
+                    );
+                }
+            }),
+        ])->get();
+
 
         return TopicResource::collection($topics);
     }

@@ -21,6 +21,7 @@ class AnswerResource extends JsonResource
             'type' => $this->type,
             'remark' => $this->remark,
             'sections' => AnswerSectionResource::collection($this->whenLoaded('sections')),
+            'question' => new QuestionResource($this->whenLoaded('question')),
         ];
     }
 }

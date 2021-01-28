@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Domain;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class DomainResource extends JsonResource
@@ -18,7 +19,9 @@ class DomainResource extends JsonResource
             'id' => $this->hash_id,
             'name' => $this->name,
             'parent' => new DomainResource($this->whenLoaded('parent')),
-            'children' => DomainResource::collection($this->whenLoaded('children')),
+            'children' => !isset($this->created_at) && isset($this->resource->toArray()['children'])
+                ? DomainResource::collection(Domain::hydrate($this->resource->toArray()['children']))
+                : DomainResource::collection($this->whenLoaded('children')),
         ];
     }
 }

@@ -13,7 +13,7 @@ class AnswerController extends Controller
 {
     public function show(Answer $answer)
     {
-        $answer->load('sections');
+        $answer->load('sections', 'question');
         return new AnswerResource($answer);
     }
 
@@ -41,8 +41,6 @@ class AnswerController extends Controller
 
         $answer->sections()->createMany($data['sections']);
 
-        $answer->load('sections');
-
-        return new AnswerResource($answer);
+        return $this->show($answer);
     }
 }

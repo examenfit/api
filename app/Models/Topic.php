@@ -10,12 +10,19 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Topic extends Model
 {
     use HasFactory, HashID;
+
     public $fillable = [
         'name',
         'introduction',
-        'complexity'
+        'complexity',
+        'cache',
     ];
+
     public $with = ['attachments'];
+
+    public $casts = [
+        'cache' => 'array',
+    ];
 
     public function exam()
     {
