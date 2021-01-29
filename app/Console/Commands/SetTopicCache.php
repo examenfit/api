@@ -52,6 +52,7 @@ class SetTopicCache extends Command
                 'totalProportionValue' => 0,
                 'averageProportionValue' => 0,
                 'questionCount' => count($topic->questions),
+                'questionsId' => collect(),
                 'totalTimeInMinutes' => 0,
                 'questionTypes' => collect(),
                 'questionTypesId' => [],
@@ -62,6 +63,7 @@ class SetTopicCache extends Command
             ]);
 
             $topic->questions->each(function ($question) use (&$cache) {
+                $cache['questionsId']->push($question->id);
                 $cache['totalPoints'] += $question->points;
                 $cache['totalProportionValue'] += $question->proportion_value;
                 $cache['totalTimeInMinutes'] += $question->time_in_minutes;
@@ -124,16 +126,5 @@ class SetTopicCache extends Command
 
             $topic->update(['cache' => $cache->toArray()]);
         });
-
-        // Aantal vragen
-        // Aantal punten
-        // Aantal minuten
-        // Gemiddelde P-waarde
-        // niveau
-        // Jaargang
-        // Tijdvak
-        // Domeinen en subdomeinen
-        // Trefwoorden
-        // Vraagtypen
     }
 }
