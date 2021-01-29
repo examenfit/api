@@ -35,6 +35,9 @@ class TopicResource extends JsonResource
                 'totalProportionValue' => $this->cache['totalProportionValue'],
                 'averageProportionValue' => $this->cache['averageProportionValue'],
                 'questionCount' => $this->cache['questionCount'],
+                'questionsId' => collect($this->cache['questionsId'])->map(
+                    fn ($id) => Hashids::encode($id)
+                ),
                 'totalTimeInMinutes' => $this->cache['totalTimeInMinutes'],
                 'questionTypes' => QuestionTypeResource::collection(
                     QuestionType::hydrate($this->cache['questionTypes'])
