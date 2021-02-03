@@ -12,7 +12,15 @@ class CollectionController extends Controller
 {
     public function show(Collection $collection)
     {
-        $collection->load('questions.answers.sections');
+        $collection->load([
+            'questions.answers.sections.tips',
+            'questions.tips',
+            'questions.topic'
+        ]);
+        // $collection = collect($collection->toArray());
+
+        // $questions = collect($collection['questions']);
+        // dump ($questions->groupBy('topic_id'));
         return new CollectionResource($collection);
     }
 

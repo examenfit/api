@@ -55,6 +55,11 @@ class Question extends Model
         return $this->belongsToMany(Tag::class);
     }
 
+    public function tips()
+    {
+        return $this->morphMany(Tip::class, 'tippable');
+    }
+
     public function addAttachments($attachments)
     {
         $collection = collect($attachments)

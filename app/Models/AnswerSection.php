@@ -11,12 +11,20 @@ class AnswerSection extends Model
     use HasFactory, HashID;
 
     public $fillable = [
+        'correction',
         'text',
+        'elaboration',
+        'explanation',
         'points',
     ];
 
     public function answer()
     {
         return $this->belongsTo(Answer::class);
+    }
+
+    public function tips()
+    {
+        return $this->morphMany(Tip::class, 'tippable');
     }
 }

@@ -19,4 +19,9 @@ class Collection extends Model
     {
         return $this->belongsToMany(Question::class);
     }
+
+    public function elaborations()
+    {
+        return $this->hasMany(Elaboration::class);
+    }
 }
