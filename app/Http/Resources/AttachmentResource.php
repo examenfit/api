@@ -19,6 +19,7 @@ class AttachmentResource extends JsonResource
             'id' => $this->hash_id,
             'name' => $this->name,
             'url' => Storage::url($this->path),
+            'path' => $this->path,
         ];
     }
 }

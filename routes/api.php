@@ -5,6 +5,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\TopicController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\Admin\TipController;
 use App\Http\Controllers\Admin\ExamController;
 use App\Http\Controllers\CollectionController;
 use App\Http\Controllers\Admin\AnswerController;
@@ -71,6 +72,9 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
         Route::get('/answers/{answer}', [AnswerController::class, 'show']);
         Route::post('/questions/{question}/answers', [AnswerController::class, 'store']);
         Route::put('/answers/{answer}', [AnswerController::class, 'update']);
+        Route::put('/answers/{answer}/sections/{answerSection}', [AnswerController::class, 'updateSection']);
+
+        Route::put('/tips', [TipController::class, 'update']);
 
         Route::get('attachments',  [AttachmentController::class, 'index']);
         Route::post('attachments', [AttachmentController::class, 'store']);
