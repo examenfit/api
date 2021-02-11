@@ -13,6 +13,7 @@ class CollectionController extends Controller
     public function show(Collection $collection)
     {
         $collection->load([
+            'author',
             'questions.answers.sections.tips',
             'questions.tips',
             'questions.topic'

@@ -16,7 +16,14 @@ class CollectionResource extends JsonResource
     {
         return [
             'id' => $this->hash_id,
+            'name' => $this->name,
             'questions' => QuestionResource::collection($this->whenLoaded('questions')),
+            'author' => $this->when($this->relationLoaded('author'), function () {
+                return [
+                    'full_name' => $this->author->full_name,
+                ];
+            }),
+            'created_at' => $this->created_at,
         ];
     }
 }
