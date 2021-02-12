@@ -32,8 +32,7 @@ class TopicResource extends JsonResource
                 'year' => $this->cache['year'],
                 'term' => $this->cache['term'],
                 'totalPoints' => $this->cache['totalPoints'],
-                'totalProportionValue' => $this->cache['totalProportionValue'],
-                'averageProportionValue' => $this->cache['averageProportionValue'],
+                'weightedProportionValue' => $this->cache['weightedProportionValue'],
                 'questionCount' => $this->cache['questionCount'],
                 'questionsId' => collect($this->cache['questionsId'])->map(
                     fn ($id) => Hashids::encode($id)

@@ -44,13 +44,13 @@ class SetTopicCache extends Command
             'questions.questionType',
             'exam',
         ])->get()->each(function ($topic) {
+            $proportionSum = 0;
             $cache = collect([
                 'level' => $topic->exam->level,
                 'year' => $topic->exam->year,
                 'term' => $topic->exam->term,
                 'totalPoints' => 0,
-                'totalProportionValue' => 0,
-                'averageProportionValue' => 0,
+                'weightedProportionValue' => 0,
                 'questionCount' => count($topic->questions),
                 'questionsId' => collect(),
                 'totalTimeInMinutes' => 0,
@@ -62,11 +62,11 @@ class SetTopicCache extends Command
                 'domainId' => [],
             ]);
 
-            $topic->questions->each(function ($question) use (&$cache) {
+            $topic->questions->each(function ($question) use (&$cache, &$proportionSum) {
                 $cache['questionsId']->push($question->id);
                 $cache['totalPoints'] += $question->points;
-                $cache['totalProportionValue'] += $question->proportion_value;
                 $cache['totalTimeInMinutes'] += $question->time_in_minutes;
+                $proportionSum += $question->points * $question->proportion_value;
 
                 $cache['questionTypes'] = $cache['questionTypes']->push([
                     'id' => $question->questionType->id,
@@ -120,8 +120,8 @@ class SetTopicCache extends Command
             });
 
             if ($cache['questionCount']) {
-                $cache['averageProportionValue'] =
-                    ($cache['totalProportionValue'] / $cache['questionCount']);
+                $cache['weightedProportionValue'] =
+                    round($proportionSum / $cache['totalPoints']);
             }
 
             $topic->update(['cache' => $cache->toArray()]);
