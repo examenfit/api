@@ -13,7 +13,9 @@ class CourseController extends Controller
 {
     public function showTags(Course $course)
     {
-        $course->load('tags');
+        $course->load(['tags' => function ($query) {
+            $query->withCount('topics');
+        }]);
 
         return TagResource::collection($course->tags);
     }

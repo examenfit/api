@@ -18,6 +18,7 @@ class TagResource extends JsonResource
             'id' => $this->hash_id,
             'name' => $this->name,
             'children' => TagResource::collection($this->whenLoaded('children')),
+            'topics_count' => $this->when($this->topics_count !== null, $this->topics_count),
         ];
     }
 }

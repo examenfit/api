@@ -96,6 +96,26 @@ class SearchController extends Controller
                 $query->whereJsonContains('cache->tagsId', $ids);
             }),
         ])->allowedSorts([
+            'name',
+            AllowedSort::custom('complexity', new class implements Sort {
+                public function __invoke(Builder $query, bool $descending, string $property) {
+                    $query->orderByRaw(
+                        "FIELD(`complexity`, 'low', 'average', 'high') ".
+                        ($descending ? 'DESC' : 'ASC')
+                    )->orderByRaw(
+                        "cast(json_unquote(json_extract(`cache`, '$.\"averageProportionValue\"')) as unsigned)".
+                        ($descending ? 'DESC' : 'ASC')
+                    );
+                }
+            }),
+            AllowedSort::custom('proportion_value', new class implements Sort {
+                public function __invoke(Builder $query, bool $descending, string $property) {
+                    $query->orderByRaw(
+                        "cast(json_unquote(json_extract(`cache`, '$.\"averageProportionValue\"')) as unsigned)".
+                        ($descending ? 'DESC' : 'ASC')
+                    );
+                }
+            }),
             AllowedSort::custom('year', new class implements Sort {
                 public function __invoke(Builder $query, bool $descending, string $property) {
                     $query->orderByRaw(
