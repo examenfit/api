@@ -27,6 +27,7 @@ class TopicResource extends JsonResource
             'attachments' => AttachmentResource::collection($this->attachments),
             'exam' => new ExamResource($this->whenLoaded('exam')),
             'questions' => QuestionResource::collection($this->whenLoaded('questions')),
+            'highlights' => HighlightResource::collection($this->whenLoaded('highlights')),
             'cache' => [
                 'level' => $this->cache['level'],
                 'year' => $this->cache['year'],

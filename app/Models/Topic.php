@@ -39,6 +39,11 @@ class Topic extends Model
         return $this->morphToMany(Attachment::class, 'attachable');
     }
 
+    public function highlights()
+    {
+        return $this->hasMany(Highlight::class);
+    }
+
     public function addAttachments($attachments)
     {
         return $this->attachments()->sync(

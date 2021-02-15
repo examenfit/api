@@ -14,7 +14,7 @@ class TopicController extends Controller
 {
     public function show(Topic $topic)
     {
-        $topic->load('exam', 'questions');
+        $topic->load('exam', 'questions', 'highlights');
         return new TopicResource($topic);
     }
 
@@ -54,6 +54,7 @@ class TopicController extends Controller
             'introduction' => 'nullable|string',
             'attachments' => 'nullable|array',
             'attachments.*.id' => ['required', new HashIdExists('attachments')],
+            'highlights.*.text' => ['required', 'string', 'max:255'],
         ]);
 
         $topic->update($data);
@@ -65,6 +66,14 @@ class TopicController extends Controller
         if ($request->has('withExamWrapper')) {
             return app('App\Http\Controllers\Admin\ExamController')
                 ->show($topic->exam);
+        }
+
+        $topic->highlights()->delete();
+
+        if (isset($data['highlights'])) {
+            $topic->highlights()->createMany(
+                collect($data['highlights'])
+            );
         }
 
         return $this->show($topic->fresh());
