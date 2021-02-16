@@ -22,6 +22,7 @@ class TopicResource extends JsonResource
             'id' => $this->hash_id,
             'exam_id' => Hashids::encode($this->exam_id),
             'complexity' => $this->complexity,
+            'popularity' => $this->popularity,
             'name' => $this->name,
             'introduction' => $this->introduction,
             'attachments' => AttachmentResource::collection($this->attachments),

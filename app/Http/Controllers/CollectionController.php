@@ -16,7 +16,8 @@ class CollectionController extends Controller
             'author',
             'questions.answers.sections.tips',
             'questions.tips',
-            'questions.topic'
+            'questions.topic.attachments',
+            'questions.attachments',
         ]);
         // $collection = collect($collection->toArray());
 

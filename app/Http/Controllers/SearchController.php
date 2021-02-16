@@ -148,7 +148,7 @@ class SearchController extends Controller
                     );
                 }
             }),
-        ])->get();
+        ])->with('highlights')->get();
 
 
         return TopicResource::collection($topics);

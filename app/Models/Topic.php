@@ -15,6 +15,7 @@ class Topic extends Model
         'name',
         'introduction',
         'complexity',
+        'popularity',
         'cache',
     ];
 
