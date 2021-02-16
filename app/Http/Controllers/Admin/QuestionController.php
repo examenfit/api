@@ -14,7 +14,14 @@ class QuestionController extends Controller
 {
     public function show(Question $question)
     {
-        $question->load('topic', 'attachments', 'tags', 'domains', 'answers.sections');
+        $question->load([
+            'topic',
+            'attachments',
+            'tags',
+            'domains',
+            'answers.sections',
+            'methodologies',
+        ]);
 
         return new QuestionResource($question);
     }
@@ -82,6 +89,8 @@ class QuestionController extends Controller
             'type_id' => ['required', new HashIdExists('question_types')],
             'tags.*.id' => ['required', new HashIdExists('tags')],
             'domains.*.id' => ['required', new HashIdExists('domains')],
+            'methodologies.*.id' => ['required', new HashIdExists('methodologies')],
+            'methodologies.*.chapter' => ['required', 'string'],
             'attachments' => 'array',
             'attachments.*.id' => ['required', new HashIdExists('attachments')],
         ]);
@@ -107,6 +116,10 @@ class QuestionController extends Controller
 
         if (isset($data['domains'])) {
             $question->addDomains($data['domains']);
+        }
+
+        if (isset($data['methodologies'])) {
+            $question->addMethodologies($data['methodologies']);
         }
 
         $question->update($data);

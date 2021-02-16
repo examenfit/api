@@ -33,6 +33,7 @@ class QuestionResource extends JsonResource
             'tags' => TagResource::collection($this->whenLoaded('tags')),
             'domains' => DomainResource::collection($this->whenLoaded('domains')),
             'tips' => TipResource::collection($this->whenLoaded('tips')),
+            'methodologies' => MethodologyResource::collection($this->whenLoaded('methodologies')),
         ];
     }
 }

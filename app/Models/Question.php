@@ -60,6 +60,11 @@ class Question extends Model
         return $this->morphMany(Tip::class, 'tippable');
     }
 
+    public function methodologies()
+    {
+        return $this->belongsToMany(Methodology::class, 'question_methodology')->withPivot('chapter');
+    }
+
     public function addAttachments($attachments)
     {
         $collection = collect($attachments)
@@ -103,5 +108,16 @@ class Question extends Model
         $this->attributes['type_id'] = $decodedValue
             ? $this->attributes['type_id'] = $decodedValue
             : $this->attributes['type_id'] = $value;
+    }
+
+    public function addMethodologies($methodologies)
+    {
+        $this->methodologies()->detach();
+
+        collect($methodologies)->each(function ($item) {
+            $this->methodologies()->attach([
+                Hashids::decode($item['id'])[0] => ['chapter' => $item['chapter']]
+            ]);
+        });
     }
 }

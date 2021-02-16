@@ -29,4 +29,9 @@ class Course extends Model
     {
         return $this->hasMany(QuestionType::class)->orderBy('name', 'ASC');
     }
+
+    public function methodologies()
+    {
+        return $this->hasMany(Methodology::class);
+    }
 }
