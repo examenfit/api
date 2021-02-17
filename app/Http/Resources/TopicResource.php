@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use App\Models\Tag;
 use App\Models\Domain;
+use App\Models\Methodology;
 use App\Models\QuestionType;
 use Vinkla\Hashids\Facades\Hashids;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -45,6 +46,11 @@ class TopicResource extends JsonResource
                 ),
                 'tags' => TagResource::collection(Tag::hydrate($this->cache['tags'])),
                 'domains' => DomainResource::collection(Domain::hydrate($this->cache['domains'])),
+                'methodologies' => collect($this->cache['methodologies'])->mapWithKeys(function ($value, $key) {
+                    return [HashIds::encode($key) => MethodologyResource::collection(
+                        Methodology::hydrate($value)
+                    )];
+                }),
             ]
         ];
     }

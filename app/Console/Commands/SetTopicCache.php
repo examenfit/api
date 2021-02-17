@@ -42,6 +42,7 @@ class SetTopicCache extends Command
             'questions.domains.parent',
             'questions.tags',
             'questions.questionType',
+            'questions.methodologies',
             'exam',
         ])->get()->each(function ($topic) {
             $proportionSum = 0;
@@ -60,6 +61,7 @@ class SetTopicCache extends Command
                 'tagsId' => [],
                 'domains' => collect(),
                 'domainId' => [],
+                'methodologies' => collect(),
             ]);
 
             $topic->questions->each(function ($question) use (&$cache, &$proportionSum) {
@@ -74,6 +76,13 @@ class SetTopicCache extends Command
                 ])->unique('id')->values();
                 $cache['questionTypesId'] = $cache['questionTypes']->pluck('id');
 
+                $question->methodologies->each(function ($methodology) use (&$cache) {
+                    $cache['methodologies']->push([
+                        'id' => $methodology->id,
+                        'name' => $methodology->name,
+                        'chapter' => $methodology->pivot->chapter,
+                    ]);
+                });
 
                 $question->tags->each(function ($tag) use (&$cache) {
                     $cache['tags'] = $cache['tags']->push([
@@ -123,6 +132,8 @@ class SetTopicCache extends Command
                 $cache['weightedProportionValue'] =
                     round($proportionSum / $cache['totalPoints']);
             }
+
+            $cache['methodologies'] = $cache['methodologies']->groupBy('id');
 
             $topic->update(['cache' => $cache->toArray()]);
         });
