@@ -26,7 +26,7 @@ class SearchController extends Controller
         $course->load([
             'domains',
             'questionTypes',
-            'exams' => fn($q) => $q->orderBy('year', 'ASC')->orderBy('term', 'ASC'),
+            'exams' => fn($q) => $q->orderBy('year', 'DESC')->orderBy('term', 'DESC'),
         ]);
 
         $yearTerm = collect();
@@ -97,6 +97,7 @@ class SearchController extends Controller
             }),
         ])->allowedSorts([
             'name',
+            'popularity',
             AllowedSort::custom('complexity', new class implements Sort {
                 public function __invoke(Builder $query, bool $descending, string $property) {
                     $query->orderByRaw(
