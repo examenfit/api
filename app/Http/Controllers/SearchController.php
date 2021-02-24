@@ -171,9 +171,6 @@ class SearchController extends Controller
             }),
         ])->with('highlights');
 
-        dump($topics->toSql());
-
-
         return TopicResource::collection($topics->get());
     }
 }
