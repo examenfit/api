@@ -26,7 +26,7 @@ class SearchController extends Controller
         $course->load([
             'domains',
             'questionTypes',
-            'exams' => fn($q) => $q->orderBy('year', 'DESC')->orderBy('term', 'DESC'),
+            'exams' => fn($q) => $q->orderBy('year', 'DESC')->orderBy('term', 'ASC'),
             'methodologies' => fn($q) => $q->join(
                 'question_methodology',
                 'methodologies.id',
@@ -55,7 +55,7 @@ class SearchController extends Controller
             'terms' => $terms->unique()->values()->toArray(),
             'yearTerm' => $yearTerm,
             'methodologies' => $course->methodologies->mapWithKeys(function ($value, $key) {
-                return [$key => $value->pluck('chapter')->unique()];
+                return [$key => $value->pluck('chapter')->unique()->sort()->values()];
             })
         ];
     }
