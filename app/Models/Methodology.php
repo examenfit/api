@@ -9,4 +9,10 @@ use Illuminate\Database\Eloquent\Model;
 class Methodology extends Model
 {
     use HasFactory, HashID;
+
+    public function chapters()
+    {
+        return $this->belongsToMany(Question::class, 'question_methodology')
+            ->withPivot(['chapter']);
+    }
 }

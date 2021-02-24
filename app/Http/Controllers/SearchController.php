@@ -27,7 +27,14 @@ class SearchController extends Controller
             'domains',
             'questionTypes',
             'exams' => fn($q) => $q->orderBy('year', 'DESC')->orderBy('term', 'DESC'),
+            'methodologies' => fn($q) => $q->join(
+                'question_methodology',
+                'methodologies.id',
+                'question_methodology.methodology_id'
+            ),
         ]);
+
+        $course->methodologies = $course->methodologies->groupBy('name');
 
         $yearTerm = collect();
         $years = collect();
@@ -47,6 +54,9 @@ class SearchController extends Controller
             'years' => $years->unique()->values()->toArray(),
             'terms' => $terms->unique()->values()->toArray(),
             'yearTerm' => $yearTerm,
+            'methodologies' => $course->methodologies->mapWithKeys(function ($value, $key) {
+                return [$key => $value->pluck('chapter')->unique()];
+            })
         ];
     }
 
@@ -94,6 +104,16 @@ class SearchController extends Controller
                     fn($item) => Hashids::decode($item)[0]
                 )->toArray();
                 $query->whereJsonContains('cache->tagsId', $ids);
+            }),
+            AllowedFilter::callback('methodology', function (Builder $query, $value) {
+                $query->whereHas('questions.methodologies', function (Builder $subQuery) use ($value) {
+                    $subQuery->where(DB::raw('`methodologies`.`name`'), $value);
+                });
+            }),
+            AllowedFilter::callback('chapter', function (Builder $query, $value) {
+                $query->whereHas('questions.methodologies', function (Builder $subQuery) use ($value) {
+                    $subQuery->where(DB::raw('`question_methodology`.`chapter`'), $value);
+                });
             }),
         ])->allowedSorts([
             'name',
@@ -149,9 +169,11 @@ class SearchController extends Controller
                     );
                 }
             }),
-        ])->with('highlights')->get();
+        ])->with('highlights');
+
+        dump($topics->toSql());
 
 
-        return TopicResource::collection($topics);
+        return TopicResource::collection($topics->get());
     }
 }
