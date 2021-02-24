@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Topic;
 use App\Models\Question;
 use App\Rules\HashIdExists;
 use Illuminate\Support\Arr;
@@ -30,24 +31,23 @@ class CartController extends Controller
                 return $decodedValue;
             });
 
-        $questions = Question::with('topic')
-            ->whereIn('id', $items)
-            ->get();
+        $topics = Question::whereIn('id', $items)
+            ->get()->pluck('topic_id')->unique();
 
-        $topics = $questions->groupBy('topic_id');
+        $data = Topic::with(['exam', 'questions'])->whereIn('id', $topics)->get();
 
-        $data = [];
+        // $data = [];
 
-        foreach ($topics as $topic_id => $questions) {
-            $topic = $questions[0]['topic'];
-            $topic['questions'] = $questions;
+        // foreach ($topics as $topic_id => $questions) {
+        //     $topic = $questions[0]['topic'];
+        //     $topic['questions'] = $questions;
 
-            for ($i = 0; $i < count($questions); $i++) {
-                unset($questions[$i]['topic']);
-            }
+        //     for ($i = 0; $i < count($questions); $i++) {
+        //         unset($questions[$i]['topic']);
+        //     }
 
-            $data[] = $topic;
-        }
+        //     $data[] = $topic;
+        // }
 
         return CartResource::collection($data);
     }
