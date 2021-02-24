@@ -14,6 +14,7 @@ class CollectionController extends Controller
     {
         $collection->load([
             'author',
+            'questions' => fn($q) => $q->orderBy('topic_id', 'ASC')->orderBy('number', 'ASC'),
             'questions.answers.sections.tips',
             'questions.tips',
             'questions.topic.attachments',
