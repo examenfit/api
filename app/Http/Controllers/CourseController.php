@@ -17,9 +17,9 @@ class CourseController extends Controller
             $query->withCount('topics');
 
             if (request()->get('level') === 'vwo') {
-                $query->where('is_vwo', true)->where('is_havo', false);
+                $query->where('is_vwo', true);
             } else {
-                $query->where('is_havo', true)->where('is_vwo', false);
+                $query->where('is_havo', true);
             }
         }]);
 
