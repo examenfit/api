@@ -15,6 +15,12 @@ class CourseController extends Controller
     {
         $course->load(['tags' => function ($query) {
             $query->withCount('topics');
+
+            if (request()->get('level') === 'vwo') {
+                $query->where('is_vwo', true)->where('is_havo', false);
+            } else {
+                $query->where('is_havo', true)->where('is_vwo', false);
+            }
         }]);
 
         return TagResource::collection($course->tags);
