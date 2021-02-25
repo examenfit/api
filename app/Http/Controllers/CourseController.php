@@ -14,7 +14,11 @@ class CourseController extends Controller
     public function showTags(Course $course)
     {
         $course->load(['tags' => function ($query) {
-            $query->withCount('topics');
+            $query->withCount(['topics' => function ($query) {
+                $query->whereHas('exam', function ($query) {
+                    $query->where('level', request()->get('level'));
+                });
+            }]);
 
             if (request()->get('level') === 'vwo') {
                 $query->where('is_vwo', true);
