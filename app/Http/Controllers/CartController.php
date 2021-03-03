@@ -14,9 +14,10 @@ class CartController extends Controller
 {
     public function index(Request $request)
     {
+        // dump(json_decode($request->items));
         $items = $request->validate([
             'items' => 'array|min:1',
-            // 'items.*' => [new HashIdExists('questions')]
+            'items.*' => [new HashIdExists('topics')]
         ]);
 
         $items = collect($items['items'])
@@ -31,24 +32,8 @@ class CartController extends Controller
                 return $decodedValue;
             });
 
-        $topics = Question::whereIn('id', $items)
-            ->get()->pluck('topic_id')->unique();
+        $topics = Topic::with('exam', 'questions')->whereIn('id', $items)->get();
 
-        $data = Topic::with(['exam', 'questions'])->whereIn('id', $topics)->get();
-
-        // $data = [];
-
-        // foreach ($topics as $topic_id => $questions) {
-        //     $topic = $questions[0]['topic'];
-        //     $topic['questions'] = $questions;
-
-        //     for ($i = 0; $i < count($questions); $i++) {
-        //         unset($questions[$i]['topic']);
-        //     }
-
-        //     $data[] = $topic;
-        // }
-
-        return CartResource::collection($data);
+        return CartResource::collection($topics);
     }
 }
