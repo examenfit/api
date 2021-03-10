@@ -72,6 +72,7 @@ class GenerateQuestionCorrectionDocument extends Command
     public function getExam($id)
     {
         $this->exam = Exam::with([
+            'course',
             'topics.questions.attachments',
             'topics.questions.answers',
             'topics.questions.domains.parent',
@@ -131,18 +132,44 @@ class GenerateQuestionCorrectionDocument extends Command
 
         $this->addSection();
 
+        $this->addCover();
+
         foreach ($topics as $topic) {
             $this->addTopic($topic);
+
+            $this->currentSection()->addPageBreak();
 
             foreach ($topic->questions as $question) {
                 $this->addQuestion($question);
 
                 $this->addAnswer($question->answers);
 
+                $this->addMetaData($question);
+
+                $this->currentSection()->addPageBreak();
+
                 // Increase question number
                 $this->questionNumber++;
             }
         }
+    }
+
+    public function addCover()
+    {
+        // Title
+        $level = strtoupper($this->exam->level);
+        $term = $this->exam->term === 1 ? 'Ⅰ' : 'Ⅱ';
+        $title = "{$this->exam->course->name} {$level} – {$this->exam->year}-{$term}";
+        $this->currentSection()->addText($title, ['bold' => true, 'size' => 24]);
+
+        // Subtitle
+        $this->currentSection()->addText(
+            "Standaard uitwerkingenbestand auteurs ExamenFit",
+            ['bold' => true, 'size' => 16]
+        );
+
+        // Next page
+        $this->currentSection()->addPageBreak();
     }
 
     public function addTopic($topic)
@@ -222,6 +249,8 @@ class GenerateQuestionCorrectionDocument extends Command
         // Title
         $this->currentSection()->addTitle('Vraag '.$this->questionNumber);
 
+        $this->addAttachments($question->attachments);
+
         // Create TextRun
         $textRun = $this->currentSection()->addTextRun(['alignment' => 'left']);
 
@@ -236,27 +265,6 @@ class GenerateQuestionCorrectionDocument extends Command
         // Question text
         $this->formatText($question->text, $textRun);
 
-        // Question type
-        $textRun->addTextBreak(2);
-        $textRun->addText('Vraagtype: ', ['bold' => true, 'color' => '0070C0']);
-        $textRun->addText($question->questionType->name, ['color' => '0070C0']);
-
-        // Domains
-        $textRun->addTextBreak(1);
-        $textRun->addText('Domeinen: ', ['bold' => true, 'color' => '0070C0']);
-
-        $domains = [];
-        foreach ($question->domains as $domain) {
-            $domains[] = $domain->name;
-        }
-
-        $textRun->addText(implode(', ', $domains), ['color' => '0070C0']);
-
-        // Tags
-        $textRun->addTextBreak(1);
-        $textRun->addText('Trefwoorden: ', ['bold' => true, 'color' => '0070C0']);
-        $textRun->addText(implode(', ', $question->tags->pluck('name')->toArray()), ['color' => '0070C0']);
-
         // Add break
         $this->currentSection()->addTextBreak(1);
     }
@@ -265,14 +273,22 @@ class GenerateQuestionCorrectionDocument extends Command
     {
         $answer = $answer[0];
 
+        $this->currentSection()->addTextBreak(2);
+
+        $this->currentSection()->addTitle("CV – Vraag {$this->questionNumber}:");
+
         $textRun = $this->currentSection()->addTextRun();
-        $textRun->addText("Antwoord vraag {$this->questionNumber}:", ['bold' => true]);
+        $textRun->addTextBreak(1);
+        $textRun->addText('Opmerking: ');
+        $textRun->addTextBreak(1);
+        $textRun->addText('...');
+        $textRun->addTextBreak(1);
 
         foreach ($answer->sections as $index => $section) {
             $textRun = $this->currentSection()->addTextRun();
 
-            $textRun->addText('Stap ' . ($index + 1) . ': ', ['bold' => true]);
-            $this->formatText($section->text, $textRun);
+            $textRun->addText('Item ' . ($index + 1) . ': ', ['bold' => true]);
+            $this->formatText($section->correction, $textRun);
         }
 
         if ($answer->remark) {
@@ -283,94 +299,105 @@ class GenerateQuestionCorrectionDocument extends Command
             $textRun->addText($answer->remark, ['italic' => true]);
         }
 
+        $this->currentSection()->addTextBreak(3);
+        $this->currentSection()
+            ->addTitle("Tussenantwoorden – Vraag {$this->questionNumber}:");
         $this->currentSection()->addTextBreak(1);
-        $textRun = $this->currentSection()->addTextRun();
 
         foreach ($answer->sections as $index => $section) {
             $textRun = $this->currentSection()->addTextRun();
             $stepNumber = $index + 1;
 
             $textRun->addText(
-                "Tussenantwoord {$stepNumber} – Vraag {$this->questionNumber}:",
+                "TA {$stepNumber}:",
                 ['bold' => true, 'color' => '0070C0']
             );
             $textRun->addTextBreak(1);
-            $this->formatText($section->text, $textRun);
-            $textRun->addTextBreak(3);
-
-            $textRun->addText(
-                "Tip {$stepNumber} – Vraag {$this->questionNumber}:",
-                ['bold' => true, 'color' => '0070C0']
-            );
-            $textRun->addTextBreak(3);
-
-            $textRun->addText(
-                "Modeluitwerking {$stepNumber} – Vraag {$this->questionNumber}:",
-                ['bold' => true, 'color' => '0070C0']
-            );
-            $textRun->addTextBreak(3);
-
-            $textRun->addText(
-                "Toelichting op modeluitwerking {$stepNumber} – Vraag {$this->questionNumber}:",
-                ['bold' => true, 'color' => '0070C0']
-            );
-            $textRun->addTextBreak(6);
+            $this->formatText($section->correction, $textRun);
+            $textRun->addTextBreak(2);
         }
 
+        $this->currentSection()->addTextBreak(1);
+        $this->currentSection()
+            ->addTitle("Tips – Vraag {$this->questionNumber}:");
+        $this->currentSection()->addTextBreak(1);
+
+        $textRun = $this->currentSection()->addTextRun();
         $textRun->addText(
-            "Verwijzing naar lesmethodes:",
+            "Algemene tip:",
             ['bold' => true, 'color' => '0070C0']
         );
 
-         // Create table
-         $table = $this->currentSection()->addTable('questionTableStyle');
+        foreach ($answer->sections as $index => $section) {
+            $textRun = $this->currentSection()->addTextRun();
+            $stepNumber = $index + 1;
 
-         // Row
-         $table->addRow();
+            $textRun->addText(
+                "Tip TA {$stepNumber}:",
+                ['bold' => true, 'color' => '0070C0']
+            );
+            $textRun->addTextBreak(1);
+        }
 
-         $cell = $table->addCell(3000);
-         $textRun = $cell->addTextRun();
-         $textRun->addText('Methode', ['bold' => true]);
+        $this->currentSection()->addTextBreak(2);
+        $this->currentSection()->addTitle("Modeluitwerking – Vraag {$this->questionNumber}:");
+        $this->currentSection()->addTextBreak(1);
 
-         $cell = $table->addCell(3000);
-         $textRun = $cell->addTextRun();
-         $textRun->addText('Deel / Jaar', ['bold' => true]);
+        foreach ($answer->sections as $index => $section) {
+            $textRun = $this->currentSection()->addTextRun();
+            $stepNumber = $index + 1;
 
-         $cell = $table->addCell(3000);
-         $textRun = $cell->addTextRun();
-         $textRun->addText('Hoofdstuk', ['bold' => true]);
+            $textRun->addText(
+                "MU {$stepNumber}:",
+                ['bold' => true, 'color' => '0070C0']
+            );
+            $textRun->addTextBreak(1);
+            if ($index === 0) {
+                $textRun->addText("Gegeven:");
+                $textRun->addTextBreak(1);
+                $textRun->addText("Gevraagd:");
+                $textRun->addTextBreak(1);
+                $textRun->addText("Aanpak:");
+                $textRun->addTextBreak(1);
+            }
+        }
+    }
 
-         // Row
-         $table->addRow();
+    public function addMetaData($question)
+    {
+        $this->currentSection()->addTextBreak(2);
+        $this->currentSection()->addTitle("Metadata – Vraag {$question->number} (Controleren):");
+        $this->currentSection()->addTextBreak(1);
 
-         $cell = $table->addCell();
-         $textRun = $cell->addTextRun();
-         $textRun->addText('Moderne wiskunde', ['bold' => true]);
+        $textRun = $this->currentSection()->addTextRun();
 
-         $cell = $table->addCell();
-         $textRun = $cell->addTextRun();
-         $textRun->addText(' ', ['color' => 'FF0000']);
+        // Question type
+        $textRun->addText('Vraagtype: ', ['bold' => true]);
+        $textRun->addText($question->questionType->name);
 
-         $cell = $table->addCell();
-         $textRun = $cell->addTextRun();
-         $textRun->addText(' ', ['color' => 'FF0000']);
+        // Domains
+        $textRun->addTextBreak(1);
+        $textRun->addText('Domeinen: ', ['bold' => true]);
 
-         // Row
-         $table->addRow();
+        $domains = [];
+        foreach ($question->domains as $domain) {
+            $domains[] = $domain->name;
+        }
 
-         $cell = $table->addCell();
-         $textRun = $cell->addTextRun();
-         $textRun->addText("Getal en Ruimte", ['bold' => true]);
+        $textRun->addText(implode(', ', $domains));
 
-         $cell = $table->addCell();
-         $textRun = $cell->addTextRun();
-         $textRun->addText(' ', ['color' => 'FF0000']);
+        // Tags
+        $textRun->addTextBreak(1);
+        $textRun->addText('Trefwoorden: ', ['bold' => true]);
+        $textRun->addText(implode(', ', $question->tags->pluck('name')->toArray()));
 
-         $cell = $table->addCell();
-         $textRun = $cell->addTextRun();
-         $textRun->addText(' ', ['color' => 'FF0000']);
+        $textRun->addTextBreak(3);
 
-         $this->addSection();
+        $this->currentSection()->addTitle("Metadata – Vraag {$question->number} (Creëren):");
+        $this->currentSection()->addTextBreak(1);
+
+        $textRun = $this->currentSection()->addTextRun();
+        $textRun->addText("Highlight - Vraag {$question->number}: ", ['bold' => true, 'color' => '0070C0']);
     }
 
     public function formatText($text, &$textRun = null, $textStyle = null)
