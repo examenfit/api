@@ -6,6 +6,7 @@ use App\Models\Exam;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ExamResource;
+use App\Rules\HashIdExists;
 use Illuminate\Support\Facades\Artisan;
 
 class ExamController extends Controller
@@ -68,12 +69,13 @@ class ExamController extends Controller
     public function update(Request $request, Exam $exam)
     {
         $data = $request->validate([
-            'course_id' => 'required',
+            'course_id' => ['required', new HashIdExists('courses')],
             'status' => 'nullable|in:concept,published',
             'level' => 'required|in:havo,vwo',
             'year' => 'required|integer|min:2010',
             'term' => 'required|integer|in:1,2',
             'standardization_value' => 'nullable|numeric',
+            'is_pilot' => 'nullable|boolean',
         ]);
 
         $exam->update($data);

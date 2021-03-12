@@ -17,6 +17,7 @@ class Exam extends Model
         'year',
         'term',
         'standardization_value',
+        'is_pilot',
         'status',
         'assignment_contents',
     ];
