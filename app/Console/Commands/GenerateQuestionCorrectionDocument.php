@@ -88,8 +88,8 @@ class GenerateQuestionCorrectionDocument extends Command
         $properties->setCompany('ExamenFit');
         $properties->setTitle(
             $this->exam->year . ' ' .
-            $this->exam->term . 'e tijdvak' . ' ' .
-            $this->exam->level . ' (ExamenFit)'
+                $this->exam->term . 'e tijdvak' . ' ' .
+                $this->exam->level . ' (ExamenFit)'
         );
         $properties->setDescription(
             "Examen aangemaakt in ExamenFit"
@@ -123,7 +123,6 @@ class GenerateQuestionCorrectionDocument extends Command
 
     public function setFooter()
     {
-
     }
 
     public function processTopics()
@@ -234,7 +233,7 @@ class GenerateQuestionCorrectionDocument extends Command
             $textRun = $textBox->addTextRun();
 
             // Add title to the textbox
-            $textRun->addText($attachment->name."\n", ['bold' => true]);
+            $textRun->addText($attachment->name . "\n", ['bold' => true]);
 
             // Add image to the textbox
             $textRun->addImage($attachment->url, [
@@ -247,7 +246,7 @@ class GenerateQuestionCorrectionDocument extends Command
     public function addQuestion($question)
     {
         // Title
-        $this->currentSection()->addTitle('Vraag '.$this->questionNumber);
+        $this->currentSection()->addTitle('Vraag ' . $this->questionNumber);
 
         $this->addAttachments($question->attachments);
 
@@ -260,7 +259,7 @@ class GenerateQuestionCorrectionDocument extends Command
         $textRun->addTextBreak(2);
 
         // Question number
-        $textRun->addText('Vraag '.$this->questionNumber.': ', ['bold' => true]);
+        $textRun->addText('Vraag ' . $this->questionNumber . ': ', ['bold' => true]);
 
         // Question text
         $this->formatText($question->text, $textRun);
@@ -372,8 +371,10 @@ class GenerateQuestionCorrectionDocument extends Command
         $textRun = $this->currentSection()->addTextRun();
 
         // Question type
-        $textRun->addText('Vraagtype: ', ['bold' => true]);
-        $textRun->addText($question->questionType->name);
+        if ($question->questionType) {
+            $textRun->addText('Vraagtype: ', ['bold' => true]);
+            $textRun->addText($question->questionType->name);
+        }
 
         // Domains
         $textRun->addTextBreak(1);
@@ -460,7 +461,7 @@ class GenerateQuestionCorrectionDocument extends Command
                                 $chunk['result'],
                                 array_merge(['bold' => true], $textStyle ?? [])
                             );
-                        break;
+                            break;
                     }
                 } else {
                     $textRun->addText($chunk, $textStyle);
@@ -512,9 +513,6 @@ class GenerateQuestionCorrectionDocument extends Command
      */
     public function currentSection()
     {
-        return $this->sections[
-            (count($this->sections) - 1)
-        ];
+        return $this->sections[(count($this->sections) - 1)];
     }
-
 }
