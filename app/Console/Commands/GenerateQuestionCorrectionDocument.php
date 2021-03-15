@@ -136,14 +136,15 @@ class GenerateQuestionCorrectionDocument extends Command
         foreach ($topics as $topic) {
             $this->addTopic($topic);
 
-            $this->currentSection()->addPageBreak();
-
             foreach ($topic->questions as $question) {
                 $this->addQuestion($question);
 
+                $this->currentSection()->addPageBreak();
+
                 $this->addAnswer($question->answers);
 
-                $this->addMetaData($question);
+                // Temporary hide
+                // $this->addMetaData($question);
 
                 $this->currentSection()->addPageBreak();
 
@@ -268,12 +269,8 @@ class GenerateQuestionCorrectionDocument extends Command
         $this->currentSection()->addTextBreak(1);
     }
 
-    public function addAnswer($answer)
+    public function addAnswer($answers)
     {
-        $answer = $answer[0];
-
-        $this->currentSection()->addTextBreak(2);
-
         $this->currentSection()->addTitle("CV – Vraag {$this->questionNumber}:");
 
         $textRun = $this->currentSection()->addTextRun();
@@ -283,22 +280,41 @@ class GenerateQuestionCorrectionDocument extends Command
         $textRun->addText('...');
         $textRun->addTextBreak(1);
 
-        foreach ($answer->sections as $index => $section) {
-            $textRun = $this->currentSection()->addTextRun();
+        foreach ($answers as $index => $answer) {
 
-            $textRun->addText('Item ' . ($index + 1) . ': ', ['bold' => true]);
-            $this->formatText($section->correction, $textRun);
-        }
+            if ($index > 0) {
+                $textRun = $this->currentSection()->addTextRun();
+                $textRun->addTextBreak(1);
+                $textRun->addText('Of', ['italic' => true]);
+                $textRun->addTextBreak(1);
+            }
 
-        if ($answer->remark) {
-            $this->currentSection()->addTextBreak(1);
-            $textRun = $this->currentSection()->addTextRun();
-            $textRun->addText('Opmerking:');
+            foreach ($answer->sections as $index => $section) {
+                $textRun = $this->currentSection()->addTextRun();
+
+                $textRun->addText('Item ' . ($index + 1) . ' (' . $section->points . 'p): ', ['bold' => true]);
+                $this->formatText($section->correction, $textRun);
+            }
+
+            $textRun->addTextBreak(2);
+            $textRun->addText('Opmerking: ');
             $textRun->addTextBreak(1);
-            $textRun->addText($answer->remark, ['italic' => true]);
+            $textRun->addText('...');
+            $textRun->addTextBreak(1);
+
+            if ($answer->remark) {
+                $this->currentSection()->addTextBreak(1);
+                $textRun = $this->currentSection()->addTextRun();
+                $textRun->addText('Opmerking:');
+                $textRun->addTextBreak(1);
+                $this->formatText($answer->remark, $textRun, ['italic' => true]);
+                // $textRun->addText($answer->remark, ['italic' => true]);
+            }
         }
 
-        $this->currentSection()->addTextBreak(3);
+        $answer = $answers[0];
+
+        $this->currentSection()->addTextBreak(1);
         $this->currentSection()
             ->addTitle("Tussenantwoorden – Vraag {$this->questionNumber}:");
         $this->currentSection()->addTextBreak(1);
@@ -308,7 +324,7 @@ class GenerateQuestionCorrectionDocument extends Command
             $stepNumber = $index + 1;
 
             $textRun->addText(
-                "TA {$stepNumber}:",
+                "TA {$stepNumber} ({$section->points}p):",
                 ['bold' => true, 'color' => '0070C0']
             );
             $textRun->addTextBreak(1);
@@ -316,7 +332,8 @@ class GenerateQuestionCorrectionDocument extends Command
             $textRun->addTextBreak(2);
         }
 
-        $this->currentSection()->addTextBreak(1);
+        $this->currentSection()->addPageBreak();
+
         $this->currentSection()
             ->addTitle("Tips – Vraag {$this->questionNumber}:");
         $this->currentSection()->addTextBreak(1);
