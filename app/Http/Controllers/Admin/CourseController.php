@@ -17,7 +17,7 @@ class CourseController extends Controller
 
     public function show(Course $course)
     {
-        $course->load(['exams', 'facets.children']);
+        $course->load('exams');
 
         return new CourseResource($course);
     }

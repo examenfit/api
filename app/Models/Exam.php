@@ -3,12 +3,13 @@
 namespace App\Models;
 
 use App\Support\HashID;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Exam extends Model
+class Exam extends Model implements Auditable
 {
-    use HasFactory, HashID;
+    use HasFactory, HashID, \OwenIt\Auditing\Auditable;
 
     public $fillable = [
         'course_id',

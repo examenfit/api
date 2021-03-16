@@ -6,10 +6,18 @@ use App\Support\HashID;
 use Vinkla\Hashids\Facades\Hashids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class Topic extends Model
+class Topic extends Model implements Auditable
 {
-    use HasFactory, HashID;
+    use HasFactory, HashID, \OwenIt\Auditing\Auditable;
+
+    protected $auditInclude = [
+        'name',
+        'introduction',
+        'complexity',
+        'popularity',
+    ];
 
     public $fillable = [
         'name',

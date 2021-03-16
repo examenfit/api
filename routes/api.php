@@ -15,6 +15,9 @@ use App\Http\Controllers\Admin\TeacherDocumentController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Admin\TopicController as AdminTopicController;
 use App\Http\Controllers\Admin\CourseController as AdminCourseController;
+use App\Http\Controllers\Admin\IndexController as AdminIndexController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\AuditController as AdminAuditController;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,7 +36,7 @@ Route::post('/login', [AuthenticatedSessionController::class, 'store'])
 Route::get('/collections/{collection}', [CollectionController::class, 'show']);
 Route::post('/collections/{collection}/{question}/elaborations', [CollectionController::class, 'storeElaboration']);
 
-Route::group(['middleware' => 'auth:sanctum'], function() {
+Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy']);
     Route::get('/user', [AuthenticatedSessionController::class, 'show']);
 
@@ -46,12 +49,14 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
 
     Route::get('/cart', [CartController::class, 'index']);
 
-    Route::group(['prefix' => 'admin', 'middleware' => 'role:admin'], function() {
+    Route::group(['prefix' => 'admin', 'middleware' => 'role:admin,author'], function () {
+        Route::get('/', [AdminIndexController::class, 'index']);
+
         Route::get('/courses', [AdminCourseController::class, 'index']);
         Route::get('/courses/{course}', [AdminCourseController::class, 'show']);
         Route::get('courses/{course}/meta', [AdminCourseController::class, 'showMeta']);
 
-        Route::get('/exams', [ExamController::class, 'index']);
+        Route::get('/courses/{course}/exams', [ExamController::class, 'index']);
         Route::post('/exams', [ExamController::class, 'store']);
         Route::get('/exams/{exam}', [ExamController::class, 'show']);
         Route::put('/exams/{exam}', [ExamController::class, 'update']);
@@ -80,5 +85,12 @@ Route::group(['middleware' => 'auth:sanctum'], function() {
         Route::post('attachments', [AttachmentController::class, 'store']);
 
         Route::get('/teacher-document/{exam}', [TeacherDocumentController::class, 'index']);
+    });
+
+    Route::group(['prefix' => 'admin', 'middleware' => 'role:admin'], function () {
+        Route::get('/audit', [AdminAuditController::class, 'index']);
+
+        Route::get('/users', [AdminUserController::class, 'index']);
+        Route::post('/users', [AdminUserController::class, 'store']);
     });
 });

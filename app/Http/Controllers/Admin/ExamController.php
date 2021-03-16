@@ -3,17 +3,18 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Exam;
+use App\Models\Course;
+use App\Rules\HashIdExists;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ExamResource;
-use App\Rules\HashIdExists;
 use Illuminate\Support\Facades\Artisan;
 
 class ExamController extends Controller
 {
-    public function index()
+    public function index(Course $course)
     {
-        $exams = Exam::with('course')->get();
+        $exams = $course->exams;
 
         return ExamResource::collection($exams);
     }
