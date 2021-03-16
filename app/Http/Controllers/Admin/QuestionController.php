@@ -72,6 +72,7 @@ class QuestionController extends Controller
     public function update(Request $request, Question $question)
     {
         $data = $request->validate([
+            'topic_id' => ['required', new HashIdExists('topics')],
             'number' => 'required|integer',
             'points' => 'required|integer',
             'time_in_minutes' => 'nullable|integer',

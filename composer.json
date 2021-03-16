@@ -10,10 +10,6 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/BertvanHoekelen/laravel-dump-server.git"
-        },
-        {
-            "type": "vcs",
             "url": "https://github.com/verwer/PHPWord.git"
         }
     ],
@@ -27,6 +23,7 @@
         "laravel/sanctum": "^2.8",
         "laravel/tinker": "^2.5",
         "league/flysystem-aws-s3-v3": "~1.0",
+        "owen-it/laravel-auditing": "^12.0",
         "phpoffice/phpword": "dev-develop",
         "predis/predis": "^1.1",
         "simplesoftwareio/simple-qrcode": "~4",
@@ -36,7 +33,7 @@
         "vinkla/hashids": "^9.0"
     },
     "require-dev": {
-        "beyondcode/laravel-dump-server": "dev-set-correct-dumper-connection",
+        "beyondcode/laravel-dump-server": "^1.7",
         "facade/ignition": "^2.5",
         "fakerphp/faker": "^1.9.1",
         "laravel/breeze": "^0.0.1",

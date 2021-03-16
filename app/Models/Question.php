@@ -4,15 +4,19 @@ namespace App\Models;
 
 use App\Support\HashID;
 use Illuminate\Support\Arr;
+use App\Models\Pivot\QuestionTag;
 use Vinkla\Hashids\Facades\Hashids;
+use App\Models\Pivot\DomainQuestion;
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Question extends Model
+class Question extends Model implements Auditable
 {
-    use HasFactory, HashID;
+    use HasFactory, HashID, \OwenIt\Auditing\Auditable;
 
     public $fillable = [
+        'topic_id',
         'type_id',
         'number',
         'points',
@@ -42,7 +46,11 @@ class Question extends Model
 
     public function domains()
     {
-        return $this->belongsToMany(Domain::class);
+        return $this->belongsToMany(Domain::class)
+            ->using(DomainQuestion::class)
+            ->withPivot([
+                'id'
+            ]);
     }
 
     public function questionType()
@@ -52,7 +60,11 @@ class Question extends Model
 
     public function tags()
     {
-        return $this->belongsToMany(Tag::class);
+        return $this->belongsToMany(Tag::class)
+            ->using(QuestionTag::class)
+            ->withPivot([
+                'id'
+            ]);
     }
 
     public function tips()
@@ -99,6 +111,15 @@ class Question extends Model
         $this->attributes['domain_id'] = $decodedValue
             ? $this->attributes['domain_id'] = $decodedValue
             : $this->attributes['domain_id'] = $value;
+    }
+
+    public function setTopicIdAttribute($value)
+    {
+        $decodedValue = $this->hashToId($value);
+
+        $this->attributes['topic_id'] = $decodedValue
+            ? $this->attributes['topic_id'] = $decodedValue
+            : $this->attributes['topic_id'] = $value;
     }
 
     public function setTypeIdAttribute($value)
