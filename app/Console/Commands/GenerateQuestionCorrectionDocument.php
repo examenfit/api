@@ -296,19 +296,18 @@ class GenerateQuestionCorrectionDocument extends Command
                 $this->formatText($section->correction, $textRun);
             }
 
-            $textRun->addTextBreak(2);
-            $textRun->addText('Opmerking: ');
-            $textRun->addTextBreak(1);
-            $textRun->addText('...');
-            $textRun->addTextBreak(1);
-
             if ($answer->remark) {
                 $this->currentSection()->addTextBreak(1);
                 $textRun = $this->currentSection()->addTextRun();
                 $textRun->addText('Opmerking:');
                 $textRun->addTextBreak(1);
                 $this->formatText($answer->remark, $textRun, ['italic' => true]);
-                // $textRun->addText($answer->remark, ['italic' => true]);
+            } else {
+                $textRun->addTextBreak(2);
+                $textRun->addText('Opmerking: ');
+                $textRun->addTextBreak(1);
+                $textRun->addText('...');
+                $textRun->addTextBreak(1);
             }
         }
 
