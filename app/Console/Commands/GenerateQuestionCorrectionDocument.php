@@ -274,7 +274,6 @@ class GenerateQuestionCorrectionDocument extends Command
         $this->currentSection()->addTitle("CV – Vraag {$this->questionNumber}:");
 
         $textRun = $this->currentSection()->addTextRun();
-        $textRun->addTextBreak(1);
         $textRun->addText('Opmerking: ');
         $textRun->addTextBreak(1);
         $textRun->addText('...');
@@ -316,7 +315,6 @@ class GenerateQuestionCorrectionDocument extends Command
         $this->currentSection()->addTextBreak(1);
         $this->currentSection()
             ->addTitle("Tussenantwoorden – Vraag {$this->questionNumber}:");
-        $this->currentSection()->addTextBreak(1);
 
         foreach ($answer->sections as $index => $section) {
             $textRun = $this->currentSection()->addTextRun();
@@ -335,13 +333,14 @@ class GenerateQuestionCorrectionDocument extends Command
 
         $this->currentSection()
             ->addTitle("Tips – Vraag {$this->questionNumber}:");
-        $this->currentSection()->addTextBreak(1);
 
         $textRun = $this->currentSection()->addTextRun();
         $textRun->addText(
             "Algemene tip:",
             ['bold' => true, 'color' => '0070C0']
         );
+
+        $textRun->addTextBreak(1);
 
         foreach ($answer->sections as $index => $section) {
             $textRun = $this->currentSection()->addTextRun();
@@ -356,7 +355,6 @@ class GenerateQuestionCorrectionDocument extends Command
 
         $this->currentSection()->addTextBreak(2);
         $this->currentSection()->addTitle("Modeluitwerking – Vraag {$this->questionNumber}:");
-        $this->currentSection()->addTextBreak(1);
 
         foreach ($answer->sections as $index => $section) {
             $textRun = $this->currentSection()->addTextRun();
@@ -464,13 +462,11 @@ class GenerateQuestionCorrectionDocument extends Command
                 if (is_array($chunk)) {
                     switch ($chunk['type']) {
                         case 'formula':
-                            $textRun->addText($chunk['result'], $textStyle, ['alignment' => 'left']);
-
-                            // Add space if the chunk only has a formula
-                            // Otherwise the formula is shown centered.
-                            // if (count($chunks) === 1) {
-                            //     $textRun->addText(' ');
-                            // }
+                            $textRun->addText(
+                                $chunk['result'],
+                                array_merge(['size' => 13], $textStyle ?? []),
+                                ['alignment' => 'left']
+                            );
                             break;
                         case 'boldStyle':
                             $textRun->addText(
