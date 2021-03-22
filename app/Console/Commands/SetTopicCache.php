@@ -62,6 +62,7 @@ class SetTopicCache extends Command
                 'domains' => collect(),
                 'domainId' => [],
                 'methodologies' => collect(),
+                'methodologyId' => collect(),
             ]);
 
             $topic->questions->each(function ($question) use (&$cache, &$proportionSum) {
@@ -70,11 +71,13 @@ class SetTopicCache extends Command
                 $cache['totalTimeInMinutes'] += $question->time_in_minutes;
                 $proportionSum += $question->points * $question->proportion_value;
 
-                $cache['questionTypes'] = $cache['questionTypes']->push([
-                    'id' => $question->questionType->id,
-                    'name' => $question->questionType->name,
-                ])->unique('id')->values();
-                $cache['questionTypesId'] = $cache['questionTypes']->pluck('id');
+                if ($question->questionType) {
+                    $cache['questionTypes'] = $cache['questionTypes']->push([
+                        'id' => $question->questionType->id,
+                        'name' => $question->questionType->name,
+                    ])->unique('id')->values();
+                    $cache['questionTypesId'] = $cache['questionTypes']->pluck('id');
+                }
 
                 $question->methodologies->each(function ($methodology) use (&$cache) {
                     $cache['methodologies']->push([
@@ -106,7 +109,7 @@ class SetTopicCache extends Command
                             $index = count($cache['domains']) - 1;
                         } else {
                             $index = $cache['domains']->search(
-                                fn($item) => $item['id'] === $domain->parent->id
+                                fn ($item) => $item['id'] === $domain->parent->id
                             );
                         }
 
@@ -128,11 +131,17 @@ class SetTopicCache extends Command
                 });
             });
 
+            $cache['domainId'] = $cache['domains']
+                ->flatten()
+                ->filter(fn ($item) => is_int($item))
+                ->values();
+
             if ($cache['questionCount']) {
                 $cache['weightedProportionValue'] =
                     round($proportionSum / $cache['totalPoints']);
             }
 
+            $cache['methodologyId'] = $cache['methodologies']->pluck('id')->unique();
             $cache['methodologies'] = $cache['methodologies']->groupBy('id');
 
             $topic->update(['cache' => $cache->toArray()]);
