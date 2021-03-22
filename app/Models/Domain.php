@@ -3,12 +3,13 @@
 namespace App\Models;
 
 use App\Support\HashID;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Staudenmeir\EloquentJsonRelations\HasJsonRelationships;
 
 class Domain extends Model
 {
-    use HasFactory, HashID;
+    use HasFactory, HashID, HasJsonRelationships;
 
     public $with = ['children'];
 
@@ -25,5 +26,10 @@ class Domain extends Model
     public function question()
     {
         return $this->belongsToMany(Question::class);
+    }
+
+    public function topics()
+    {
+        return $this->hasManyJson(Topic::class, 'cache->domainId');
     }
 }

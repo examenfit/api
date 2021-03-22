@@ -15,6 +15,11 @@ class Course extends Model
         return $this->hasMany(Exam::class);
     }
 
+    public function topics()
+    {
+        return $this->hasManyThrough(Topic::class, Exam::class);
+    }
+
     public function domains()
     {
         return $this->hasMany(Domain::class);

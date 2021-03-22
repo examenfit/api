@@ -19,7 +19,9 @@ class MethodologyResource extends JsonResource
             'name' => $this->name,
             'chapter' => $this->whenPivotLoaded('question_methodology', function () {
                 return $this->pivot->chapter;
-            }, $this->getAttribute('chapter'))
+            }, $this->getAttribute('chapter')),
+            'chapters' => ChapterResource::collection($this->whenLoaded('chapters')),
+            'topics_count' => $this->topics_count,
         ];
     }
 }

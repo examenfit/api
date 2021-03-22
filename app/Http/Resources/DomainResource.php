@@ -22,6 +22,7 @@ class DomainResource extends JsonResource
             'children' => !isset($this->created_at) && isset($this->resource->toArray()['children'])
                 ? DomainResource::collection(Domain::hydrate($this->resource->toArray()['children']))
                 : DomainResource::collection($this->whenLoaded('children')),
+            'topics_count' => $this->topics_count,
         ];
     }
 }

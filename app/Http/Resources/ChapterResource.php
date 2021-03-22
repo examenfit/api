@@ -2,9 +2,10 @@
 
 namespace App\Http\Resources;
 
+use Vinkla\Hashids\Facades\Hashids;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class QuestionTypeResource extends JsonResource
+class ChapterResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -15,8 +16,8 @@ class QuestionTypeResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'id' => $this->hash_id,
-            'name' => $this->name,
+            'id' => $this->pivot->chapter,
+            'name' => $this->pivot->chapter,
             'topics_count' => $this->topics_count,
         ];
     }
