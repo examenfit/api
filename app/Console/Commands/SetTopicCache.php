@@ -42,7 +42,7 @@ class SetTopicCache extends Command
             'questions.domains.parent',
             'questions.tags',
             'questions.questionType',
-            'questions.methodologies',
+            'questions.chapters',
             'exam',
         ])->get()->each(function ($topic) {
             $proportionSum = 0;
@@ -61,8 +61,8 @@ class SetTopicCache extends Command
                 'tagsId' => [],
                 'domains' => collect(),
                 'domainId' => [],
-                'methodologies' => collect(),
                 'methodologyId' => collect(),
+                'chapterId' => collect(),
             ]);
 
             $topic->questions->each(function ($question) use (&$cache, &$proportionSum) {
@@ -79,12 +79,16 @@ class SetTopicCache extends Command
                     $cache['questionTypesId'] = $cache['questionTypes']->pluck('id');
                 }
 
-                $question->methodologies->each(function ($methodology) use (&$cache) {
-                    $cache['methodologies']->push([
-                        'id' => $methodology->id,
-                        'name' => $methodology->name,
-                        'chapter' => $methodology->pivot->chapter,
-                    ]);
+                $question->chapters->each(function ($chapter) use (&$cache) {
+                    if ($chapter->parent_id) {
+                        $cache['chapterId']->push($chapter->parent_id);
+                    }
+
+                    $cache['chapterId']->push($chapter->id);
+
+                    if (!$cache['methodologyId']->contains($chapter->methodology_id)) {
+                        $cache['methodologyId']->push($chapter->methodology_id);
+                    }
                 });
 
                 $question->tags->each(function ($tag) use (&$cache) {
@@ -140,9 +144,6 @@ class SetTopicCache extends Command
                 $cache['weightedProportionValue'] =
                     round($proportionSum / $cache['totalPoints']);
             }
-
-            $cache['methodologyId'] = $cache['methodologies']->pluck('id')->unique();
-            $cache['methodologies'] = $cache['methodologies']->groupBy('id');
 
             $topic->update(['cache' => $cache->toArray()]);
         });

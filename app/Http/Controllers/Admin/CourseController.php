@@ -24,7 +24,7 @@ class CourseController extends Controller
 
     public function showMeta(Course $course)
     {
-        $course->load('tags', 'domains', 'questionTypes', 'methodologies');
+        $course->load('tags', 'domains', 'questionTypes', 'methodologies.chapters');
 
         return new CourseResource($course);
     }
