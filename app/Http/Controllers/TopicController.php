@@ -18,7 +18,8 @@ class TopicController extends Controller
             'questions.questionType',
             'questions.answers.sections',
             'questions.tags',
-            'questions.methodologies',
+            'questions.chapters',
+            'questions.chapters.parent',
         ]);
 
         return new TopicResource($topic);

@@ -10,6 +10,20 @@ class Collection extends Model
 {
     use HasFactory, HashID;
 
+    public $fillable = [
+        'user_id',
+        'name',
+    ];
+
+    public static function booted()
+    {
+        static::creating(function ($collection) {
+            if (is_null($collection->user_id)) {
+                $collection->user_id = auth()->user()->id;
+            }
+        });
+    }
+
     public function author()
     {
         return $this->belongsTo(User::class, 'user_id');

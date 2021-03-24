@@ -72,9 +72,9 @@ class Question extends Model implements Auditable
         return $this->morphMany(Tip::class, 'tippable');
     }
 
-    public function methodologies()
+    public function chapters()
     {
-        return $this->belongsToMany(Methodology::class, 'question_methodology')->withPivot('chapter');
+        return $this->belongsToMany(Chapter::class, 'question_chapter');
     }
 
     public function addAttachments($attachments)
@@ -131,14 +131,12 @@ class Question extends Model implements Auditable
             : $this->attributes['type_id'] = $value;
     }
 
-    public function addMethodologies($methodologies)
+    public function addChapters($chapters)
     {
-        $this->methodologies()->detach();
+        $collection = collect($chapters)
+            ->pluck('id')
+            ->transform(fn ($id) => Hashids::decode($id)[0]);
 
-        collect($methodologies)->each(function ($item) {
-            $this->methodologies()->attach([
-                Hashids::decode($item['id'])[0] => ['chapter' => $item['chapter']]
-            ]);
-        });
+        return $this->chapters()->sync($collection);
     }
 }

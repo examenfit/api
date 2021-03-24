@@ -50,8 +50,14 @@ class SearchController extends Controller
                     ->orderBy('term', 'ASC');
             },
             'methodologies' => function ($query) use ($request) {
-                $query->with(['chapters' => function ($query) {
-                    $query->orderBy('chapter');
+                $query->with(['chapters' => function ($query) use ($request) {
+                    $query->with(['children' => function ($query) use ($request) {
+                        $query->withCount(['topics' => function ($query) use ($request) {
+                            $query->where('cache->level', $request->level ?? 'havo');
+                        }])->orderBy('name');
+                    }])->withCount(['topics' => function ($query) use ($request) {
+                        $query->where('cache->level', $request->level ?? 'havo');
+                    }])->orderBy('name');
                 }])->withCount(['topics' => function ($query) use ($request) {
                     $query->where('cache->level', $request->level ?? 'havo');
                 }]);
@@ -153,15 +159,14 @@ class SearchController extends Controller
                 $query->whereJsonContains('cache->tagsId', $ids);
             }),
             AllowedFilter::callback('methodology', function (Builder $query, $value) {
-                $query->whereHas('questions.methodologies', function (Builder $subQuery) use ($value) {
-                    $id = Hashids::decode($value)[0];
-                    $subQuery->where(DB::raw('`methodologies`.`id`'), $id);
-                });
+                $id = Hashids::decode($value)[0];
+                $query->whereJsonContains('cache->methodologyId', $id);
             }),
             AllowedFilter::callback('chapter', function (Builder $query, $value) {
-                $query->whereHas('questions.methodologies', function (Builder $subQuery) use ($value) {
-                    $subQuery->where(DB::raw('`question_methodology`.`chapter`'), $value);
-                });
+                $ids = collect($value)->map(
+                    fn ($item) => Hashids::decode($item)[0]
+                )->toArray();
+                $query->whereJsonContains('cache->chapterId', $ids);
             }),
         ])->allowedSorts([
             'name',

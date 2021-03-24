@@ -16,8 +16,12 @@ class ChapterResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'id' => $this->pivot->chapter,
-            'name' => $this->pivot->chapter,
+            'id' => $this->hash_id,
+            'name' => $this->name,
+            'title' => $this->title,
+            'methodology' => new MethodologyResource($this->whenLoaded('methodology')),
+            'parent' => new ChapterResource($this->whenLoaded('parent')),
+            'children' => ChapterResource::collection($this->whenLoaded('children')),
             'topics_count' => $this->topics_count,
         ];
     }
