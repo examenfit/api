@@ -49,6 +49,8 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 
     Route::get('/cart', [CartController::class, 'index']);
 
+    Route::post('/collections', [CollectionController::class, 'store']);
+
     Route::group(['prefix' => 'admin', 'middleware' => 'role:admin,author'], function () {
         Route::get('/', [AdminIndexController::class, 'index']);
 
