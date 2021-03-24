@@ -21,6 +21,8 @@ class CollectionController extends Controller
             'questions.tips',
             'questions.topic.attachments',
             'questions.attachments',
+            'questions.tags',
+            'questions.chapters.methodology'
         ]);
         // $collection = collect($collection->toArray());
 
