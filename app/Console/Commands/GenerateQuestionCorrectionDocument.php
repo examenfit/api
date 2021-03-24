@@ -168,6 +168,13 @@ class GenerateQuestionCorrectionDocument extends Command
             ['bold' => true, 'size' => 16]
         );
 
+        $this->currentSection()->addTextBreak(2);
+
+        $this->currentSection()->addText(
+            "Auteur:",
+            ['bold' => true, 'size' => 16]
+        );
+
         // Next page
         $this->currentSection()->addPageBreak();
     }
@@ -273,12 +280,6 @@ class GenerateQuestionCorrectionDocument extends Command
     {
         $this->currentSection()->addTitle("CV – Vraag {$this->questionNumber}:");
 
-        $textRun = $this->currentSection()->addTextRun();
-        $textRun->addText('Opmerking: ');
-        $textRun->addTextBreak(1);
-        $textRun->addText('...');
-        $textRun->addTextBreak(1);
-
         foreach ($answers as $index => $answer) {
 
             if ($index > 0) {
@@ -301,12 +302,6 @@ class GenerateQuestionCorrectionDocument extends Command
                 $textRun->addText('Opmerking:');
                 $textRun->addTextBreak(1);
                 $this->formatText($answer->remark, $textRun, ['italic' => true]);
-            } else {
-                $textRun->addTextBreak(2);
-                $textRun->addText('Opmerking: ');
-                $textRun->addTextBreak(1);
-                $textRun->addText('...');
-                $textRun->addTextBreak(1);
             }
         }
 
@@ -366,11 +361,11 @@ class GenerateQuestionCorrectionDocument extends Command
             );
             $textRun->addTextBreak(1);
             if ($index === 0) {
-                $textRun->addText("Gegeven:");
+                $textRun->addText("Gegeven:", ['bold' => true]);
                 $textRun->addTextBreak(1);
-                $textRun->addText("Gevraagd:");
+                $textRun->addText("Gevraagd:", ['bold' => true]);
                 $textRun->addTextBreak(1);
-                $textRun->addText("Aanpak:");
+                $textRun->addText("Aanpak:", ['bold' => true]);
                 $textRun->addTextBreak(1);
             }
         }
