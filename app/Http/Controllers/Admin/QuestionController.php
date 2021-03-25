@@ -20,7 +20,7 @@ class QuestionController extends Controller
             'tags',
             'domains',
             'answers.sections',
-            'methodologies',
+            'chapters',
         ]);
 
         return new QuestionResource($question);
@@ -87,8 +87,7 @@ class QuestionController extends Controller
             'type_id' => ['nullable', new HashIdExists('question_types')],
             'tags.*.id' => ['required', new HashIdExists('tags')],
             'domains.*.id' => ['required', new HashIdExists('domains')],
-            'methodologies.*.id' => ['required', new HashIdExists('methodologies')],
-            'methodologies.*.chapter' => ['required', 'string'],
+            'chapters.*.id' => ['required', new HashIdExists('chapters')],
             'attachments' => 'array',
             'attachments.*.id' => ['required', new HashIdExists('attachments')],
         ]);
@@ -116,8 +115,8 @@ class QuestionController extends Controller
             $question->addDomains($data['domains']);
         }
 
-        if (isset($data['methodologies'])) {
-            $question->addMethodologies($data['methodologies']);
+        if (isset($data['chapters'])) {
+            $question->addChapters($data['chapters']);
         }
 
         $question->update($data);

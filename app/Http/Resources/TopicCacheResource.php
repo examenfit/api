@@ -35,11 +35,6 @@ class TopicCacheResource extends JsonResource
             ),
             'tags' => TagResource::collection(Tag::hydrate($this->resource['tags'])),
             'domains' => DomainResource::collection(Domain::hydrate($this->resource['domains'])),
-            'methodologies' => collect($this->resource['methodologies'])->mapWithKeys(function ($value, $key) {
-                return [HashIds::encode($key) => MethodologyResource::collection(
-                    Methodology::hydrate($value)
-                )];
-            }),
         ];
     }
 }

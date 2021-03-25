@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Question;
-use App\Models\Elaboration;
 use App\Models\Collection;
+use App\Models\Elaboration;
+use App\Rules\HashIdExists;
 use Illuminate\Http\Request;
+use Vinkla\Hashids\Facades\Hashids;
 use App\Http\Resources\CollectionResource;
 
 class CollectionController extends Controller
@@ -14,16 +16,38 @@ class CollectionController extends Controller
     {
         $collection->load([
             'author',
-            'questions' => fn($q) => $q->orderBy('topic_id', 'ASC')->orderBy('number', 'ASC'),
+            'questions' => fn ($q) => $q->orderBy('topic_id', 'ASC')->orderBy('number', 'ASC'),
             'questions.answers.sections.tips',
             'questions.tips',
             'questions.topic.attachments',
             'questions.attachments',
+            'questions.tags',
+            'questions.chapters.methodology'
         ]);
         // $collection = collect($collection->toArray());
 
         // $questions = collect($collection['questions']);
         // dump ($questions->groupBy('topic_id'));
+        return new CollectionResource($collection);
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'questions' => 'required|array',
+            'questions.*' => new HashIdExists('questions'),
+        ]);
+
+        $collection = Collection::create([
+            'name' => 'Mijn opgaven (' . date('d-m-Y') . ')',
+        ]);
+
+        $collection->questions()->sync(
+            collect($data['questions'])->map(
+                fn ($q) => Hashids::decode($q)[0],
+            )
+        );
+
         return new CollectionResource($collection);
     }
 

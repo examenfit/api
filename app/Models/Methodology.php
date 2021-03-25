@@ -14,8 +14,7 @@ class Methodology extends Model implements Auditable
 
     public function chapters()
     {
-        return $this->belongsToMany(Question::class, 'question_methodology')
-            ->withPivot(['chapter']);
+        return $this->hasMany(Chapter::class)->whereNull('chapter_id');
     }
 
     public function topics()
