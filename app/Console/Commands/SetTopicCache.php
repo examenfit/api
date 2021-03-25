@@ -47,6 +47,7 @@ class SetTopicCache extends Command
         ])->get()->each(function ($topic) {
             $proportionSum = 0;
             $cache = collect([
+                'examStatus' => $topic->exam->status,
                 'level' => $topic->exam->level,
                 'year' => $topic->exam->year,
                 'term' => $topic->exam->term,
