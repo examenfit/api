@@ -33,7 +33,7 @@ use App\Http\Controllers\Admin\AuditController as AdminAuditController;
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])
     ->middleware('guest');
 
-Route::get('/collections/{collection}', [CollectionController::class, 'show']);
+Route::get('/collections/{collection}/{topic?}', [CollectionController::class, 'show']);
 Route::post('/collections/{collection}/{question}/elaborations', [CollectionController::class, 'storeElaboration']);
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
