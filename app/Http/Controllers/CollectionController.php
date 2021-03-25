@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Topic;
 use App\Models\Question;
 use App\Models\Collection;
 use App\Models\Elaboration;
@@ -12,11 +13,17 @@ use App\Http\Resources\CollectionResource;
 
 class CollectionController extends Controller
 {
-    public function show(Collection $collection)
+    public function show(Collection $collection, Topic $topic)
     {
         $collection->load([
             'author',
-            'questions' => fn ($q) => $q->orderBy('topic_id', 'ASC')->orderBy('number', 'ASC'),
+            'questions' => function ($query) use ($topic) {
+                if ($topic->id) {
+                    $query->where('topic_id', $topic->id);
+                }
+
+                $query->orderBy('number', 'ASC');
+            },
             'questions.answers.sections.tips',
             'questions.tips',
             'questions.topic.attachments',
