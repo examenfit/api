@@ -22,51 +22,38 @@ use App\Models\Exam;
 
 class SearchController extends Controller
 {
+    private function topicFilter($query)
+    {
+        return $query->where('cache->level', request()->level ?? 'havo')
+            ->where('cache->examStatus', 'published');
+    }
+
     public function index(Request $request, Course $course)
     {
         $course->load([
-            'domains' => function ($query) use ($request) {
+            'domains' => function ($query) {
                 $query
-                    ->withCount(['topics' => function ($query) use ($request) {
-                        $query->where('cache->level', $request->level ?? 'havo');
-                    }])
-                    ->with(['children' => function ($query) use ($request) {
-                        $query->withCount(['topics' => function ($query) use ($request) {
-                            $query->where('cache->level', $request->level ?? 'havo');
-                        }]);
+                    ->withCount(['topics' => fn ($query) => $this->topicFilter($query)])
+                    ->with(['children' => function ($query) {
+                        $query->withCount(['topics' => fn ($query) => $this->topicFilter($query)]);
                     }]);
             },
-            'questionTypes' => function ($query) use ($request) {
-                $query->withCount(['topics' => function ($query) use ($request) {
-                    $query->where('cache->level', $request->level ?? 'havo');
-                }]);
+            'questionTypes' => function ($query) {
+                $query->withCount(['topics' => fn ($query) => $this->topicFilter($query)]);
             },
-            'topics' => function ($query) use ($request) {
-                $query->where('cache->level', $request->level ?? 'havo');
-            },
-            'exams' => function ($query) use ($request) {
-                $query->where('level', $request->level ?? 'havo')
-                    ->orderBy('year', 'DESC')
-                    ->orderBy('term', 'ASC');
-            },
-            'methodologies' => function ($query) use ($request) {
-                $query->with(['chapters' => function ($query) use ($request) {
-                    $query->with(['children' => function ($query) use ($request) {
-                        $query->withCount(['topics' => function ($query) use ($request) {
-                            $query->where('cache->level', $request->level ?? 'havo');
-                        }])->orderBy('name');
-                    }])->withCount(['topics' => function ($query) use ($request) {
-                        $query->where('cache->level', $request->level ?? 'havo');
-                    }])->orderBy('name');
-                }])->withCount(['topics' => function ($query) use ($request) {
-                    $query->where('cache->level', $request->level ?? 'havo');
-                }]);
+            'topics' => fn ($query) => $this->topicFilter($query),
+            'methodologies' => function ($query) {
+                $query->with(['chapters' => function ($query) {
+                    $query->with(['children' => function ($query) {
+                        $query->withCount([
+                            'topics' => fn ($query) => $this->topicFilter($query)
+                        ])->orderBy('name');
+                    }])->withCount([
+                        'topics' => fn ($query) => $this->topicFilter($query)
+                    ])->orderBy('name');
+                }])->withCount(['topics' => fn ($query) => $this->topicFilter($query)]);
             },
         ]);
-
-        // foreach ($course->methodologies as $key => $value) {
-        //     $course->methodologies[$key]->chapters = $value->chapters->unique('pivot.chapter');
-        // }
 
         $years = $course->topics
             ->countBy(fn ($topic) => $topic->cache['year'])
@@ -234,7 +221,7 @@ class SearchController extends Controller
                     );
                 }
             }),
-        ])->with('highlights');
+        ])->with('highlights')->where('cache->examStatus', 'published');
 
         return TopicResource::collection($topics->get());
     }
