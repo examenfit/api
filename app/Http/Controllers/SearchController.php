@@ -85,7 +85,11 @@ class SearchController extends Controller
                     'name' => $key,
                     'topics_count' => $item
                 ];
-            })->values();
+            })
+            ->sortBy(function ($value) {
+                return array_search($value['id'], ["high", "average", "low"]);
+            })
+            ->values();
 
         return [
             'domains' => DomainResource::collection($course->domains),
