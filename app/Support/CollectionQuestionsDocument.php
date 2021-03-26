@@ -306,9 +306,9 @@ class CollectionQuestionsDocument
         $collection_id = $this->collection->hash_id;
         if ($question) {
             $question_id = $question->hash_id;
-            $url = url("/c/{$collection_id}/${question_id}/");
+            $url = url("https://app.examenfit.nl/c/{$collection_id}/${question_id}");
         } else {
-            $url = url("/a/{$collection_id}/");
+            $url = url("https://app.examenfit.nl/a/{$collection_id}/");
         }
         Log::info($url);
 
