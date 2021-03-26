@@ -7,8 +7,10 @@ use App\Models\Collection;
 use App\Models\Elaboration;
 use App\Rules\HashIdExists;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Vinkla\Hashids\Facades\Hashids;
 use App\Http\Resources\CollectionResource;
+use App\Support\CollectionQuestionsDocument;
 
 class CollectionController extends Controller
 {
@@ -29,6 +31,18 @@ class CollectionController extends Controller
         // $questions = collect($collection['questions']);
         // dump ($questions->groupBy('topic_id'));
         return new CollectionResource($collection);
+    }
+
+    public function showCollectionQuestionsDocument(Collection $collection)
+    {
+        $hash = $collection->hash_id;
+        $file = '/tmp/{$hash}.docx'; // use temp filename
+        $document = new CollectionQuestionsDocument();
+        $document->createDocument($collection);
+        $document->saveDocument($file);
+        return response()->download($file, 'collection.docx', [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        ]);
     }
 
     public function store(Request $request)
