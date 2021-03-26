@@ -35,7 +35,6 @@ Route::post('/login', [AuthenticatedSessionController::class, 'store'])
 
 Route::get('/collections/{collection}', [CollectionController::class, 'show']);
 Route::get('/c/{collection}', [CollectionController::class, 'showCollectionQuestionsDocument']);
-Route::get('/d/{collection}', [CollectionController::class, 'showCollectionQuestionsDocument']);
 Route::post('/collections/{collection}/{question}/elaborations', [CollectionController::class, 'storeElaboration']);
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
