@@ -33,6 +33,7 @@ use App\Http\Controllers\Admin\AuditController as AdminAuditController;
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])
     ->middleware('guest');
 
+//Route::get('/collections/{collection}', [CollectionController::class, 'show']);
 Route::get('/collections/{collection}/{topic?}', [CollectionController::class, 'show']);
 Route::post('/collections/{collection}/{question}/elaborations', [CollectionController::class, 'storeElaboration']);
 
@@ -50,6 +51,8 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('/cart', [CartController::class, 'index']);
 
     Route::post('/collections', [CollectionController::class, 'store']);
+    // Temporary route, because /collections/{collection}/file conflicts with the public route
+    Route::get('/download-collection/{collection}', [CollectionController::class, 'showCollectionQuestionsDocument']);
 
     Route::group(['prefix' => 'admin', 'middleware' => 'role:admin,author'], function () {
         Route::get('/', [AdminIndexController::class, 'index']);
