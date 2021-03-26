@@ -40,16 +40,14 @@ class CollectionController extends Controller
         return new CollectionResource($collection);
     }
 
-    public function showCollectionQuestionsDocument(Collection $collection)
+    public function showCollectionQuestionsDocument(Request $request, Collection $collection)
     {
-        $hash = $collection->hash_id;
-        $file = '/tmp/{$hash}.docx'; // use temp filename
+        $path = storage_path("app/public/collections/{$collection->hash_id}.docx");
+
         $document = new CollectionQuestionsDocument();
         $document->createDocument($collection);
-        $document->saveDocument($file);
-        return response()->download($file, 'collection.docx', [
-            'Content-Type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-        ]);
+        $document->saveDocument($path, 'docx');
+        return response()->download($path, 'collection.docx');
     }
 
     public function store(Request $request)

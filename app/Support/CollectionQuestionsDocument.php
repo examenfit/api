@@ -38,7 +38,7 @@ class CollectionQuestionsDocument
         $this->collection = $collection;
         $this->collection->load([
             'author',
-            'questions' => fn($q) => $q->orderBy('topic_id', 'ASC')->orderBy('number', 'ASC'),
+            'questions' => fn ($q) => $q->orderBy('topic_id', 'ASC')->orderBy('number', 'ASC'),
             'questions.topic',
             'questions.topic.exam',
             'questions.topic.exam.course',
@@ -120,8 +120,8 @@ class CollectionQuestionsDocument
         foreach ($this->collection['questions'] as $question) {
             $topic = $question->topic;
             if ($topic_id !== $topic->id) {
-              $topic_id = $topic->id;
-              $this->addTopic($topic);
+                $topic_id = $topic->id;
+                $this->addTopic($topic);
             }
             $this->addQuestion($question, ++$number);
         }
@@ -154,7 +154,7 @@ class CollectionQuestionsDocument
         $this->addAttachments($topic->attachments, null, 'large', 1.3);
     }
 
-/*
+    /*
     function addCollectionTitle($title, $questions, $points, $duration, $downloaded)
     {
         $section = $this->currentSection();
@@ -184,11 +184,11 @@ class CollectionQuestionsDocument
         $exam = $term === 1 ? "{$year}-I" : "{$year}-II";
         $section = $this->currentSection();
         $table = $section->addTable([
-          'unit' => \PhpOffice\PhpWord\Style\Table::WIDTH_PERCENT,
-          'width' => 100*50,
-          'Spacing' => 0,
-          'cellSpacing' => 0,
-          'borderBottomSize' => 6
+            'unit' => \PhpOffice\PhpWord\Style\Table::WIDTH_PERCENT,
+            'width' => 100 * 50,
+            'Spacing' => 0,
+            'cellSpacing' => 0,
+            'borderBottomSize' => 6
         ]);
         $row = $table->addRow();
 
@@ -196,12 +196,12 @@ class CollectionQuestionsDocument
         $left->addText($title, ['size' => 14, 'bold' => true]);
 
         $right = $row->addCell();
-        $txt = $right->addTextRun(['align'=>'right']);
-        $txt->addText($course, ['bold'=>true]);
+        $txt = $right->addTextRun(['align' => 'right']);
+        $txt->addText($course, ['bold' => true]);
         $txt->addText(' | ');
-        $txt->addText($level, ['bold'=>true]);
+        $txt->addText($level, ['bold' => true]);
         $txt->addText(' | ');
-        $txt->addText($exam, ['bold'=>true]);
+        $txt->addText($exam, ['bold' => true]);
 
         $textRun = $section->addTextRun();
         $textRun->addTextBreak(1);
@@ -244,7 +244,7 @@ class CollectionQuestionsDocument
             $textRun = $textBox->addTextRun();
 
             // Add title to the textbox
-            $textRun->addText($attachment->name."\n", ['bold' => true]);
+            $textRun->addText($attachment->name . "\n", ['bold' => true]);
 
             // Add image to the textbox
             //Log::info($attachment->url);
@@ -283,7 +283,7 @@ class CollectionQuestionsDocument
 
         //$domains = [];
         //foreach ($question->domains as $domain) {
-            //$domains[] = $domain->name;
+        //$domains[] = $domain->name;
         //}
         //$textRun->addText(implode(', ', $domains), ['color' => '0070C0']);
 
@@ -306,7 +306,7 @@ class CollectionQuestionsDocument
         $collection_id = $this->collection->hash_id;
         if ($question) {
             $question_id = $question->hash_id;
-            $url = url("/t/{$collection_id}/${question_id}/");
+            $url = url("/c/{$collection_id}/${question_id}/");
         } else {
             $url = url("/a/{$collection_id}/");
         }
@@ -450,9 +450,7 @@ class CollectionQuestionsDocument
      */
     function currentSection()
     {
-        return $this->sections[
-            (count($this->sections) - 1)
-        ];
+        return $this->sections[(count($this->sections) - 1)];
     }
 
     function saveDocument($file, $type = 'docx')
@@ -493,5 +491,4 @@ class CollectionQuestionsDocument
         $writer->save($file);
         //Log::info($file);
     }
-
 }
