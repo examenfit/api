@@ -41,7 +41,7 @@ class CollectionQuestionsDocument
         $this->collection = $collection;
         $this->collection->load([
             'author',
-            'questions' => fn($q) => $q->orderBy('topic_id', 'ASC')->orderBy('number', 'ASC'),
+            'questions' => fn ($q) => $q->orderBy('topic_id', 'ASC')->orderBy('number', 'ASC'),
             'questions.topic',
             'questions.topic.exam',
             'questions.topic.exam.course',
@@ -124,8 +124,8 @@ class CollectionQuestionsDocument
         foreach ($this->collection['questions'] as $question) {
             $topic = $question->topic;
             if ($topic_id !== $topic->id) {
-              $topic_id = $topic->id;
-              $this->addTopic($topic);
+                $topic_id = $topic->id;
+                $this->addTopic($topic);
             }
             $this->addQuestion($question);
         }
@@ -184,9 +184,9 @@ class CollectionQuestionsDocument
         $left->addText('examenvragen op maat', ['size' => 14, 'bold' => true]);
 
         $right = $row->addCell();
-        $right->addText($this->collection->name, ['size'=>16, 'bold' => true],['align'=>'right']);
+        $right->addText($this->collection->name, ['size' => 16, 'bold' => true],['align' => 'right']);
         $txt = $right->addTextRun([
-            'align'=>'right',
+            'align' => 'right',
             'spaceAfter' => \PhpOffice\PhpWord\Shared\Converter::pointToTwip(0),
             'spacing' => 120,
             'lineHeight' => 2,
@@ -197,7 +197,7 @@ class CollectionQuestionsDocument
         $txt->addText('  |  ');
         $txt->addText("$time_in_minutes min.");
 
-        $right->addText("Download: {$timestamp}", ['size'=>10, 'italic' => true],['align'=>'right']);
+        $right->addText("Download: {$timestamp}", ['size' => 10, 'italic' => true],['align' => 'right']);
         $section->addTextRun()->addTextBreak(2);
     }
 
@@ -219,12 +219,12 @@ class CollectionQuestionsDocument
 
         $right = $row->addCell();
         $right->getStyle()->setVAlign('center');
-        $txt = $right->addTextRun([ 'align'=>'right' ]);
-        $txt->addText('Met ExamenFit kun je eenvoudig vragen samenstellen en gericht vragen oefenen.',['size'=>8]);
+        $txt = $right->addTextRun([ 'align' => 'right' ]);
+        $txt->addText('Met ExamenFit kun je eenvoudig vragen samenstellen en gericht vragen oefenen.',['size' => 8]);
         $txt->addtextBreak();
-        $txt->addText('Kijk op ',['size'=>8]);
-        $txt->addText('www.examenfit.nl', ['bold'=>true,'size'=>8]);
-        $txt->addText(' voor meer informatie.',['size'=>8]);
+        $txt->addText('Kijk op ',['size' => 8]);
+        $txt->addText('www.examenfit.nl', ['bold' => true,'size' => 8]);
+        $txt->addText(' voor meer informatie.',['size' => 8]);
     }
 
     function addTopicTitle($topic)
@@ -239,11 +239,11 @@ class CollectionQuestionsDocument
         $exam = $term === 1 ? "{$year}-I" : "{$year}-II";
         $section = $this->currentSection();
         $table = $section->addTable([
-          'unit' => \PhpOffice\PhpWord\Style\Table::WIDTH_PERCENT,
-          'width' => 100*50,
-          'Spacing' => 0,
-          'cellSpacing' => 0,
-          'borderBottomSize' => 6
+            'unit' => \PhpOffice\PhpWord\Style\Table::WIDTH_PERCENT,
+            'width' => 100 * 50,
+            'Spacing' => 0,
+            'cellSpacing' => 0,
+            'borderBottomSize' => 6
         ]);
         $row = $table->addRow();
 
@@ -251,12 +251,12 @@ class CollectionQuestionsDocument
         $left->addText($title, ['size' => 14, 'bold' => true]);
 
         $right = $row->addCell();
-        $txt = $right->addTextRun(['align'=>'right']);
-        $txt->addText($course, ['bold'=>true]);
-        $txt->addText('  |  ');
-        $txt->addText($level, ['bold'=>true]);
-        $txt->addText('  |  ');
-        $txt->addText($exam, ['bold'=>true]);
+        $txt = $right->addTextRun(['align' => 'right']);
+        $txt->addText($course, ['bold' => true]);
+        $txt->addText(' | ');
+        $txt->addText($level, ['bold' => true]);
+        $txt->addText(' | ');
+        $txt->addText($exam, ['bold' => true]);
 
         $textRun = $this->currentSection()->addTextRun();
         $textRun->addTextBreak();
@@ -299,7 +299,7 @@ class CollectionQuestionsDocument
             $textRun = $textBox->addTextRun();
 
             // Add title to the textbox
-            $textRun->addText($attachment->name."\n", ['bold' => true]);
+            $textRun->addText($attachment->name . "\n", ['bold' => true]);
 
             // Add image to the textbox
             //Log::info($attachment->url);
@@ -339,7 +339,7 @@ class CollectionQuestionsDocument
 
         //$domains = [];
         //foreach ($question->domains as $domain) {
-            //$domains[] = $domain->name;
+        //$domains[] = $domain->name;
         //}
         //$textRun->addText(implode(', ', $domains), ['color' => '0070C0']);
 
@@ -377,14 +377,14 @@ class CollectionQuestionsDocument
         $row = $table->addRow();
 
         $left = $row->addCell();
-        $txt = $left->addTextRun(['align'=>'left']);
-        $txt->addText("{$question->points} punten",['size'=>10,'bold'=>true]);
+        $txt = $left->addTextRun(['align' => 'left']);
+        $txt->addText("{$question->points} punten",['size' => 10,'bold' => true]);
 
         $right = $row->addCell();
-        $txt = $right->addTextRun(['align'=>'right']);
-        $txt->addText("{$question->time_in_minutes} min.",['size'=>10,'bold'=>true]);
+        $txt = $right->addTextRun(['align' => 'right']);
+        $txt->addText("{$question->time_in_minutes} min.",['size' => 10,'bold' => true]);
         $txt->addText('   ');
-        $txt->addText("$complexity",['size'=>10,'bold'=>true]);
+        $txt->addText("$complexity",['size' => 10,'bold' => true]);
     }
 
     function createQrUrl($question)
@@ -392,9 +392,10 @@ class CollectionQuestionsDocument
         $collection_id = $this->collection->hash_id;
         if ($question) {
             $question_id = $question->hash_id;
-            $url = url("/t/{$collection_id}/${question_id}/");
+            $topic_id = $question->topic->hash_id;
+            $url = "https://app.examenfit.nl/c/{$collection_id}/{$topic_id}/{$question_id}";
         } else {
-            $url = url("/a/{$collection_id}/");
+            $url = "https://app.examenfit.nl/a/{$collection_id}/";
         }
         Log::info($url);
 
@@ -424,8 +425,8 @@ class CollectionQuestionsDocument
             'width' => 54,
             'height' => 54
         ]);
-        $right = $row->addCell(4000, ['valign'=>'center']);
-        $right->addText('Gebruik de QR-code om na te kijken of om tips te krijgen', ['bold'=>true]);
+        $right = $row->addCell(4000, ['valign' => 'center']);
+        $right->addText('Gebruik de QR-code om na te kijken of om tips te krijgen', ['bold' => true]);
     }
 
     function formatText($text, &$textRun = null, $textStyle = null)
@@ -545,9 +546,7 @@ class CollectionQuestionsDocument
      */
     function currentSection()
     {
-        return $this->sections[
-            (count($this->sections) - 1)
-        ];
+        return $this->sections[(count($this->sections) - 1)];
     }
 
     function saveDocument($file, $type = 'docx')
@@ -588,5 +587,4 @@ class CollectionQuestionsDocument
         $writer->save($file);
         //Log::info($file);
     }
-
 }
