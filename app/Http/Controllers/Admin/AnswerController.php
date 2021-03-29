@@ -32,15 +32,21 @@ class AnswerController extends Controller
     public function update(Request $request, Answer $answer)
     {
         $data = $request->validate([
-            'sections' => 'array|min:1',
+            'remark' => 'nullable|string',
+            'sections' => 'array',
             'sections.*.id' => 'nullable',
             'sections.*.text' => 'required|string',
             'secionts.*.points' => 'required|integer'
         ]);
 
-        $answer->sections()->delete();
+        if (isset($data['sections']) && count($data['sections'])) {
+            $answer->sections()->delete();
+            $answer->sections()->createMany($data['sections']);
+        }
 
-        $answer->sections()->createMany($data['sections']);
+        if (isset($data['remark'])) {
+            $answer->update(['remark' => $data['remark']]);
+        }
 
         return $this->show($answer);
     }
