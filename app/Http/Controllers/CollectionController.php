@@ -53,12 +53,13 @@ class CollectionController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
+            'name' => 'required|string|max:255',
             'questions' => 'required|array',
             'questions.*' => new HashIdExists('questions'),
         ]);
 
         $collection = Collection::create([
-            'name' => 'Mijn opgaven (' . date('d-m-Y') . ')',
+            'name' => $data['name'],
         ]);
 
         $collection->questions()->sync(

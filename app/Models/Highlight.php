@@ -12,4 +12,9 @@ class Highlight extends Model implements Auditable
     use HasFactory, HashID, \OwenIt\Auditing\Auditable;
 
     public $guarded = [];
+
+    public function linkable()
+    {
+        return $this->morphTo();
+    }
 }

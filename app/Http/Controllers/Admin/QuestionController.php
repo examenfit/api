@@ -21,6 +21,7 @@ class QuestionController extends Controller
             'domains',
             'answers.sections',
             'chapters',
+            'highlights'
         ]);
 
         return new QuestionResource($question);
@@ -90,6 +91,8 @@ class QuestionController extends Controller
             'chapters.*.id' => ['required', new HashIdExists('chapters')],
             'attachments' => 'array',
             'attachments.*.id' => ['required', new HashIdExists('attachments')],
+            'highlights' => 'array',
+            'highlights.*.text' => ['required', 'string', 'max:255'],
         ]);
 
         if (isset($data['attachments'])) {
@@ -117,6 +120,15 @@ class QuestionController extends Controller
 
         if (isset($data['chapters'])) {
             $question->addChapters($data['chapters']);
+        }
+
+
+        if (isset($data['highlights'])) {
+            $question->highlights()->delete();
+
+            $question->highlights()->createMany(
+                collect($data['highlights'])
+            );
         }
 
         $question->update($data);

@@ -35,6 +35,7 @@ class QuestionResource extends JsonResource
             'tips' => TipResource::collection($this->whenLoaded('tips')),
             'methodologies' => MethodologyResource::collection($this->whenLoaded('methodologies')),
             'chapters' => ChapterResource::collection($this->whenLoaded('chapters')),
+            'highlights' => HighlightResource::collection($this->whenLoaded('highlights')),
         ];
     }
 }
