@@ -24,7 +24,14 @@ class CourseController extends Controller
 
     public function showMeta(Course $course)
     {
-        $course->load('tags', 'domains', 'questionTypes', 'methodologies.chapters');
+        $course->load([
+            'tags',
+            'domains',
+            'questionTypes',
+            'methodologies.chapters' => function ($query) {
+                $query->orderBy('name');
+            }
+        ]);
 
         return new CourseResource($course);
     }
