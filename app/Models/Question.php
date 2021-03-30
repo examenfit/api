@@ -77,6 +77,11 @@ class Question extends Model implements Auditable
         return $this->belongsToMany(Chapter::class, 'question_chapter');
     }
 
+    public function highlights()
+    {
+        return $this->morphMany(Highlight::class, 'linkable');
+    }
+
     public function addAttachments($attachments)
     {
         $collection = collect($attachments)

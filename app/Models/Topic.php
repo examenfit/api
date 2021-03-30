@@ -50,7 +50,7 @@ class Topic extends Model implements Auditable
 
     public function highlights()
     {
-        return $this->hasMany(Highlight::class);
+        return $this->morphMany(Highlight::class, 'linkable');
     }
 
     public function addAttachments($attachments)
