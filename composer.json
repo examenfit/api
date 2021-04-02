@@ -29,6 +29,7 @@
         "simplesoftwareio/simple-qrcode": "~4",
         "spatie/laravel-query-builder": "^3.3",
         "spatie/pdf-to-text": "^1.3",
+        "staudenmeir/eloquent-has-many-deep": "^1.7",
         "staudenmeir/eloquent-json-relations": "^1.1",
         "vinkla/hashids": "^9.0"
     },
