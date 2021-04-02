@@ -68,6 +68,8 @@ class CollectionController extends Controller
             )
         );
 
+        $collection->load('topics');
+
         return new CollectionResource($collection);
     }
 

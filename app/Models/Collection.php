@@ -5,10 +5,11 @@ namespace App\Models;
 use App\Support\HashID;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 
 class Collection extends Model
 {
-    use HasFactory, HashID;
+    use HasFactory, HashID, HasRelationships;
 
     public $fillable = [
         'user_id',
@@ -32,6 +33,16 @@ class Collection extends Model
     public function questions()
     {
         return $this->belongsToMany(Question::class);
+    }
+
+    public function topics()
+    {
+        return $this->hasManyDeep(
+            Topic::class,
+            ['collection_question', Question::class],
+            ['collection_id', 'id', 'id'],
+            ['id', 'question_id', 'topic_id']
+        )->distinct();
     }
 
     public function elaborations()
