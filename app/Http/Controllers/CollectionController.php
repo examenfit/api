@@ -24,7 +24,8 @@ class CollectionController extends Controller
                     $query->where('topic_id', $topic->id);
                 }
 
-                $query->orderBy('number', 'ASC');
+                $query->orderBy('topic_id', 'ASC')
+                    ->orderBy('number', 'ASC');
             },
             'questions.answers.sections.tips',
             'questions.tips',
@@ -33,10 +34,7 @@ class CollectionController extends Controller
             'questions.tags',
             'questions.chapters.methodology'
         ]);
-        // $collection = collect($collection->toArray());
 
-        // $questions = collect($collection['questions']);
-        // dump ($questions->groupBy('topic_id'));
         return new CollectionResource($collection);
     }
 
