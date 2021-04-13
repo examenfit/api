@@ -16,11 +16,11 @@ class CourseController extends Controller
         $course->load(['tags' => function ($query) {
             $query->withCount(['topics' => function ($query) {
                 $query->whereHas('exam', function ($query) {
-                    $query->where('level', request()->get('level'));
+                    $query->where('level', request()->get('level') === "dNRlx" ? "havo" : "vwo");
                 });
             }]);
 
-            if (request()->get('level') === 'vwo') {
+            if (request()->get('level') === 'pNQ8O') {
                 $query->where('is_vwo', true);
             } else {
                 $query->where('is_havo', true);

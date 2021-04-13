@@ -24,12 +24,21 @@ class SearchController extends Controller
 {
     private function topicFilter($query)
     {
-        return $query->where('cache->level', request()->level ?? 'havo')
+        $levels = [1, 'havo'];
+
+        //vwo
+        if (request()->level === 'pNQ8O') {
+            $levels = [2, 'vwo'];
+        }
+
+        return $query->whereIn('cache->level', $levels)
             ->where('cache->examStatus', 'published');
     }
 
     public function index(Request $request, Course $course)
     {
+        $level = Hashids::decode(request()->level)[0] ?? 2;
+
         $course->load([
             'domains' => function ($query) {
                 $query
@@ -42,15 +51,16 @@ class SearchController extends Controller
                 $query->withCount(['topics' => fn ($query) => $this->topicFilter($query)]);
             },
             'topics' => fn ($query) => $this->topicFilter($query),
-            'methodologies' => function ($query) {
-                $query->with(['chapters' => function ($query) {
-                    $query->with(['children' => function ($query) {
-                        $query->withCount([
+            'methodologies' => function ($query) use ($level) {
+                $query->with(['chapters' => function ($query) use ($level) {
+                    $query->where('level_id', $level)
+                        ->with(['children' => function ($query) {
+                            $query->withCount([
+                                'topics' => fn ($query) => $this->topicFilter($query)
+                            ])->orderBy('name');
+                        }])->withCount([
                             'topics' => fn ($query) => $this->topicFilter($query)
                         ])->orderBy('name');
-                    }])->withCount([
-                        'topics' => fn ($query) => $this->topicFilter($query)
-                    ])->orderBy('name');
                 }])->withCount(['topics' => fn ($query) => $this->topicFilter($query)]);
             },
         ]);
@@ -105,7 +115,14 @@ class SearchController extends Controller
     {
         $topics = QueryBuilder::for(Topic::class)->allowedFilters([
             AllowedFilter::callback('level', function (Builder $query, $value) {
-                $query->where('cache->level', $value);
+                $level = 'havo';
+
+                //vwo
+                if ($value === 'pNQ8O') {
+                    $level = 'vwo';
+                }
+
+                $query->where('cache->level', $level);
             }),
             AllowedFilter::callback('domain', function (Builder $query, $value) {
                 $query->whereHas('questions.domains', function (Builder $subQuery) use ($value) {
