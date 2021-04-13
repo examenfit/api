@@ -82,6 +82,12 @@ class Question extends Model implements Auditable
         return $this->morphMany(Highlight::class, 'linkable');
     }
 
+    public function dependencies()
+    {
+        return $this->belongsToMany(Self::class, 'question_dependency', 'depend_id')
+            ->withPivot(['introduction', 'attachments']);
+    }
+
     public function addAttachments($attachments)
     {
         $collection = collect($attachments)

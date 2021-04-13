@@ -6,6 +6,7 @@ use App\Models\Topic;
 use App\Models\Question;
 use App\Rules\HashIdExists;
 use Illuminate\Http\Request;
+use Vinkla\Hashids\Facades\Hashids;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ExamResource;
 use App\Http\Resources\QuestionResource;
@@ -21,7 +22,8 @@ class QuestionController extends Controller
             'domains',
             'answers.sections',
             'chapters',
-            'highlights'
+            'highlights',
+            'dependencies',
         ]);
 
         return new QuestionResource($question);
@@ -93,6 +95,10 @@ class QuestionController extends Controller
             'attachments.*.id' => ['required', new HashIdExists('attachments')],
             'highlights' => 'array',
             'highlights.*.text' => ['required', 'string', 'max:255'],
+            'dependencies' => 'array',
+            'dependencies.*.id' => ['required', new HashIdExists('questions')],
+            'dependencies.*.introduction' => 'nullable|boolean',
+            'dependencies.*.attachments' => 'nullable|boolean',
         ]);
 
         if (isset($data['attachments'])) {
@@ -128,6 +134,21 @@ class QuestionController extends Controller
 
             $question->highlights()->createMany(
                 collect($data['highlights'])
+            );
+        }
+
+        if (isset($data['dependencies'])) {
+            $question->dependencies()->sync(
+                collect($data['dependencies'])
+                    ->filter(
+                        fn ($item) => $item['introduction'] || $item['attachments']
+                    )
+                    ->mapWithKeys(
+                        fn ($item) => [Hashids::decode($item['id'])[0] => [
+                            'introduction' => $item['introduction'],
+                            'attachments' => $item['attachments'],
+                        ]]
+                    )
             );
         }
 
