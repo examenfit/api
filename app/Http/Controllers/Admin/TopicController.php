@@ -14,7 +14,13 @@ class TopicController extends Controller
 {
     public function show(Topic $topic)
     {
-        $topic->load('exam', 'questions', 'highlights');
+        $topic->load([
+            'exam',
+            'questions',
+            'questions.attachments',
+            'questions.appendixes',
+            'highlights',
+        ]);
         return new TopicResource($topic);
     }
 

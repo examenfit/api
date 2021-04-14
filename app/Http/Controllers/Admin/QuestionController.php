@@ -18,6 +18,7 @@ class QuestionController extends Controller
         $question->load([
             'topic',
             'attachments',
+            'appendixes',
             'tags',
             'domains',
             'answers.sections',
@@ -93,16 +94,23 @@ class QuestionController extends Controller
             'chapters.*.id' => ['required', new HashIdExists('chapters')],
             'attachments' => 'array',
             'attachments.*.id' => ['required', new HashIdExists('attachments')],
+            'appendixes' => 'array',
+            'appendixes.*.id' => ['required', new HashIdExists('attachments')],
             'highlights' => 'array',
             'highlights.*.text' => ['required', 'string', 'max:255'],
             'dependencies' => 'array',
             'dependencies.*.id' => ['required', new HashIdExists('questions')],
             'dependencies.*.introduction' => 'nullable|boolean',
             'dependencies.*.attachments' => 'nullable|boolean',
+            'dependencies.*.appendixes' => 'nullable|boolean',
         ]);
 
         if (isset($data['attachments'])) {
             $question->addAttachments($data['attachments']);
+        }
+
+        if (isset($data['appendixes'])) {
+            $question->addAppendixes($data['appendixes']);
         }
 
         if (isset($data['answerSections'])) {
@@ -141,12 +149,15 @@ class QuestionController extends Controller
             $question->dependencies()->sync(
                 collect($data['dependencies'])
                     ->filter(
-                        fn ($item) => $item['introduction'] || $item['attachments']
+                        fn ($item) => $item['introduction']
+                            || $item['attachments']
+                            || $item['appendixes']
                     )
                     ->mapWithKeys(
                         fn ($item) => [Hashids::decode($item['id'])[0] => [
                             'introduction' => $item['introduction'],
                             'attachments' => $item['attachments'],
+                            'appendixes' => $item['appendixes'],
                         ]]
                     )
             );

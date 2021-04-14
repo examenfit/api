@@ -29,6 +29,7 @@ class QuestionResource extends JsonResource
             'question_type' => new QuestionTypeResource($this->whenLoaded('questionType')),
             'topic' => new TopicResource($this->whenLoaded('topic')),
             'attachments' => AttachmentResource::collection($this->whenLoaded('attachments')),
+            'appendixes' => AttachmentResource::collection($this->whenLoaded('appendixes')),
             'answers' => AnswerResource::collection($this->whenLoaded('answers')),
             'tags' => TagResource::collection($this->whenLoaded('tags')),
             'domains' => DomainResource::collection($this->whenLoaded('domains')),
@@ -41,6 +42,7 @@ class QuestionResource extends JsonResource
                 return [
                     'introduction' => !!$this->pivot->introduction,
                     'attachments' => !!$this->pivot->attachments,
+                    'appendixes' => !!$this->pivot->appendixes,
                 ];
             }),
         ];

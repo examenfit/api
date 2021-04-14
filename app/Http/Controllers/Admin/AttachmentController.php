@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Exam;
+use App\Models\Appendix;
 use App\Models\Attachment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AttachmentResource;
 
@@ -20,6 +22,9 @@ class AttachmentController extends Controller
                     return $query->where('exam_id', $exam->id);
                 })
                 ->orWhereHas('questions', function ($query) use ($exam) {
+                    return $query->whereIn('topic_id', $exam->topics->pluck('id'));
+                })
+                ->orWhereHas('questionAppendix', function ($query) use ($exam) {
                     return $query->whereIn('topic_id', $exam->topics->pluck('id'));
                 })
                 ->get();
