@@ -35,9 +35,13 @@ class AttachmentController extends Controller
             'file' => 'required|file',
         ]);
 
+        $imageSize = getimagesize($data['file']->getPathName());
+
         $attachment = Attachment::create([
             'name' => $data['name'],
             'path' => $data['file']->store('attachments'),
+            'image_height' => $imageSize[0] / 3,
+            'image_width' => $imageSize[1] / 3,
         ]);
 
         return new AttachmentResource($attachment);
