@@ -23,6 +23,8 @@ class Question extends Model implements Auditable
         'time_in_minutes',
         'complexity',
         'proportion_value',
+        'proportion_threshold_low',
+        'proportion_threshold_high',
         'introduction',
         'text',
     ];

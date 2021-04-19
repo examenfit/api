@@ -82,6 +82,8 @@ class QuestionController extends Controller
             'time_in_minutes' => 'nullable|integer',
             'complexity' => 'nullable|in:low,average,high',
             'proportion_value' => 'nullable|numeric',
+            'proportion_threshold_low' => 'nullable|numeric|min:0',
+            'proportion_threshold_high' => 'nullable|numeric|min:0',
             'introduction' => 'nullable|string',
             'text' => 'required|string',
             'answerSections' => 'array',
