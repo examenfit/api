@@ -6,6 +6,7 @@ use App\Models\Topic;
 use App\Models\Question;
 use App\Rules\HashIdExists;
 use Illuminate\Http\Request;
+use Vinkla\Hashids\Facades\Hashids;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ExamResource;
 use App\Http\Resources\QuestionResource;
@@ -17,11 +18,13 @@ class QuestionController extends Controller
         $question->load([
             'topic',
             'attachments',
+            'appendixes',
             'tags',
             'domains',
             'answers.sections',
             'chapters',
-            'highlights'
+            'highlights',
+            'dependencies',
         ]);
 
         return new QuestionResource($question);
@@ -79,6 +82,8 @@ class QuestionController extends Controller
             'time_in_minutes' => 'nullable|integer',
             'complexity' => 'nullable|in:low,average,high',
             'proportion_value' => 'nullable|numeric',
+            'proportion_threshold_low' => 'nullable|numeric|min:0',
+            'proportion_threshold_high' => 'nullable|numeric|min:0',
             'introduction' => 'nullable|string',
             'text' => 'required|string',
             'answerSections' => 'array',
@@ -91,12 +96,23 @@ class QuestionController extends Controller
             'chapters.*.id' => ['required', new HashIdExists('chapters')],
             'attachments' => 'array',
             'attachments.*.id' => ['required', new HashIdExists('attachments')],
+            'appendixes' => 'array',
+            'appendixes.*.id' => ['required', new HashIdExists('attachments')],
             'highlights' => 'array',
             'highlights.*.text' => ['required', 'string', 'max:255'],
+            'dependencies' => 'array',
+            'dependencies.*.id' => ['required', new HashIdExists('questions')],
+            'dependencies.*.introduction' => 'nullable|boolean',
+            'dependencies.*.attachments' => 'nullable|boolean',
+            'dependencies.*.appendixes' => 'nullable|boolean',
         ]);
 
         if (isset($data['attachments'])) {
             $question->addAttachments($data['attachments']);
+        }
+
+        if (isset($data['appendixes'])) {
+            $question->addAppendixes($data['appendixes']);
         }
 
         if (isset($data['answerSections'])) {
@@ -128,6 +144,24 @@ class QuestionController extends Controller
 
             $question->highlights()->createMany(
                 collect($data['highlights'])
+            );
+        }
+
+        if (isset($data['dependencies'])) {
+            $question->dependencies()->sync(
+                collect($data['dependencies'])
+                    ->filter(
+                        fn ($item) => $item['introduction']
+                            || $item['attachments']
+                            || $item['appendixes']
+                    )
+                    ->mapWithKeys(
+                        fn ($item) => [Hashids::decode($item['id'])[0] => [
+                            'introduction' => $item['introduction'],
+                            'attachments' => $item['attachments'],
+                            'appendixes' => $item['appendixes'],
+                        ]]
+                    )
             );
         }
 

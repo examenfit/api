@@ -22,6 +22,11 @@ class Attachment extends Model
         return $this->morphedByMany(Question::class, 'attachable');
     }
 
+    public function questionAppendix()
+    {
+        return $this->belongsToMany(Question::class, 'question_appendix');
+    }
+
     public function getUrlAttribute()
     {
         return Storage::url($this->attributes['path']);

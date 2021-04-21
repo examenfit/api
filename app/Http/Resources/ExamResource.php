@@ -25,6 +25,7 @@ class ExamResource extends JsonResource
             'term' => $this->term,
             'standardization_value' => $this->standardization_value,
             'is_pilot' => $this->is_pilot,
+            'introduction' => $this->introduction,
             'topics' => TopicResource::collection($this->whenLoaded('topics')),
             'files' => ExamSourceFileResource::collection($this->whenLoaded('files')),
             'course' => new CourseResource($this->whenLoaded('course')),

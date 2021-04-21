@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Exam;
+use App\Models\Appendix;
 use App\Models\Attachment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AttachmentResource;
 
@@ -22,6 +24,9 @@ class AttachmentController extends Controller
                 ->orWhereHas('questions', function ($query) use ($exam) {
                     return $query->whereIn('topic_id', $exam->topics->pluck('id'));
                 })
+                ->orWhereHas('questionAppendix', function ($query) use ($exam) {
+                    return $query->whereIn('topic_id', $exam->topics->pluck('id'));
+                })
                 ->get();
 
             return AttachmentResource::collection($attachments);
@@ -35,9 +40,13 @@ class AttachmentController extends Controller
             'file' => 'required|file',
         ]);
 
+        $imageSize = getimagesize($data['file']->getPathName());
+
         $attachment = Attachment::create([
             'name' => $data['name'],
             'path' => $data['file']->store('attachments'),
+            'image_height' => $imageSize[0] / 3,
+            'image_width' => $imageSize[1] / 3,
         ]);
 
         return new AttachmentResource($attachment);

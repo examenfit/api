@@ -24,11 +24,14 @@ class QuestionResource extends JsonResource
             'time_in_minutes' => $this->time_in_minutes,
             'complexity' => $this->complexity,
             'proportion_value' => $this->proportion_value,
+            'proportion_threshold_low' => $this->proportion_threshold_low,
+            'proportion_threshold_high' => $this->proportion_threshold_high,
             'introduction' => $this->introduction,
             'text' => $this->text,
             'question_type' => new QuestionTypeResource($this->whenLoaded('questionType')),
             'topic' => new TopicResource($this->whenLoaded('topic')),
             'attachments' => AttachmentResource::collection($this->whenLoaded('attachments')),
+            'appendixes' => AttachmentResource::collection($this->whenLoaded('appendixes')),
             'answers' => AnswerResource::collection($this->whenLoaded('answers')),
             'tags' => TagResource::collection($this->whenLoaded('tags')),
             'domains' => DomainResource::collection($this->whenLoaded('domains')),
@@ -36,6 +39,14 @@ class QuestionResource extends JsonResource
             'methodologies' => MethodologyResource::collection($this->whenLoaded('methodologies')),
             'chapters' => ChapterResource::collection($this->whenLoaded('chapters')),
             'highlights' => HighlightResource::collection($this->whenLoaded('highlights')),
+            'dependencies' => QuestionResource::collection($this->whenLoaded('dependencies')),
+            'question_dependency' => $this->whenPivotLoaded('question_dependency', function () {
+                return [
+                    'introduction' => !!$this->pivot->introduction,
+                    'attachments' => !!$this->pivot->attachments,
+                    'appendixes' => !!$this->pivot->appendixes,
+                ];
+            }),
         ];
     }
 }

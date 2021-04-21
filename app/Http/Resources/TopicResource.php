@@ -18,6 +18,8 @@ class TopicResource extends JsonResource
         return [
             'id' => $this->hash_id,
             'exam_id' => Hashids::encode($this->exam_id),
+            'proportion_threshold_low' => $this->proportion_threshold_low,
+            'proportion_threshold_high' => $this->proportion_threshold_high,
             'complexity' => $this->complexity,
             'popularity' => $this->popularity,
             'name' => $this->name,

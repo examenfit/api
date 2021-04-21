@@ -23,6 +23,8 @@ class Question extends Model implements Auditable
         'time_in_minutes',
         'complexity',
         'proportion_value',
+        'proportion_threshold_low',
+        'proportion_threshold_high',
         'introduction',
         'text',
     ];
@@ -42,6 +44,11 @@ class Question extends Model implements Auditable
     public function attachments()
     {
         return $this->morphToMany(Attachment::class, 'attachable');
+    }
+
+    public function appendixes()
+    {
+        return $this->belongsToMany(Attachment::class, 'question_appendix');
     }
 
     public function domains()
@@ -82,6 +89,12 @@ class Question extends Model implements Auditable
         return $this->morphMany(Highlight::class, 'linkable');
     }
 
+    public function dependencies()
+    {
+        return $this->belongsToMany(Self::class, 'question_dependency', 'depend_id')
+            ->withPivot(['introduction', 'attachments', 'appendixes']);
+    }
+
     public function addAttachments($attachments)
     {
         $collection = collect($attachments)
@@ -89,6 +102,15 @@ class Question extends Model implements Auditable
             ->transform(fn ($id) => Hashids::decode($id)[0]);
 
         return $this->attachments()->sync($collection);
+    }
+
+    public function addAppendixes($appendixes)
+    {
+        $collection = collect($appendixes)
+            ->pluck('id')
+            ->transform(fn ($id) => Hashids::decode($id)[0]);
+
+        return $this->appendixes()->sync($collection);
     }
 
     public function addTags($tags)

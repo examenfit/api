@@ -77,6 +77,7 @@ class ExamController extends Controller
             'term' => 'required|integer|in:1,2',
             'standardization_value' => 'nullable|numeric',
             'is_pilot' => 'nullable|boolean',
+            'introduction' => 'nullable|string'
         ]);
 
         $exam->update($data);
