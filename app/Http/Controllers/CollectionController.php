@@ -26,19 +26,18 @@ class CollectionController extends Controller
                     $query->where('topic_id', $topic->id);
                 }
 
-                $query->orderBy('number', 'ASC');
+                $query->orderBy('topic_id', 'ASC')
+                    ->orderBy('number', 'ASC');
             },
             'questions.answers.sections.tips',
             'questions.tips',
             'questions.topic.attachments',
             'questions.attachments',
             'questions.tags',
+            'questions.dependencies',
             'questions.chapters.methodology'
         ]);
-        // $collection = collect($collection->toArray());
 
-        // $questions = collect($collection['questions']);
-        // dump ($questions->groupBy('topic_id'));
         return new CollectionResource($collection);
     }
 
@@ -114,6 +113,8 @@ class CollectionController extends Controller
                 fn ($q) => Hashids::decode($q)[0],
             )
         );
+
+        $collection->load('topics');
 
         return new CollectionResource($collection);
     }

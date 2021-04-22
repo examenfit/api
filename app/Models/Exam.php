@@ -20,6 +20,7 @@ class Exam extends Model implements Auditable
         'standardization_value',
         'is_pilot',
         'status',
+        'introduction',
         'assignment_contents',
     ];
 

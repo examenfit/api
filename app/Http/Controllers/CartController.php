@@ -22,7 +22,7 @@ class CartController extends Controller
 
         $items = collect($items['items'])
             ->filter()
-            ->map(function($item) {
+            ->map(function ($item) {
                 $decodedValue = Arr::first(\Vinkla\Hashids\Facades\Hashids::decode($item));
 
                 if (!is_int($decodedValue)) {
@@ -32,7 +32,10 @@ class CartController extends Controller
                 return $decodedValue;
             });
 
-        $topics = Topic::with('exam', 'questions')->whereIn('id', $items)->get();
+        $topics = Topic::with([
+            'exam',
+            'questions'
+        ])->whereIn('id', $items)->get();
 
         return CartResource::collection($topics);
     }

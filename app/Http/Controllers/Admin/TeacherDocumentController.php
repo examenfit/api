@@ -11,14 +11,16 @@ class TeacherDocumentController extends Controller
 {
     public function index(Exam $exam)
     {
-        Artisan::call('ef:questioncorrection', ['exam' => $exam->id]);
+        try {
+            Artisan::call('ef:questioncorrection', ['exam' => $exam->id]);
 
-        $path = storage_path("app/public/question-correction/{$exam->hash_id}.docx");
+            $path = storage_path("app/public/question-correction/{$exam->hash_id}.docx");
 
-        if (file_exists($path)) {
-            return response()->download($path);
+            if (file_exists($path)) {
+                return response()->download($path);
+            }
+        } catch (\Exception $error) {
+            return response($error->getMessage(), 500);
         }
-
-        return "Couldn't create file";
     }
 }

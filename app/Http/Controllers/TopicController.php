@@ -20,6 +20,7 @@ class TopicController extends Controller
             'questions.tags',
             'questions.chapters',
             'questions.chapters.parent',
+            'questions.highlights',
         ]);
 
         return new TopicResource($topic);

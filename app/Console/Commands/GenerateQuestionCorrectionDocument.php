@@ -511,8 +511,16 @@ class GenerateQuestionCorrectionDocument extends Command
         // Delete file
         fclose($tempFile);
 
-        // Return MathML XML
-        return $match[0];
+        try {
+            // Return MatchML
+            return $match[0];
+        } catch (\Exception $error) {
+            throw new \Exception("
+Kon formule niet verwerken: {$formula}.
+Ergens in de buurt van vraag {$this->questionNumber}.
+Dat kan in de vraag zelf zijn, het onderwerp ervoor of erna of in een oplossingsstrategie.
+            ");
+        }
     }
 
     /**

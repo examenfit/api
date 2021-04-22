@@ -11,6 +11,8 @@ class QuestionType extends Model
 {
     use HasFactory, HashID, HasJsonRelationships;
 
+    public $guarded = [];
+
     public function question()
     {
         return $this->belongsTo(Question::class);
