@@ -103,9 +103,6 @@ i {
   clear: both;
   width: 6in;
 }
-.large-attachment * {
-  width: 6in;
-}
 .question-intro {
   clear: both;
   font-size: 11pt;
