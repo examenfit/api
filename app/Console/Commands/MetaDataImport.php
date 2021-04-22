@@ -175,8 +175,6 @@ class MetaDataImport extends Command
                 $tag = Tag::forceCreate([
                     'course_id' => 1,
                     'name' => $tagValue,
-                    'is_havo' => false,
-                    'is_vwo' => true,
                 ]);
             }
 
@@ -191,14 +189,12 @@ class MetaDataImport extends Command
         $this->info('Vraagtype verwerken: ' . $value);
         $type = QuestionType::where('name', $value)->first();
 
-
         if (!$type) {
             $type = QuestionType::create([
                 'course_id' => 1,
                 'name' => $value,
             ]);
         }
-
 
         $question->update([
             'type_id' => $type->id,
