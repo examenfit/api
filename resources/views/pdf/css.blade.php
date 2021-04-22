@@ -179,6 +179,7 @@ svg {
 .topic ~ .topic {
   page-break-before: always;
 }
-.question {
+.question,
+.question-main {
   page-break-inside: avoid;
 }
