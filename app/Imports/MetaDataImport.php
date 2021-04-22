@@ -112,7 +112,15 @@ class MetaDataImport implements ToCollection, WithHeadingRow, WithCalculatedForm
                 return explode(': ', $domain)[1];
             })
             ->map(function ($domain) {
+                if (
+                    $domain === "Exponentiële verbanden"
+                    || $domain === "Exponentiële en logaritmische functie"
+                ) {
+                    $domain = "Exponentiële en logaritmische functies";
+                }
+
                 $this->console->info('Domein ophalen: ' . $domain);
+
                 return Domain::where('name', 'LIKE', $domain . '%')
                     ->where(function ($query) {
                         $query->whereNotNull('parent_id')
