@@ -1,6 +1,6 @@
-@if ($attachment['image_width'] >= 200)
+@if ($image_width >= 200)
   <div class=large-attachment>
-    <b>{{ $attachment['name'] }}</b>
-    <img src="{{ $attachment['url'] }}">
+    <b>{{ $name }}</b>
+    <img src="{{ Storage::url($path) }}">
   </div>
 @endif

@@ -93,7 +93,7 @@ class CollectionController extends Controller
         $collection['topics'] = $topics;
         $collection['points'] = $points;
         $collection['time_in_minutes'] = $time_in_minutes;
-        return view('pdf', [ 'collection' => $collection ]);
+        return view('pdf', $collection);
     }
 
     public function store(Request $request)

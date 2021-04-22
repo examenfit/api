@@ -2,17 +2,17 @@
   @include('pdf.examenfit-branding')
   <div class=collection-info>
     <div class=collection-title>
-      {{ $collection['name'] }}
+      {{ $name }}
     </div>
     <div class=collection-meta>
       <div class=question-count>
-        {{ count($collection['questions']) }} vragen
+        {{ count($questions) }} vragen
       </div>
       <div class=points> 
-        @include('pdf.points', $collection)
+        @include('pdf.points')
       </div>
       <div class=duration>
-        @include('pdf.time_in_minutes', $collection)
+        @include('pdf.time_in_minutes')
       </div>
     </div>
     <div class=collection-download>
