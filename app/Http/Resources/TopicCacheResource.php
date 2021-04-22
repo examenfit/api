@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use App\Models\Tag;
 use App\Models\Domain;
+use App\Models\Highlight;
 use App\Models\Methodology;
 use App\Models\QuestionType;
 use Vinkla\Hashids\Facades\Hashids;
@@ -35,6 +36,7 @@ class TopicCacheResource extends JsonResource
             ),
             'tags' => TagResource::collection(Tag::hydrate($this->resource['tags'])),
             'domains' => DomainResource::collection(Domain::hydrate($this->resource['domains'])),
+            'highlights' => HighlightResource::collection(Highlight::hydrate($this->resource['highlights'])),
         ];
     }
 }

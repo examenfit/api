@@ -32,6 +32,7 @@ class CollectionController extends Controller
             'questions.topic.attachments',
             'questions.attachments',
             'questions.tags',
+            'questions.dependencies',
             'questions.chapters.methodology'
         ]);
 

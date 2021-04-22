@@ -43,6 +43,7 @@ class SetTopicCache extends Command
             'questions.tags',
             'questions.questionType',
             'questions.chapters',
+            'questions.highlights',
             'exam',
         ])->get()->each(function ($topic) {
             $proportionSum = 0;
@@ -64,6 +65,7 @@ class SetTopicCache extends Command
                 'domainId' => [],
                 'methodologyId' => collect(),
                 'chapterId' => collect(),
+                'highlights' => collect(),
             ]);
 
             $topic->questions->each(function ($question) use (&$cache, &$proportionSum) {
@@ -133,6 +135,14 @@ class SetTopicCache extends Command
                             ]));
                         }
                     }
+                });
+
+                $question->highlights->each(function ($highlight) use (&$cache) {
+                    // dd($highlight);
+                    $cache['highlights']->push([
+                        'id' => $highlight->id,
+                        'text' => $highlight->text,
+                    ]);
                 });
             });
 

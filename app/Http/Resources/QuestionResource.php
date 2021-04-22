@@ -39,7 +39,7 @@ class QuestionResource extends JsonResource
             'methodologies' => MethodologyResource::collection($this->whenLoaded('methodologies')),
             'chapters' => ChapterResource::collection($this->whenLoaded('chapters')),
             'highlights' => HighlightResource::collection($this->whenLoaded('highlights')),
-            'dependencies' => QuestionResource::collection($this->whenLoaded('dependencies')),
+            'dependencies' => QuestionDependencyResource::collection($this->whenLoaded('dependencies')),
             'question_dependency' => $this->whenPivotLoaded('question_dependency', function () {
                 return [
                     'introduction' => !!$this->pivot->introduction,
