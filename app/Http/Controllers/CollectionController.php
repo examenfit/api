@@ -9,9 +9,11 @@ use App\Models\Elaboration;
 use App\Rules\HashIdExists;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\URL;
 use Vinkla\Hashids\Facades\Hashids;
 use App\Http\Resources\CollectionResource;
 use App\Support\CollectionQuestionsDocument;
+use App\Support\DocumentMarkup;
 
 class CollectionController extends Controller
 {
@@ -48,6 +50,51 @@ class CollectionController extends Controller
         $document->createDocument($collection);
         $document->saveDocument($path, 'docx');
         return response()->download($path, 'collection.docx');
+    }
+
+    public function showCollectionQuestionsHtml(Request $request, Collection $collection)
+    {
+        $markup = new DocumentMarkup();
+
+        $collection->load([
+            'author',
+            'questions' => fn ($q) => $q->orderBy('topic_id', 'ASC')->orderBy('number', 'ASC'),
+            'questions.attachments',
+            'questions.topic',
+            'questions.topic.attachments',
+            'questions.topic.exam',
+            'questions.topic.exam.course',
+        ]);
+
+        $topic_id = -1;
+        $topics = [];
+        $points = 0;
+        $time_in_minutes = 0;
+ 
+        foreach($collection['questions'] as $question) {
+            $points += $question['points'];
+            $time_in_minutes += $question['time_in_minutes'];
+
+            $topic = $question['topic'];
+            if ($topic['id'] !== $topic_id) {
+              $topics[] = $topic;
+              $topic_id = $topic['id'];
+            }
+
+            foreach($topic['questions'] as $question) {
+              $question['introduction'] = $markup->fix($question['introduction']);
+              $question['text'] = $markup->fix($question['text']);
+
+              $c = $collection->hash_id;
+              $q = $question->hash_id;
+              $t = $topic->hash_id;
+              $question['url'] = "https://app.examenfit.nl/c/{$c}/{$t}/{$q}";
+            }
+        }
+        $collection['topics'] = $topics;
+        $collection['points'] = $points;
+        $collection['time_in_minutes'] = $time_in_minutes;
+        return view('pdf', [ 'collection' => $collection ]);
     }
 
     public function store(Request $request)
