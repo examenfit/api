@@ -21,9 +21,11 @@ class CollectionQuestionsDocument
     public $collection = null;
     public $document = null;
     public $sections = [];
+    public $dashboardUrl;
 
     public function __construct()
     {
+        $this->dashboardUrl = config('app.dashboard_url');
     }
 
     function createDocument($collection)
@@ -393,9 +395,9 @@ class CollectionQuestionsDocument
         if ($question) {
             $question_id = $question->hash_id;
             $topic_id = $question->topic->hash_id;
-            $url = "https://app.examenfit.nl/c/{$collection_id}/{$topic_id}/{$question_id}";
+            $url = "{$this->dashboardUrl}/c/{$collection_id}/{$topic_id}/{$question_id}";
         } else {
-            $url = "https://app.examenfit.nl/a/{$collection_id}/";
+            $url = "{$this->dashboardUrl}/a/{$collection_id}/";
         }
         Log::info($url);
 
