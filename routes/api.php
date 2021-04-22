@@ -30,6 +30,9 @@ use App\Http\Controllers\Admin\AuditController as AdminAuditController;
 |
 */
 
+// fixme maybe should not be public
+Route::get('/download-collection-html/{collection}', [CollectionController::class, 'showCollectionQuestionsHtml']);
+
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])
     ->middleware('guest');
 
