@@ -23,6 +23,7 @@ class CourseResource extends JsonResource
             'tags' => TagResource::collection($this->whenLoaded('tags')),
             'questionTypes' => QuestionTypeResource::collection($this->whenLoaded('questionTypes')),
             'methodologies' => MethodologyResource::collection($this->whenLoaded('methodologies')),
+            'levels' => LevelResource::collection($this->whenLoaded('levels')),
         ];
     }
 }
