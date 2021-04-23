@@ -35,7 +35,8 @@ class CollectionController extends Controller
             'questions.attachments',
             'questions.tags',
             'questions.dependencies',
-            'questions.chapters.methodology'
+            'questions.chapters.methodology',
+            'questions.chapters.parent',
         ]);
 
         return new CollectionResource($collection);
@@ -69,31 +70,31 @@ class CollectionController extends Controller
         $topics = [];
         $points = 0;
         $time_in_minutes = 0;
- 
-        foreach($collection['questions'] as $question) {
+
+        foreach ($collection['questions'] as $question) {
             $points += $question['points'];
             $time_in_minutes += $question['time_in_minutes'];
 
             $topic = $question['topic'];
             if ($topic['id'] !== $topic_id) {
-              $topics[] = $topic;
-              $topic_id = $topic['id'];
+                $topics[] = $topic;
+                $topic_id = $topic['id'];
             }
 
-            foreach($topic['questions'] as $question) {
-              $question['introduction'] = $markup->fix($question['introduction']);
-              $question['text'] = $markup->fix($question['text']);
+            foreach ($topic['questions'] as $question) {
+                $question['introduction'] = $markup->fix($question['introduction']);
+                $question['text'] = $markup->fix($question['text']);
 
-              $c = $collection->hash_id;
-              $q = $question->hash_id;
-              $t = $topic->hash_id;
-              $question['url'] = "https://app.examenfit.nl/c/{$c}/{$t}/{$q}";
+                $c = $collection->hash_id;
+                $q = $question->hash_id;
+                $t = $topic->hash_id;
+                $question['url'] = "https://app.examenfit.nl/c/{$c}/{$t}/{$q}";
             }
         }
         $collection['topics'] = $topics;
         $collection['points'] = $points;
         $collection['time_in_minutes'] = $time_in_minutes;
-        return view('pdf', $collection);
+        return view('pdf', ['collection' => $collection]);
     }
 
     public function store(Request $request)
