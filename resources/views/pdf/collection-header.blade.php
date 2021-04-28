@@ -1,8 +1,8 @@
 <div class=collection-header>
   @include('pdf.examenfit-branding')
   <div class=collection-info>
-    <div class=collection-title>
-      {{ $name }}
+    <div class=collection-name>
+      {{ $name ?? '' }}
     </div>
     <div class=collection-meta>
       <div class=question-count>

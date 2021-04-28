@@ -1,9 +1,17 @@
+&nbsp;
+<span>
+  @include('pdf.meter')
+</span>
+&nbsp;
+<span>
 @if ($complexity == 'low')
-  complexiteit: laag
+  laag
 @elseif ($complexity == 'high')
-  complexiteit: hoog
+  hoog
 @elseif ($complexity == 'average')
-  complexiteit: gemiddeld
+  gemiddeld
 @else
-  complexiteit: {{ $complexity }}
+  onbekend
 @endif
+</span>
+&nbsp;

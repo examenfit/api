@@ -3,6 +3,10 @@
   margin: 0;
   padding: 0;
 }
+@page {
+  size: A4 portrait;
+  margin: 0.5in 0in;
+}
 body {
   font-family: Helvetica, Arial, sans-serif;
   font-size: 0;
@@ -21,7 +25,7 @@ i {
   font-style: italic;
 }
 .collection {
-  padding: 1in;
+  padding: 0 1in;
 }
 .collection-header {
   border-bottom: solid 8pt #bed62f;
@@ -43,7 +47,7 @@ i {
 .collection-info {
   text-align: right;
 }
-.collection-title {
+.collection-name {
   font-size: 21pt;
   margin-bottom: 14pt;
 }
@@ -161,15 +165,15 @@ i {
   height: 2cm;
 }
 .action-info {
-  font-size: 14pt;
+  font-size: 12pt;
   font-weight: bold;
-  padding: 21pt;
+  padding: 18pt;
   vertical-align: top;
 }
 svg {
   min-height: 2ex;
 }
-.katex-html {
+.katex-mathml {
   display: none;
 }
 
@@ -179,4 +183,11 @@ svg {
 .question,
 .question-main {
   page-break-inside: avoid;
+}
+.icon {
+  display: inline-block;
+  width: 11pt;
+  height: 11pt;
+  vertical-align: baseline;
+  margin-bottom: -1.2pt;
 }
