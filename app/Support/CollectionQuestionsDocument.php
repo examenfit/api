@@ -47,6 +47,7 @@ class CollectionQuestionsDocument
             'questions.topic',
             'questions.topic.exam',
             'questions.topic.exam.course',
+            'questions.dependencies',
         ]);
     }
 
@@ -120,16 +121,45 @@ class CollectionQuestionsDocument
 
     function processQuestions()
     {
+        $topics = [];
         $topic_id = 0;
-        $this->addSection();
-        $this->addCollectionTitle($this->collection);
+        $introduction = [];
+        $attachments = [];
+        $text = [];
         foreach ($this->collection['questions'] as $question) {
+            $id = $question['id'];
+            $text[$id] = true;
+            $introduction[$id] = true;
+            $attachments[$id] = true;
+
+            foreach($question['dependencies'] as $dependency) {
+                $pivot = $dependency['pivot'];
+                $id = $pivot['question_id'];
+                if ($pivot['introduction']) $introduction[$id] = true;
+                if ($pivot['attachments']) $attachments[$id] = true;
+                if ($pivot['appendixes']) $appendixes[$id] = true;
+            }
+
             $topic = $question->topic;
             if ($topic_id !== $topic->id) {
                 $topic_id = $topic->id;
-                $this->addTopic($topic);
+                $topics[] = $topic;
             }
-            $this->addQuestion($question);
+        }
+
+        $this->addSection();
+        $this->addCollectionTitle($this->collection);
+        foreach($topics as $topic) {
+            $this->addTopic($topic);
+            foreach($topic['questions'] as $question) {
+                $id = $question['id'];
+                $this->addQuestion(
+                    $question,
+                    array_key_exists($id, $introduction),
+                    array_key_exists($id, $attachments),
+                    array_key_exists($id, $text)
+                );
+            }
         }
         $this->addCollectionEnd();
     }
@@ -304,7 +334,7 @@ class CollectionQuestionsDocument
             $textRun->addText($attachment->name . "\n", ['bold' => true]);
 
             // Add image to the textbox
-            //Log::info($attachment->url);
+            Log::info($attachment->url);
             $textRun->addImage($attachment->url, [
                 'width' => $attachment->image_width,
                 'height' => $attachment->image_height,
@@ -312,50 +342,40 @@ class CollectionQuestionsDocument
         }
     }
 
-    function addQuestion($question)
+    function addQuestion($question, $use_introduction, $use_attachments, $use_text)
     {
+        if (!$use_introduction && !$use_attachments && !$use_text) {
+          return;
+        }
+
         $section = $this->currentSection();
 
-        $this->addAttachments($question->attachments);
+        if ($use_attachments) {
+            $this->addAttachments($question->attachments);
+        }
 
         // Introduction
-        $textRun = $section->addTextRun(['alignment' => 'left']);
-        $this->formatText($question->introduction, $textRun);
-        $textRun->addTextBreak(1);
+        if ($use_introduction) {
+            $textRun = $section->addTextRun(['alignment' => 'left']);
+            $this->formatText($question->introduction, $textRun);
+            $textRun->addTextBreak(1);
+        }
 
         // Question text
-        $this->addQuestionTitle($question);
-        $textRun = $section->addTextRun(['alignment' => 'left']);
-        $textRun->addTextBreak(1);
-        $this->formatText($question->text, $textRun);
-        $textRun->addTextBreak(1);
+        if ($use_text) {
+            $this->addQuestionTitle($question);
+            $textRun = $section->addTextRun(['alignment' => 'left']);
+            $textRun->addTextBreak(1);
+            $this->formatText($question->text, $textRun);
+            $textRun->addTextBreak(1);
 
-        // Question type
-        //$textRun->addTextBreak(1);
-        //$textRun->addText('Vraagtype: ', ['bold' => true, 'color' => '0070C0']);
-        //$textRun->addText($question->questionType->name, ['color' => '0070C0']);
+            // Word Docs will not contain QR-codes
+            // $this->addQrCode($question);
 
-        // Domains
-        //$textRun->addTextBreak(1);
-        //$textRun->addText('Domeinen: ', ['bold' => true, 'color' => '0070C0']);
-
-        //$domains = [];
-        //foreach ($question->domains as $domain) {
-        //$domains[] = $domain->name;
-        //}
-        //$textRun->addText(implode(', ', $domains), ['color' => '0070C0']);
-
-        // Tags
-        //$textRun->addTextBreak(1);
-        //$textRun->addText('Trefwoorden: ', ['bold' => true, 'color' => '0070C0']);
-        //$textRun->addText(implode(', ', $question->tags->pluck('name')->toArray()), ['color' => '0070C0']);
-
-        // Add QrCode
-        $this->addQrCode($question);
-
-        // addTextBreak
-        $textRun = $section->addTextRun(['alignment' => 'left']);
-        $textRun->addTextBreak(1);
+            // addTextBreak
+            $textRun = $section->addTextRun(['alignment' => 'left']);
+            $textRun->addTextBreak(1);
+        }
     }
 
     function addQuestionTitle($question)
@@ -578,9 +598,9 @@ class CollectionQuestionsDocument
 
     function saveDocx($file)
     {
+        Log::info($file);
         $writer = \PhpOffice\PhpWord\IOFactory::createWriter($this->document, 'Word2007');
         $writer->save($file);
-        //Log::info($file);
     }
 
     function savePDF($file)
