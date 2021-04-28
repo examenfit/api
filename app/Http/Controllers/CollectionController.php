@@ -75,7 +75,6 @@ class CollectionController extends Controller
         $text = [];
         $introduction = [];
         $attachments = [];
-        $appendixes = [];
 
         foreach ($collection['questions'] as $question) {
 
@@ -86,15 +85,12 @@ class CollectionController extends Controller
             $text[$id] = 1;
             $introductions[$id] = 1;
             $attachments[$id] = 1;
-            $appendixes[$id] = 1;
-            if ($id == "") die($question);
 
             foreach ($question['dependencies'] as $dependency) {
                 $pivot = $dependency['pivot'];
                 $id = $pivot['question_id'];
                 if ($pivot['introduction']) $introduction[$id] = 1;
                 if ($pivot['attachments']) $attachments[$id] = 1;
-                if ($pivot['appendixes']) $appendixes[$id] = 1;
             }
 
             $topic = $question['topic'];
@@ -114,8 +110,6 @@ class CollectionController extends Controller
                 $question['use_text'] = array_key_exists($id, $text);
                 $question['use_introduction'] = array_key_exists($id, $introduction);
                 $question['use_attachments'] = array_key_exists($id, $attachments);
-                $question['use_appendixes'] = array_key_exists($id, $appendixes);
-
                 $question['introduction'] = $markup->fix($question['introduction']);
                 $question['text'] = $markup->fix($question['text']);
 
