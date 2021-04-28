@@ -64,37 +64,73 @@ class CollectionController extends Controller
             'questions.topic.attachments',
             'questions.topic.exam',
             'questions.topic.exam.course',
+            'questions.dependencies',
         ]);
 
         $topic_id = -1;
-        $topics = [];
         $points = 0;
         $time_in_minutes = 0;
 
+        $topics = [];
+        $text = [];
+        $introduction = [];
+        $attachments = [];
+        $appendixes = [];
+
         foreach ($collection['questions'] as $question) {
+
             $points += $question['points'];
             $time_in_minutes += $question['time_in_minutes'];
+
+            $id = $question['id'];
+            $text[$id] = 1;
+            $introductions[$id] = 1;
+            $attachments[$id] = 1;
+            $appendixes[$id] = 1;
+            if ($id == "") die($question);
+
+            foreach ($question['dependencies'] as $dependency) {
+                $pivot = $dependency['pivot'];
+                $id = $pivot['question_id'];
+                if ($pivot['introduction']) $introduction[$id] = 1;
+                if ($pivot['attachments']) $attachments[$id] = 1;
+                if ($pivot['appendixes']) $appendixes[$id] = 1;
+            }
 
             $topic = $question['topic'];
             if ($topic['id'] !== $topic_id) {
                 $topics[] = $topic;
                 $topic_id = $topic['id'];
             }
+        }
+
+        $questions = [];
+        foreach ($topics as $topic) {
+            $topic['introduction'] = $markup->fix($topic['introduction']);
 
             foreach ($topic['questions'] as $question) {
+                $id = $question['id'];
+
+                $question['use_text'] = array_key_exists($id, $text);
+                $question['use_introduction'] = array_key_exists($id, $introduction);
+                $question['use_attachments'] = array_key_exists($id, $attachments);
+                $question['use_appendixes'] = array_key_exists($id, $appendixes);
+
                 $question['introduction'] = $markup->fix($question['introduction']);
                 $question['text'] = $markup->fix($question['text']);
 
                 $c = $collection->hash_id;
                 $q = $question->hash_id;
                 $t = $topic->hash_id;
+
                 $question['url'] = "https://app.examenfit.nl/c/{$c}/{$t}/{$q}";
             }
         }
+
         $collection['topics'] = $topics;
         $collection['points'] = $points;
         $collection['time_in_minutes'] = $time_in_minutes;
-        return view('pdf', ['collection' => $collection]);
+        return view('pdf', $collection);
     }
 
     public function store(Request $request)
