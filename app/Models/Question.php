@@ -84,7 +84,7 @@ class Question extends Model implements Auditable
 
     public function highlights()
     {
-        return $this->morphMany(Highlight::class, 'linkable');
+        return $this->hasMany(Highlight::class);
     }
 
     public function dependencies()
