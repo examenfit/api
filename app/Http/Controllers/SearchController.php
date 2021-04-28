@@ -243,7 +243,10 @@ class SearchController extends Controller
                     );
                 }
             }),
-        ])->with('highlights')->where('cache->examStatus', 'published');
+        ])
+            ->with('highlights')
+            ->where('cache->course_id', $course->id)
+            ->where('cache->examStatus', 'published');
 
         return TopicResource::collection($topics->get());
     }
