@@ -6,11 +6,11 @@ class DocumentMarkup {
 
   const BOLD = '/\*\*(.+?)\*\*/m';
   const LATEX = '/(`\$\$(.+?)\$\$`)/m'; // without parentheses the backticks fuck stuff up!?
-  const LINEBREAK = '/\n\n/m';
+  const LINEBREAK = '/\n/m';
 
   public function fixLineBreaks($text) {
     $text = preg_replace_callback(DocumentMarkup::LINEBREAK, function($m) {
-      return '<br><br>';
+      return '<br>';
     }, $text);
     return $text;
   }
