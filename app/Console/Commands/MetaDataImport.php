@@ -3,7 +3,9 @@
 namespace App\Console\Commands;
 
 use App\Models\Tag;
+use App\Models\Level;
 use App\Models\Topic;
+use App\Models\Course;
 use App\Models\Domain;
 use App\Models\Chapter;
 use App\Models\Question;
@@ -47,31 +49,90 @@ class MetaDataImport extends Command
      */
     public function handle()
     {
-        $collection = Excel::toCollection(new ImportsMetaDataImport, 'vwoa.xlsx');
+        $filePath = $this->ask("What is the path to the file?");
+
+        $courses = Course::all()->mapWithKeys(
+            fn ($row) => [$row->id => $row->name]
+        )->toArray();
+
+        $this->course_id = array_search(
+            $this->choice(
+                "What is the ID of the course?",
+                $courses
+            ),
+            $courses
+        );
+
+        $levels = Level::query()
+            ->where('course_id', $this->course_id)
+            ->get()
+            ->mapWithKeys(
+                fn ($row) => [$row->id => $row->name]
+            )->toArray();
+
+        $this->level_id = array_search(
+            $this->choice(
+                "What is the ID of the level?",
+                $levels
+            ),
+            $levels
+        );
+
+        $chapters = Chapter::query()
+            ->where('level_id', $this->level_id)
+            ->where('methodology_id', 1)
+            ->whereNull('chapter_id')
+            ->get()
+            ->mapWithKeys(
+                fn ($row) => [$row->id => $row->name . ' (' . $row->title . ')']
+            )->toArray();
+
+        $this->gr_exam_chapter_id = array_search(
+            $this->choice(
+                "Whats the Exam Chapter ID of Getal & Ruimte?",
+                $chapters
+            ),
+            $chapters
+        );
+
+        $chapters = Chapter::query()
+            ->where('level_id', $this->level_id)
+            ->where('methodology_id', 2)
+            ->whereNull('chapter_id')
+            ->get()
+            ->mapWithKeys(
+                fn ($row) => [$row->id => $row->name . ' (' . $row->title . ')']
+            )->toArray();
+
+        $this->mw_exam_chapter_id = array_search(
+            $this->choice(
+                "Whats the Exam Chapter ID of Moderne Wiskunde?",
+                $chapters
+            ),
+            $chapters
+        );
+
+        $collection = Excel::toCollection(new ImportsMetaDataImport, $filePath);
 
         $collection->each(function ($row) {
             $row->each(function ($item) {
                 $this->processRow($item);
             });
         });
-
-
-        // $rows->each(function ($row) {
-        //     dd($row);
-        // });
-        // //     $this->processRow($row);
-        // // }
     }
 
     public function processRow($row)
     {
         if (!is_null($row['opgave'])) {
             $this->info('Opgave ophalen: ' . $row['opgave']);
-            $this->topic = Topic::where('name', $row['opgave'])->firstOrFail();
+            $this->topic = Topic::where('name', $row['opgave'])
+                ->whereHas('exam', function ($query) {
+                    $level = Level::find($this->level_id);
+                    $query->where('level', strtolower($level->name));
+                })->firstOrFail();
         }
 
         if (!is_null($row['vraag_nr'])) {
-            // dd($row);
             $this->info('Vraag ophalen: ' . $row['vraag_nr']);
 
             $question = Question::query()
@@ -79,11 +140,11 @@ class MetaDataImport extends Command
                 ->where('number', $row['vraag_nr'])
                 ->firstOrFail();
 
-            $this->processChapters($question, $row);
-            $this->processDomains($question, $row['domeinen']);
-            $this->processTags($question, $row['trefwoorden']);
+            // $this->processChapters($question, $row);
+            // $this->processDomains($question, $row['domeinen']);
+            // $this->processTags($question, $row['trefwoorden']);
             $this->processQuestionType($question, $row['vraagtypen']);
-            $this->processHighlights($question, $row['highlights']);
+            // $this->processHighlights($question, $row['highlights']);
         }
     }
 
@@ -105,7 +166,7 @@ class MetaDataImport extends Command
         $process = explode("\n", $row['examentraining_gr']);
         foreach ($process as $item) {
             $chapters[] = Chapter::where('methodology_id', 1)
-                ->where('chapter_id', 10) // Examentraining
+                ->where('chapter_id', $this->gr_exam_chapter_id) // Examentraining
                 ->where('name', $item)
                 ->firstOrFail()
                 ->id;
@@ -125,7 +186,7 @@ class MetaDataImport extends Command
         $process = explode("\n", $row['examentraining_mw']);
         foreach ($process as $item) {
             $chapters[] = Chapter::where('methodology_id', 2)
-                ->where('chapter_id', 31) // Examentraining
+                ->where('chapter_id', $this->mw_exam_chapter_id) // Examentraining
                 ->where('name', trim($item))
                 ->firstOrFail()
                 ->id;
@@ -136,26 +197,37 @@ class MetaDataImport extends Command
 
     public function processDomains($question, $values)
     {
+        $availableDomains = Domain::query()
+            ->with('children')
+            ->where('level_id', $this->level_id)
+            ->get()
+            ->map(function ($item) {
+                $items = $item->children->pluck('id');
+                return $items->push($item->id);
+            })->flatten();
+
         $domains = collect(explode("\n", $values))
             ->map(function ($domain) {
                 $this->info('Domein splitten: ' . $domain);
-                return explode(': ', $domain)[1];
+                return explode(': ', $domain)[0];
             })
-            ->map(function ($domain) {
-                if (
-                    $domain === "Exponentiële verbanden"
-                    || $domain === "Exponentiële en logaritmische functie"
-                ) {
-                    $domain = "Exponentiële en logaritmische functies";
-                }
+            ->map(function ($domain) use ($availableDomains) {
+                // if (
+                //     $domain === "Exponentiële verbanden"
+                //     || $domain === "Exponentiële en logaritmische functie"
+                // ) {
+                //     $domain = "Exponentiële en logaritmische functies";
+                // }
 
                 $this->info('Domein ophalen: ' . $domain);
 
-                return Domain::where('name', 'LIKE', $domain . '%')
-                    ->where(function ($query) {
-                        $query->whereNotNull('parent_id')
-                            ->orWhere('name', 'Vaardigheden (A)');
-                    })->firstOrFail();
+                return Domain::where('name', 'LIKE', '%(' . $domain . ')')
+                    ->whereIn('id', $availableDomains)
+                    // ->where(function ($query) {
+                    //     $query->whereNotNull('parent_id')
+                    //         ->orWhere('name', 'Vaardigheden (A)');
+                    // })
+                    ->firstOrFail();
             })
             ->pluck('id');
 
@@ -173,7 +245,8 @@ class MetaDataImport extends Command
 
             if (!$tag) {
                 $tag = Tag::forceCreate([
-                    'course_id' => 1,
+                    'course_id' => $this->course_id,
+                    'level_id' => $this->level_id,
                     'name' => $tagValue,
                 ]);
             }
@@ -187,11 +260,15 @@ class MetaDataImport extends Command
     public function processQuestionType($question, $value)
     {
         $this->info('Vraagtype verwerken: ' . $value);
-        $type = QuestionType::where('name', $value)->first();
+        $type = QuestionType::query()
+            ->where('level_id', $this->level_id)
+            ->where('name', $value)
+            ->first();
 
         if (!$type) {
             $type = QuestionType::create([
                 'course_id' => 1,
+                'level_id' => $this->level_id,
                 'name' => $value,
             ]);
         }

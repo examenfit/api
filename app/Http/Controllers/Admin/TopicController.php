@@ -19,7 +19,6 @@ class TopicController extends Controller
             'questions',
             'questions.attachments',
             'questions.appendixes',
-            'highlights',
         ]);
         return new TopicResource($topic);
     }
@@ -55,15 +54,12 @@ class TopicController extends Controller
     {
 
         $data = $request->validate([
-            'proportion_threshold_low' => 'nullable|integer',
-            'proportion_threshold_high' => 'nullable|integer',
             'complexity' => 'nullable|in:low,average,high',
             'popularity' => 'nullable|numeric|max:5',
             'name' => 'nullable|string',
             'introduction' => 'nullable|string',
             'attachments' => 'nullable|array',
             'attachments.*.id' => ['required', new HashIdExists('attachments')],
-            'highlights.*.text' => ['required', 'string', 'max:255'],
         ]);
 
         $topic->update($data);
@@ -75,14 +71,6 @@ class TopicController extends Controller
         if ($request->has('withExamWrapper')) {
             return app('App\Http\Controllers\Admin\ExamController')
                 ->show($topic->exam);
-        }
-
-        $topic->highlights()->delete();
-
-        if (isset($data['highlights'])) {
-            $topic->highlights()->createMany(
-                collect($data['highlights'])
-            );
         }
 
         return $this->show($topic->fresh());

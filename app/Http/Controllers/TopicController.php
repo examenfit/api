@@ -11,7 +11,6 @@ class TopicController extends Controller
     public function show(Topic $topic)
     {
         $topic->load([
-            'highlights',
             'exam.course',
             'questions.attachments',
             'questions.domains.parent',

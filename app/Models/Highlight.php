@@ -13,8 +13,8 @@ class Highlight extends Model implements Auditable
 
     public $guarded = [];
 
-    public function linkable()
+    public function question()
     {
-        return $this->morphTo();
+        return $this->belongsTo(Question::class);
     }
 }

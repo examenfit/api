@@ -18,8 +18,6 @@ class TopicResource extends JsonResource
         return [
             'id' => $this->hash_id,
             'exam_id' => Hashids::encode($this->exam_id),
-            'proportion_threshold_low' => $this->proportion_threshold_low,
-            'proportion_threshold_high' => $this->proportion_threshold_high,
             'complexity' => $this->complexity,
             'popularity' => $this->popularity,
             'name' => $this->name,
@@ -27,7 +25,6 @@ class TopicResource extends JsonResource
             'attachments' => AttachmentResource::collection($this->attachments),
             'exam' => new ExamResource($this->whenLoaded('exam')),
             'questions' => QuestionResource::collection($this->whenLoaded('questions')),
-            'highlights' => HighlightResource::collection($this->whenLoaded('highlights')),
             'cache' => new TopicCacheResource($this->cache),
         ];
     }

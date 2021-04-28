@@ -20,8 +20,6 @@ class Topic extends Model implements Auditable
     ];
 
     public $fillable = [
-        'proportion_threshold_low',
-        'proportion_threshold_high',
         'name',
         'introduction',
         'complexity',
@@ -48,11 +46,6 @@ class Topic extends Model implements Auditable
     public function attachments()
     {
         return $this->morphToMany(Attachment::class, 'attachable');
-    }
-
-    public function highlights()
-    {
-        return $this->morphMany(Highlight::class, 'linkable');
     }
 
     public function addAttachments($attachments)

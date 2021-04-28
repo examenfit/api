@@ -40,15 +40,19 @@ class SearchController extends Controller
         $level = Hashids::decode(request()->level)[0] ?? 2;
 
         $course->load([
-            'domains' => function ($query) {
+            'domains' => function ($query) use ($level) {
                 $query
                     ->withCount(['topics' => fn ($query) => $this->topicFilter($query)])
                     ->with(['children' => function ($query) {
                         $query->withCount(['topics' => fn ($query) => $this->topicFilter($query)]);
-                    }]);
+                    }])
+                    ->where('level_id', $level);
             },
-            'questionTypes' => function ($query) {
-                $query->withCount(['topics' => fn ($query) => $this->topicFilter($query)]);
+            'questionTypes' => function ($query) use ($level) {
+                $query->where('level_id', $level)
+                    ->withCount([
+                        'topics' => fn ($query) => $this->topicFilter($query)
+                    ]);
             },
             'topics' => fn ($query) => $this->topicFilter($query),
             'methodologies' => function ($query) use ($level) {
@@ -242,7 +246,9 @@ class SearchController extends Controller
                     );
                 }
             }),
-        ])->with('highlights')->where('cache->examStatus', 'published');
+        ])
+            ->where('cache->course_id', $course->id)
+            ->where('cache->examStatus', 'published');
 
         return TopicResource::collection($topics->get());
     }
