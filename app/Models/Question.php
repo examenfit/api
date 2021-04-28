@@ -29,7 +29,7 @@ class Question extends Model implements Auditable
         'text',
     ];
 
-    public $with = ['attachments'];
+    public $with = ['attachments', 'appendixes'];
 
     public function topic()
     {
@@ -92,6 +92,7 @@ class Question extends Model implements Auditable
     public function dependencies()
     {
         return $this->belongsToMany(Self::class, 'question_dependency', 'depend_id')
+            ->orderBy('number', 'ASC')
             ->withPivot(['introduction', 'attachments', 'appendixes']);
     }
 

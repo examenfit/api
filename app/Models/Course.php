@@ -10,6 +10,11 @@ class Course extends Model
 {
     use HasFactory, HashID;
 
+    public function levels()
+    {
+        return $this->hasMany(Level::class);
+    }
+
     public function exams()
     {
         return $this->hasMany(Exam::class);

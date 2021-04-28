@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\CourseController as AdminCourseController;
 use App\Http\Controllers\Admin\IndexController as AdminIndexController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\AuditController as AdminAuditController;
+use App\Http\Controllers\Admin\TagController as AdminTagController;
 
 /*
 |--------------------------------------------------------------------------
@@ -29,6 +30,9 @@ use App\Http\Controllers\Admin\AuditController as AdminAuditController;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+
+// fixme maybe should not be public
+Route::get('/download-collection-html/{collection}', [CollectionController::class, 'showCollectionQuestionsHtml']);
 
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])
     ->middleware('guest');
@@ -59,6 +63,8 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 
         Route::get('/courses', [AdminCourseController::class, 'index']);
         Route::get('/courses/{course}', [AdminCourseController::class, 'show']);
+        Route::get('/courses/{course}/tags', [AdminTagController::class, 'index']);
+        Route::post('/courses/{course}/tags', [AdminTagController::class, 'store']);
         Route::get('courses/{course}/meta', [AdminCourseController::class, 'showMeta']);
 
         Route::get('/courses/{course}/exams', [ExamController::class, 'index']);
@@ -83,6 +89,9 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::post('/questions/{question}/answers', [AnswerController::class, 'store']);
         Route::put('/answers/{answer}', [AnswerController::class, 'update']);
         Route::put('/answers/{answer}/sections/{answerSection}', [AnswerController::class, 'updateSection']);
+
+        Route::put("/tags/{tag}", [AdminTagController::class, 'update']);
+        Route::delete("/tags/{tag}", [AdminTagController::class, 'destroy']);
 
         Route::put('/tips', [TipController::class, 'update']);
 

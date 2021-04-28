@@ -8,6 +8,7 @@ use App\Models\Course;
 use Illuminate\Http\Request;
 use App\Http\Resources\TagResource;
 use App\Http\Resources\TopicResource;
+use Vinkla\Hashids\Facades\Hashids;
 
 class CourseController extends Controller
 {
@@ -18,13 +19,9 @@ class CourseController extends Controller
                 $query->whereHas('exam', function ($query) {
                     $query->where('level', request()->get('level') === "dNRlx" ? "havo" : "vwo");
                 });
-            }]);
+            }])->orderBy('name');
 
-            if (request()->get('level') === 'pNQ8O') {
-                $query->where('is_vwo', true);
-            } else {
-                $query->where('is_havo', true);
-            }
+            $query->where('level_id', Hashids::decode(request()->get('level'))[0]);
         }]);
 
         return TagResource::collection($course->tags);
