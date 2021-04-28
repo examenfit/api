@@ -244,7 +244,6 @@ class SearchController extends Controller
                 }
             }),
         ])
-            ->with('highlights')
             ->where('cache->course_id', $course->id)
             ->where('cache->examStatus', 'published');
 
