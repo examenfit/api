@@ -20,8 +20,6 @@ class Topic extends Model implements Auditable
     ];
 
     public $fillable = [
-        'proportion_threshold_low',
-        'proportion_threshold_high',
         'name',
         'introduction',
         'complexity',

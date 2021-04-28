@@ -24,8 +24,6 @@ class QuestionResource extends JsonResource
             'time_in_minutes' => $this->time_in_minutes,
             'complexity' => $this->complexity,
             'proportion_value' => $this->proportion_value,
-            'proportion_threshold_low' => $this->proportion_threshold_low,
-            'proportion_threshold_high' => $this->proportion_threshold_high,
             'introduction' => $this->introduction,
             'text' => $this->text,
             'question_type' => new QuestionTypeResource($this->whenLoaded('questionType')),

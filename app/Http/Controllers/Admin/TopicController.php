@@ -54,8 +54,6 @@ class TopicController extends Controller
     {
 
         $data = $request->validate([
-            'proportion_threshold_low' => 'nullable|integer',
-            'proportion_threshold_high' => 'nullable|integer',
             'complexity' => 'nullable|in:low,average,high',
             'popularity' => 'nullable|numeric|max:5',
             'name' => 'nullable|string',
