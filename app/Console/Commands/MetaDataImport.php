@@ -212,21 +212,10 @@ class MetaDataImport extends Command
                 return explode(': ', $domain)[0];
             })
             ->map(function ($domain) use ($availableDomains) {
-                // if (
-                //     $domain === "Exponentiële verbanden"
-                //     || $domain === "Exponentiële en logaritmische functie"
-                // ) {
-                //     $domain = "Exponentiële en logaritmische functies";
-                // }
-
                 $this->info('Domein ophalen: ' . $domain);
 
                 return Domain::where('name', 'LIKE', '%(' . $domain . ')')
                     ->whereIn('id', $availableDomains)
-                    // ->where(function ($query) {
-                    //     $query->whereNotNull('parent_id')
-                    //         ->orWhere('name', 'Vaardigheden (A)');
-                    // })
                     ->firstOrFail();
             })
             ->pluck('id');
