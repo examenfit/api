@@ -25,7 +25,16 @@ class CollectionQuestionsDocument
 
     public function __construct()
     {
+        $this->skipPageBreak = false;
         $this->dashboardUrl = config('app.dashboard_url');
+    }
+
+    function showAppendixes($show = true) {
+        $this->showAppendixes = $show;
+    }
+
+    function showQuestions($show = true) {
+        $this->showQuestion = $show;
     }
 
     function createDocument($collection)
@@ -36,6 +45,7 @@ class CollectionQuestionsDocument
         $this->setHeader();
         $this->setFooter();
         $this->processQuestions();
+        $this->processAppendixes();
     }
 
     function setCollection($collection)
@@ -47,7 +57,7 @@ class CollectionQuestionsDocument
             'questions.topic',
             'questions.topic.exam',
             'questions.topic.exam.course',
-            'questions.dependencies',
+            'questions.dependencies'
         ]);
     }
 
@@ -104,19 +114,24 @@ class CollectionQuestionsDocument
         // ...
     }
 
-    function addSection()
+    function addSection($isHeader = false)
     {
-        if (count($this->sections)) {
-            //$this->currentSection()->addPageBreak();
+        if ($this->skipPageBreak) {
+            /* do nothing */
         } else {
-            $section = $this->document->addSection([
-                'marginTop' => 1200,
-                'marginRight' => 1200,
-                'marginBottom' => 1200,
-                'marginLeft' => 1200,
-            ]);
-            $this->sections[] = $section;
+            if (count($this->sections)) {
+                $this->currentSection()->addPageBreak();
+            } else {
+                $section = $this->document->addSection([
+                    'marginTop' => 1200,
+                    'marginRight' => 1200,
+                    'marginBottom' => 1200,
+                    'marginLeft' => 1200,
+                ]);
+                $this->sections[] = $section;
+            }
         }
+        $this->skipPageBreak = $isHeader;
     }
 
     function processQuestions()
@@ -137,7 +152,6 @@ class CollectionQuestionsDocument
                 $id = $pivot['question_id'];
                 if ($pivot['introduction']) $introduction[$id] = true;
                 if ($pivot['attachments']) $attachments[$id] = true;
-                if ($pivot['appendixes']) $appendixes[$id] = true;
             }
 
             $topic = $question->topic;
@@ -146,8 +160,9 @@ class CollectionQuestionsDocument
                 $topics[] = $topic;
             }
         }
+        $this->topics = $topics;
 
-        $this->addSection();
+        $this->addSection(true);
         $this->addCollectionTitle($this->collection);
         foreach($topics as $topic) {
             $this->addTopic($topic);
@@ -162,6 +177,91 @@ class CollectionQuestionsDocument
             }
         }
         $this->addCollectionEnd();
+    }
+
+    function processAppendixes()
+    {
+        $appendixes = [];
+        foreach ($this->collection['questions'] as $question) {
+            $id = $question->id;
+            if (count($question->appendixes) > 0) {
+                $appendixes[$id] = true;
+            }
+            foreach($question['dependencies'] as $dependency) {
+                $pivot = $dependency['pivot'];
+                $id = $pivot['question_id'];
+                if ($pivot['appendixes']) $appendixes[$id] = true;
+            }
+        }
+
+        $this->addSection(true);
+        $this->addAppendixesTitle();
+        $this->added = [];
+        $first = null;
+        //$this->addAppendixesTitle($this->collection);
+        foreach($this->topics as $topic) {
+            foreach($topic['questions'] as $question) {
+                $id = $question->id;
+                if (array_key_exists($id, $appendixes)) {
+                    $this->addQuestionAppendixes($question);
+                }
+            }
+        }
+    }
+
+
+    function addAppendixesTitle() {
+        $section = $this->currentSection();
+        $table = $section->addTable([
+            'unit' => \PhpOffice\PhpWord\Style\Table::WIDTH_PERCENT,
+            'width' => 100 * 50,
+            'Spacing' => 0,
+            'cellSpacing' => 0,
+            'borderBottomSize' => 12
+        ]);
+        $row = $table->addRow();
+
+        $left = $row->addCell();
+        //$left->addText('ExamenFit', ['size' => 32]);
+        $left->addText('Uitwerkbijlage', ['size' => 14, 'bold' => true]);
+    }
+
+    function addQuestionAppendixes($question) {
+        foreach ($question['appendixes'] as $appendix) {
+            $this->addAppendix($appendix);
+        }
+    }
+
+    function addAppendix($appendix) {
+        $titleHeight = 20;
+        $id = $appendix->id;
+        if (array_key_exists($id, $this->added)) {
+            /* skip */
+        } else {
+            $attachment = $appendix;
+            $question = $appendix->question;
+
+            $parent = $this->currentSection();
+
+            // Create textbox
+            $textBox = $parent->addTextBox([
+                'width' => $attachment->image_width + 20, // Textbox padding compensation
+                'height' => $attachment->image_height + $titleHeight,
+                'borderColor' => '#FFFFFF',
+            ]);
+
+            $textRun = $textBox->addTextRun();
+
+            // Add title to the textbox
+            $textRun->addText($attachment->name . "\n", ['bold' => true]);
+
+            // Add image to the textbox
+            Log::info($attachment->url);
+            $textRun->addImage($attachment->url, [
+                'width' => $attachment->image_width,
+                'height' => $attachment->image_height,
+            ]);
+        }
     }
 
     function addTopic($topic)
@@ -382,11 +482,11 @@ class CollectionQuestionsDocument
     {
         //$this->currentSection()->addTitle($title);
         $COMPLEXITY = [
-            'low' => 'Eenvoudig',
-            'average' => 'Gemiddeld',
-            'high' => 'Moeilijk',
+            'low' => 'laag',
+            'average' => 'gemiddeld',
+            'high' => 'hoog',
         ];
-        $complexity = $COMPLEXITY[$question->complexity];
+        $complexity = 'complexiteit: '.$COMPLEXITY[$question->complexity];
         $section = $this->currentSection();
         $section->addTitle("Vraag {$question->number}", 2);
         $table = $section->addTable([
