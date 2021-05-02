@@ -1,1 +1,5 @@
-{{ $points }} punten
+&nbsp;
+<span>
+  {{ $points }} punten
+</span>
+&nbsp;

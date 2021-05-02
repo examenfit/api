@@ -5,5 +5,6 @@
 </head>
 <body>
 @include('pdf.collection')
+@include('pdf.appendixes')
 </body>
 </html>

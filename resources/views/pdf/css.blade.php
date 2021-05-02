@@ -191,3 +191,23 @@ svg {
   vertical-align: baseline;
   margin-bottom: -1.2pt;
 }
+.appendixes {
+  bage-break-before: always;
+}
+.appendixes-header {
+  font-size: 14pt;
+  font-weight: bold;
+  border-bottom: 4pt solid black;
+  padding: 4pt 0;
+  margin-bottom: 14pt;
+}
+.appendix {
+  page-break-inside: avoid;
+  margin: 7pt 0;
+}
+.appendix-name {
+  font-size: 11pt;
+}
+.appendix-image {
+  text-align: center; /* aligns images to center as well */
+}

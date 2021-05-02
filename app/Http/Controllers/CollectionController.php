@@ -72,9 +72,10 @@ class CollectionController extends Controller
         $time_in_minutes = 0;
 
         $topics = [];
-        $text = [];
-        $introduction = [];
-        $attachments = [];
+        $use_text = [];
+        $use_introduction = [];
+        $use_attachments = [];
+        $use_appendixes = [];
 
         foreach ($collection['questions'] as $question) {
 
@@ -82,15 +83,18 @@ class CollectionController extends Controller
             $time_in_minutes += $question['time_in_minutes'];
 
             $id = $question['id'];
-            $text[$id] = 1;
-            $introductions[$id] = 1;
-            $attachments[$id] = 1;
+            $use_text[$id] = true;
+            $use_introductions[$id] = true;
+            $use_attachments[$id] = true;
+            $use_appendixes[$id] = true;
 
             foreach ($question['dependencies'] as $dependency) {
                 $pivot = $dependency['pivot'];
                 $id = $pivot['question_id'];
-                if ($pivot['introduction']) $introduction[$id] = 1;
-                if ($pivot['attachments']) $attachments[$id] = 1;
+
+                if ($pivot['introduction']) $use_introduction[$id] = true;
+                if ($pivot['attachments']) $use_attachments[$id] = true;
+                if ($pivot['appendixes']) $use_appendixes[$id] = true;
             }
 
             $topic = $question['topic'];
@@ -100,16 +104,31 @@ class CollectionController extends Controller
             }
         }
 
-        $questions = [];
+        $appendixes = [];
+        $appendix_added = [];
+
         foreach ($topics as $topic) {
             $topic['introduction'] = $markup->fix($topic['introduction']);
 
             foreach ($topic['questions'] as $question) {
                 $id = $question['id'];
 
-                $question['use_text'] = array_key_exists($id, $text);
-                $question['use_introduction'] = array_key_exists($id, $introduction);
-                $question['use_attachments'] = array_key_exists($id, $attachments);
+                $question['use_text'] = array_key_exists($id, $use_text);
+                $question['use_introduction'] = array_key_exists($id, $use_introduction);
+                $question['use_attachments'] = array_key_exists($id, $use_attachments);
+
+                if (array_key_exists($id, $use_appendixes)) {
+                    foreach ($question['appendixes'] as $appendix) {
+                        $id = $appendix->id;
+                        if (array_key_exists($id, $appendix_added)) {
+                            /* skip */
+                        } else {
+                            $appendixes[] = $appendix;
+                            $appendix_added[$id] = true;
+                        }
+                    }
+                }
+
                 $question['introduction'] = $markup->fix($question['introduction']);
                 $question['text'] = $markup->fix($question['text']);
 
@@ -124,6 +143,9 @@ class CollectionController extends Controller
         $collection['topics'] = $topics;
         $collection['points'] = $points;
         $collection['time_in_minutes'] = $time_in_minutes;
+
+        $collection['appendixes'] = $appendixes;
+
         return view('pdf', $collection);
     }
 

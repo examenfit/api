@@ -6,7 +6,7 @@
     </div>
     <div class=collection-meta>
       <div class=question-count>
-        {{ count($questions) }} vragen
+        @include('pdf.question-count')
       </div>
       <div class=points> 
         @include('pdf.points')
