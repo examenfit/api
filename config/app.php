@@ -58,7 +58,7 @@ return [
 
     'dashboard_url' => env('DASHBOARD_URL', null),
 
-    'examenfit_scripts_url' => env('EXAMENFIT_SCRIPTS_URL', '52.59.238.35'),
+    'examenfit_scripts_url' => env('EXAMENFIT_SCRIPTS_URL', '10.0.1.15'),
 
     /*
     |--------------------------------------------------------------------------
