@@ -42,6 +42,7 @@ Route::post('/collections/{collection}/{question}/elaborations', [CollectionCont
 
 Route::get('/download-collection/{collection}', [CollectionController::class, 'showCollectionQuestionsDocument']);
 Route::get('/download-collection-html/{collection}', [CollectionController::class, 'showCollectionQuestionsHtml']);
+Route::get('/download-collection-pdf/{collection}', [CollectionController::class, 'showCollectionQuestionsPdf']);
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy']);

@@ -52,6 +52,39 @@ class CollectionController extends Controller
         return response()->download($path, 'collection.docx');
     }
 
+    public function showCollectionQuestionsPdf(Request $request, Collection $collection)
+    {
+        Log::info('showCollectionQuestionsPdf');
+
+        $api = url("/api/download-collection-html");
+        $api = str_replace("http://localhost:8000", "https://staging-api.examenfit.nl", $api);
+
+        Log::info("api=$api");
+
+        $server = config('app.examenfit_scripts_url');
+
+        $hash = $collection->hash_id;
+        $pdf = "${hash}.pdf";
+        $tmp = "/tmp/${pdf}";
+
+        Log::info("pdf=$pdf");
+        Log::info("tmp=$tmp");
+
+        // currently ssh authentication goes with public key authentication
+        // in the future this may need to become ssh -i id_rsa or something alike
+        $generate = "ssh examenfit@$server make/pdf $hash $api";
+        $retrieve = "scp examenfit@$server:pdf/$pdf $tmp";
+
+        Log::info($generate);
+        shell_exec($generate);
+
+        Log::info($retrieve);
+        shell_exec($retrieve);
+
+        Log::info("response");
+        return response()->download($tmp);
+    }
+
     public function showCollectionQuestionsHtml(Request $request, Collection $collection)
     {
         $markup = new DocumentMarkup();
