@@ -192,7 +192,8 @@ svg {
   margin-bottom: -1.2pt;
 }
 .appendixes {
-  bage-break-before: always;
+  padding: 0 1in;
+  page-break-before: always;
 }
 .appendixes-header {
   font-size: 14pt;
