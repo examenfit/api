@@ -434,16 +434,9 @@ class CollectionQuestionsDocument
         if ($use_text) {
             $this->addQuestionTitle($question);
             $this->addQuestionText($question);
-            $textRun = $section->addTextRun(['alignment' => 'left']);
-            $textRun->addTextBreak(1);
-            $this->formatText($question->text, $textRun);
-            $textRun->addTextBreak(1);
-
-            // Word Docs will not contain QR-codes
-            // $this->addQrCode($question);
 
             // addTextBreak
-            $textRun = $section->addTextRun(['alignment' => 'left']);
+            $textRun = $section->addTextRun();
             $textRun->addTextBreak(1);
         }
     }
