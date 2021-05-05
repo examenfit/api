@@ -140,11 +140,11 @@ class MetaDataImport extends Command
                 ->where('number', $row['vraag_nr'])
                 ->firstOrFail();
 
-            $this->processChapters($question, $row);
-            $this->processDomains($question, $row['domeinen']);
-            $this->processTags($question, $row['trefwoorden']);
+            // $this->processChapters($question, $row);
+            // $this->processDomains($question, $row['domeinen']);
+            // $this->processTags($question, $row['trefwoorden']);
             $this->processQuestionType($question, $row['vraagtypen']);
-            $this->processHighlights($question, $row['highlights']);
+            // $this->processHighlights($question, $row['highlights']);
         }
     }
 
@@ -212,21 +212,10 @@ class MetaDataImport extends Command
                 return explode(': ', $domain)[0];
             })
             ->map(function ($domain) use ($availableDomains) {
-                // if (
-                //     $domain === "Exponentiële verbanden"
-                //     || $domain === "Exponentiële en logaritmische functie"
-                // ) {
-                //     $domain = "Exponentiële en logaritmische functies";
-                // }
-
                 $this->info('Domein ophalen: ' . $domain);
 
                 return Domain::where('name', 'LIKE', '%(' . $domain . ')')
                     ->whereIn('id', $availableDomains)
-                    // ->where(function ($query) {
-                    //     $query->whereNotNull('parent_id')
-                    //         ->orWhere('name', 'Vaardigheden (A)');
-                    // })
                     ->firstOrFail();
             })
             ->pluck('id');
@@ -260,11 +249,15 @@ class MetaDataImport extends Command
     public function processQuestionType($question, $value)
     {
         $this->info('Vraagtype verwerken: ' . $value);
-        $type = QuestionType::where('name', $value)->first();
+        $type = QuestionType::query()
+            ->where('level_id', $this->level_id)
+            ->where('name', $value)
+            ->first();
 
         if (!$type) {
             $type = QuestionType::create([
                 'course_id' => 1,
+                'level_id' => $this->level_id,
                 'name' => $value,
             ]);
         }

@@ -31,8 +31,7 @@ use App\Http\Controllers\Admin\TagController as AdminTagController;
 |
 */
 
-// fixme maybe should not be public
-Route::get('/download-collection-html/{collection}', [CollectionController::class, 'showCollectionQuestionsHtml']);
+// fixme these routes should probs not be public
 
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])
     ->middleware('guest');
@@ -40,6 +39,15 @@ Route::post('/login', [AuthenticatedSessionController::class, 'store'])
 //Route::get('/collections/{collection}', [CollectionController::class, 'show']);
 Route::get('/collections/{collection}/{topic?}', [CollectionController::class, 'show']);
 Route::post('/collections/{collection}/{question}/elaborations', [CollectionController::class, 'storeElaboration']);
+
+Route::get('/download-collection/{collection}', [CollectionController::class, 'showCollectionQuestionsDocument']);
+Route::get('/download-collection-html/{collection}', [CollectionController::class, 'showCollectionQuestionsHtml']);
+Route::get('/download-collection-pdf/{collection}', [CollectionController::class, 'showCollectionQuestionsPdf']);
+
+
+Route::get('/download-appendixes-html/{topic}', [TopicController::class, 'html']);
+Route::get('/download-appendixes-pdf/{topic}', [TopicController::class, 'pdf']);
+
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy']);
@@ -55,8 +63,9 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('/cart', [CartController::class, 'index']);
 
     Route::post('/collections', [CollectionController::class, 'store']);
-    // Temporary route, because /collections/{collection}/file conflicts with the public route
-    Route::get('/download-collection/{collection}', [CollectionController::class, 'showCollectionQuestionsDocument']);
+    
+    //Route::get('/download-collection/{collection}', [CollectionController::class, 'showCollectionQuestionsDocument']);
+    //Route::get('/download-collection-html/{collection}', [CollectionController::class, 'showCollectionQuestionsHtml']);
 
     Route::group(['prefix' => 'admin', 'middleware' => 'role:admin,author'], function () {
         Route::get('/', [AdminIndexController::class, 'index']);

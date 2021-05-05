@@ -1,12 +1,14 @@
 <div class=collection-header>
-  @include('pdf.examenfit-branding')
   <div class=collection-info>
-    <div class=collection-title>
-      {{ $name }}
+    <div class=collection-name>
+      {{ $name ?? '' }}
     </div>
     <div class=collection-meta>
+      <div class=topic-count>
+        @include('pdf.topic-count')
+      </div>
       <div class=question-count>
-        {{ count($questions) }} vragen
+        @include('pdf.question-count')
       </div>
       <div class=points> 
         @include('pdf.points')
@@ -16,7 +18,8 @@
       </div>
     </div>
     <div class=collection-download>
-      gedownload {{ date("Y-m-d H:i:s") }}
+      gedownload {{ $timestamp }}
     </div>
   </div>
+  @include('pdf.examenfit-branding')
 </div>

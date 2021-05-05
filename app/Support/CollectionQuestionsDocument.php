@@ -25,7 +25,16 @@ class CollectionQuestionsDocument
 
     public function __construct()
     {
+        $this->skipPageBreak = false;
         $this->dashboardUrl = config('app.dashboard_url');
+    }
+
+    function showAppendixes($show = true) {
+        $this->showAppendixes = $show;
+    }
+
+    function showQuestions($show = true) {
+        $this->showQuestion = $show;
     }
 
     function createDocument($collection)
@@ -36,6 +45,7 @@ class CollectionQuestionsDocument
         $this->setHeader();
         $this->setFooter();
         $this->processQuestions();
+        $this->processAppendixes();
     }
 
     function setCollection($collection)
@@ -47,6 +57,7 @@ class CollectionQuestionsDocument
             'questions.topic',
             'questions.topic.exam',
             'questions.topic.exam.course',
+            'questions.dependencies'
         ]);
     }
 
@@ -103,35 +114,156 @@ class CollectionQuestionsDocument
         // ...
     }
 
-    function addSection()
+    function addSection($isHeader = false)
     {
-        if (count($this->sections)) {
-            //$this->currentSection()->addPageBreak();
+        if ($this->skipPageBreak) {
+            /* do nothing */
         } else {
-            $section = $this->document->addSection([
-                'marginTop' => 1200,
-                'marginRight' => 1200,
-                'marginBottom' => 1200,
-                'marginLeft' => 1200,
-            ]);
-            $this->sections[] = $section;
+            if (count($this->sections)) {
+                $this->currentSection()->addPageBreak();
+            } else {
+                $section = $this->document->addSection([
+                    'marginTop' => 1200,
+                    'marginRight' => 1200,
+                    'marginBottom' => 1200,
+                    'marginLeft' => 1200,
+                ]);
+                $this->sections[] = $section;
+            }
         }
+        $this->skipPageBreak = $isHeader;
     }
 
     function processQuestions()
     {
+        $topics = [];
         $topic_id = 0;
-        $this->addSection();
-        $this->addCollectionTitle($this->collection);
+        $introduction = [];
+        $attachments = [];
+        $text = [];
         foreach ($this->collection['questions'] as $question) {
+            $id = $question['id'];
+            $text[$id] = true;
+            $introduction[$id] = true;
+            $attachments[$id] = true;
+
+            foreach($question['dependencies'] as $dependency) {
+                $pivot = $dependency['pivot'];
+                $id = $pivot['question_id'];
+                if ($pivot['introduction']) $introduction[$id] = true;
+                if ($pivot['attachments']) $attachments[$id] = true;
+            }
+
             $topic = $question->topic;
             if ($topic_id !== $topic->id) {
                 $topic_id = $topic->id;
-                $this->addTopic($topic);
+                $topics[] = $topic;
             }
-            $this->addQuestion($question);
+        }
+        $this->topics = $topics;
+
+        $this->addSection(true);
+        $this->addCollectionTitle($this->collection);
+        foreach($topics as $topic) {
+            $this->addTopic($topic);
+            foreach($topic['questions'] as $question) {
+                $id = $question['id'];
+                $this->addQuestion(
+                    $question,
+                    array_key_exists($id, $introduction),
+                    array_key_exists($id, $attachments),
+                    array_key_exists($id, $text)
+                );
+            }
         }
         $this->addCollectionEnd();
+    }
+
+    function processAppendixes()
+    {
+        $appendixes = [];
+        foreach ($this->collection['questions'] as $question) {
+            $id = $question->id;
+            if (count($question->appendixes) > 0) {
+                $appendixes[$id] = true;
+            }
+            foreach($question['dependencies'] as $dependency) {
+                $pivot = $dependency['pivot'];
+                $id = $pivot['question_id'];
+                if ($pivot['appendixes']) $appendixes[$id] = true;
+            }
+        }
+
+        if (count($appendixes)) {
+            $this->addSection(true);
+            $this->addAppendixesTitle();
+            $this->added = [];
+            $first = null;
+            //$this->addAppendixesTitle($this->collection);
+            foreach($this->topics as $topic) {
+                foreach($topic['questions'] as $question) {
+                    $id = $question->id;
+                    if (array_key_exists($id, $appendixes)) {
+                        $this->addQuestionAppendixes($question);
+                    }
+                }
+            }
+        }
+    }
+
+
+    function addAppendixesTitle() {
+        $section = $this->currentSection();
+        $table = $section->addTable([
+            'unit' => \PhpOffice\PhpWord\Style\Table::WIDTH_PERCENT,
+            'width' => 100 * 50,
+            'Spacing' => 0,
+            'cellSpacing' => 0,
+            'borderBottomSize' => 12
+        ]);
+        $row = $table->addRow();
+
+        $left = $row->addCell();
+        $left->addText('Uitwerkbijlage', ['size' => 14, 'bold' => true]);
+    }
+
+    function addQuestionAppendixes($question) {
+        foreach ($question['appendixes'] as $appendix) {
+            $this->addAppendix($appendix);
+        }
+    }
+
+    function addAppendix($appendix) {
+        $titleHeight = 20;
+        $id = $appendix->id;
+        if (array_key_exists($id, $this->added)) {
+            /* skip */
+        } else {
+            $attachment = $appendix;
+            $question = $appendix->question;
+
+            $parent = $this->currentSection();
+
+            // Create textbox
+            $textBox = $parent->addTextBox([
+                'width' => $attachment->image_width + 20, // Textbox padding compensation
+                'height' => $attachment->image_height + $titleHeight,
+                'borderColor' => '#FFFFFF',
+            ]);
+
+            $textRun = $textBox->addTextRun();
+
+            // Add title to the textbox
+            $textRun->addText($attachment->name . "\n", ['bold' => true]);
+
+            // Add image to the textbox
+            Log::info($attachment->url);
+            $scale = 1;
+            $textRun->addImage($attachment->url, [
+                'width' => $attachment->image_width * $scale,
+                'height' => $attachment->image_height * $scale
+            ]);
+        }
     }
 
     function addTopic($topic)
@@ -157,6 +289,18 @@ class CollectionQuestionsDocument
 
     function addCollectionTitle($collection)
     {
+        $section = $this->currentSection();
+        $table = $section->addTable([
+            'unit' => \PhpOffice\PhpWord\Style\Table::WIDTH_PERCENT,
+            'width' => 100 * 50,
+            'Spacing' => 0,
+            'cellSpacing' => 0,
+            'borderBottomSize' => 32
+        ]);
+        $row = $table->addRow();
+        $cell = $row->addCell();
+
+        $topics = count($this->collection->topics);
         $questions = 0;
         $points = 0;
         $time_in_minutes = 0;
@@ -167,66 +311,22 @@ class CollectionQuestionsDocument
             $time_in_minutes += $question->time_in_minutes;
         }
 
-        $ts = new DateTime();
-        $ts->setTimeZOne(new DateTimeZone('CET'));
-        $timestamp = $ts->format('Y-m-d H:i:s');
-
-        $section = $this->currentSection();
-        $table = $section->addTable([
-            'unit' => \PhpOffice\PhpWord\Style\Table::WIDTH_PERCENT,
-            'width' => 100 * 50,
-            'Spacing' => 0,
-            'cellSpacing' => 0,
-            'borderBottomSize' => 32
-        ]);
-        $row = $table->addRow();
-
-        $left = $row->addCell();
-        $left->addText('ExamenFit', ['size' => 32]);
-        $left->addText('examenvragen op maat', ['size' => 14, 'bold' => true]);
-
-        $right = $row->addCell();
-        $right->addText($this->collection->name, ['size' => 16, 'bold' => true], ['align' => 'right']);
-        $txt = $right->addTextRun([
-            'align' => 'right',
-            'spaceAfter' => \PhpOffice\PhpWord\Shared\Converter::pointToTwip(0),
-            'spacing' => 120,
-            'lineHeight' => 2,
-        ]);
+        $title = $cell->addTextRun();
+        $title->addText($this->collection->name, ['size' => 16, 'bold' => true]);
+        $txt = $cell->addTextRun();
+        $txt->addText("$topics opgaven");
+        $txt->addText('  |  ');
         $txt->addText("$questions vragen");
         $txt->addText('  |  ');
         $txt->addText("$points punten");
         $txt->addText('  |  ');
         $txt->addText("$time_in_minutes min.");
 
-        $right->addText("Download: {$timestamp}", ['size' => 10, 'italic' => true], ['align' => 'right']);
         $section->addTextRun()->addTextBreak(2);
     }
 
     function addCollectionEnd()
     {
-        $section = $this->currentSection();
-        $section->addTextRun()->addTextBreak(2);
-        $table = $section->addTable([
-            'unit' => \PhpOffice\PhpWord\Style\Table::WIDTH_PERCENT,
-            'width' => 100 * 50,
-            'Spacing' => 0,
-            'cellSpacing' => 0,
-            'borderTopSize' => 32
-        ]);
-        $row = $table->addRow();
-
-        $left = $row->addCell();
-        $left->addText('ExamenFit', ['size' => 32]);
-
-        $right = $row->addCell();
-        $right->getStyle()->setVAlign('center');
-        $txt = $right->addTextRun(['align' => 'right']);
-        $txt->addText('Met ExamenFit kun je eenvoudig vragen samenstellen en gericht vragen oefenen.', ['size' => 8]);
-        $txt->addtextBreak();
-        $txt->addText('Kijk op ', ['size' => 8]);
-        $txt->addText('www.examenfit.nl', ['bold' => true, 'size' => 8]);
-        $txt->addText(' voor meer informatie.', ['size' => 8]);
     }
 
     function addTopicTitle($topic)
@@ -304,7 +404,7 @@ class CollectionQuestionsDocument
             $textRun->addText($attachment->name . "\n", ['bold' => true]);
 
             // Add image to the textbox
-            //Log::info($attachment->url);
+            Log::info($attachment->url);
             $textRun->addImage($attachment->url, [
                 'width' => $attachment->image_width,
                 'height' => $attachment->image_height,
@@ -312,63 +412,64 @@ class CollectionQuestionsDocument
         }
     }
 
-    function addQuestion($question)
+    function addQuestion($question, $use_introduction, $use_attachments, $use_text)
     {
+        if (!$use_introduction && !$use_attachments && !$use_text) {
+          return;
+        }
+
         $section = $this->currentSection();
 
-        $this->addAttachments($question->attachments);
+        if ($use_attachments) {
+            $this->addAttachments($question->attachments);
+        }
 
         // Introduction
-        $textRun = $section->addTextRun(['alignment' => 'left']);
-        $this->formatText($question->introduction, $textRun);
-        $textRun->addTextBreak(1);
+        if ($use_introduction) {
+            $textRun = $section->addTextRun(['alignment' => 'left']);
+            $this->formatText($question->introduction, $textRun);
+            $textRun->addTextBreak(1);
+        }
 
         // Question text
-        $this->addQuestionTitle($question);
-        $textRun = $section->addTextRun(['alignment' => 'left']);
-        $textRun->addTextBreak(1);
-        $this->formatText($question->text, $textRun);
-        $textRun->addTextBreak(1);
+        if ($use_text) {
+            $this->addQuestionTitle($question);
+            $this->addQuestionText($question);
 
-        // Question type
-        //$textRun->addTextBreak(1);
-        //$textRun->addText('Vraagtype: ', ['bold' => true, 'color' => '0070C0']);
-        //$textRun->addText($question->questionType->name, ['color' => '0070C0']);
+            // addTextBreak
+            $textRun = $section->addTextRun();
+            $textRun->addTextBreak(1);
+        }
+    }
 
-        // Domains
-        //$textRun->addTextBreak(1);
-        //$textRun->addText('Domeinen: ', ['bold' => true, 'color' => '0070C0']);
-
-        //$domains = [];
-        //foreach ($question->domains as $domain) {
-        //$domains[] = $domain->name;
-        //}
-        //$textRun->addText(implode(', ', $domains), ['color' => '0070C0']);
-
-        // Tags
-        //$textRun->addTextBreak(1);
-        //$textRun->addText('Trefwoorden: ', ['bold' => true, 'color' => '0070C0']);
-        //$textRun->addText(implode(', ', $question->tags->pluck('name')->toArray()), ['color' => '0070C0']);
-
-        // Add QrCode
-        $this->addQrCode($question);
-
-        // addTextBreak
-        $textRun = $section->addTextRun(['alignment' => 'left']);
-        $textRun->addTextBreak(1);
+    function addQuestionText($question) {
+        $section = $this->currentSection();
+        $table = $section->addTable([
+            'unit' => \PhpOffice\PhpWord\Style\Table::WIDTH_PERCENT,
+            'width' => 100 * 50,
+            'Spacing' => 0,
+            'cellSpacing' => 0,
+            'cellMargin' => 100,
+            'marginBottom' => 100,
+        ]);
+        $row = $table->addRow();
+        $cell = $row->addCell(5000, [
+            'borderSize' => 12
+        ]);
+        $txt = $cell->addTextRun();
+        $txt->addText($question->text);
     }
 
     function addQuestionTitle($question)
     {
         //$this->currentSection()->addTitle($title);
         $COMPLEXITY = [
-            'low' => 'Eenvoudig',
-            'average' => 'Gemiddeld',
-            'high' => 'Moeilijk',
+            'low' => 'laag',
+            'average' => 'gemiddeld',
+            'high' => 'hoog',
         ];
-        $complexity = $COMPLEXITY[$question->complexity];
+        $complexity = 'complexiteit: '.$COMPLEXITY[$question->complexity];
         $section = $this->currentSection();
-        $section->addTitle("Vraag {$question->number}", 2);
         $table = $section->addTable([
             'unit' => \PhpOffice\PhpWord\Style\Table::WIDTH_PERCENT,
             'width' => 100 * 50,
@@ -378,15 +479,16 @@ class CollectionQuestionsDocument
         ]);
         $row = $table->addRow();
 
-        $left = $row->addCell();
+        $left = $row->addCell(2500);
         $txt = $left->addTextRun(['align' => 'left']);
-        $txt->addText("{$question->points} punten", ['size' => 10, 'bold' => true]);
+        $txt->addText("Vraag {$question->number} ", ['size' => 11, 'bold' => true]);
+        $txt->addText(" {$question->points} punten", ['size' => 11]);
 
-        $right = $row->addCell();
+        $right = $row->addCell(2500);
         $txt = $right->addTextRun(['align' => 'right']);
-        $txt->addText("{$question->time_in_minutes} min.", ['size' => 10, 'bold' => true]);
+        $txt->addText("{$question->time_in_minutes} min.", ['size' => 11]);
         $txt->addText('   ');
-        $txt->addText("$complexity", ['size' => 10, 'bold' => true]);
+        $txt->addText("$complexity", ['size' => 11]);
     }
 
     function createQrUrl($question)
@@ -578,9 +680,9 @@ class CollectionQuestionsDocument
 
     function saveDocx($file)
     {
+        Log::info($file);
         $writer = \PhpOffice\PhpWord\IOFactory::createWriter($this->document, 'Word2007');
         $writer->save($file);
-        //Log::info($file);
     }
 
     function savePDF($file)

@@ -23,8 +23,6 @@ class Question extends Model implements Auditable
         'time_in_minutes',
         'complexity',
         'proportion_value',
-        'proportion_threshold_low',
-        'proportion_threshold_high',
         'introduction',
         'text',
     ];
@@ -86,7 +84,7 @@ class Question extends Model implements Auditable
 
     public function highlights()
     {
-        return $this->morphMany(Highlight::class, 'linkable');
+        return $this->hasMany(Highlight::class);
     }
 
     public function dependencies()

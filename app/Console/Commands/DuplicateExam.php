@@ -40,7 +40,6 @@ class DuplicateExam extends Command
     {
         $exam = Exam::with([
             'topics.attachments',
-            'topics.highlights',
             'topics.questions',
             'topics.questions.answers',
             'topics.questions.answers.sections',
@@ -61,13 +60,6 @@ class DuplicateExam extends Command
             $newTopic = $topic->replicate();
             $newTopic->exam_id = $newExam->id;
             $newTopic->save();
-
-            // Topics -> Highlights
-            foreach ($topic->highlights as $highlight) {
-                $newHighlight = $highlight->replicate();
-                $newHighlight->linkable_id = $newTopic->id;
-                $newHighlight->save();
-            }
 
             // Topics -> Attachments
             foreach ($topic->attachments as $attachment) {
