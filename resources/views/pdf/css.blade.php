@@ -1,3 +1,9 @@
+:root {
+  --text-size: 10pt;
+  --title-size: 12pt;
+  --collection-name-size: 18pt;
+  --icon-align: -1.2pt;
+}
 * {
   font: inherit;
   margin: 0;
@@ -40,11 +46,11 @@ i {
   text-align: right;
 }
 .examenfit-logo > * {
-  width: 150pt;
+  width: 122pt;
   margin-bottom: 7pt;
 }
 .examenfit-punchline {
-  font-size: 8.5pt;
+  font-size: 7pt;
   font-weight: 400;
   color: #999;
   margin-bottom: 14pt;
@@ -52,11 +58,11 @@ i {
 .collection-info {
 }
 .collection-name {
-  font-size: 21pt;
+  font-size: var(--collection-name-size);
   margin-bottom: 14pt;
 }
 .collection-meta {
-  font-size: 11pt;
+  font-size: var(--text-size);
   margin-bottom: 7pt;
 }
 .collection-meta > * {
@@ -68,7 +74,7 @@ i {
   font-weight: 100;
 }
 .collection-download {
-  font-size: 9pt;
+  font-size: 8pt;
   font-style: italic;
   font-weight: 100;
 }
@@ -93,13 +99,13 @@ i {
   text-align: right;
 }
 .topic-title {
-  font-size: 14pt;
+  font-size: var(--title-size);
   font-weight: bold;
   float: left;
 }
 .topic-meta {
   display: inline-block;
-  font-size: 11pt;
+  font-size: var(--text-size);
   text-align: right;
 }
 .topic-meta > * {
@@ -109,7 +115,7 @@ i {
 }
 .topic-intro {
   clear: both;
-  font-size: 11pt;
+  font-size: var(--text-size);
   line-height: 15pt;
 }
 .small-attachment {
@@ -131,7 +137,7 @@ i {
 }
 .question-intro {
   clear: both;
-  font-size: 11pt;
+  font-size: var(--text-size);
   line-height: 15pt;
 }
 .question-figure {
@@ -149,10 +155,10 @@ i {
 }
 .question-header > * {
   display: inline;
-  font-size: 11pt;
+  font-size: var(--text-size);
 }
 .question-title {
-  font-size: 11pt;
+  font-size: var(--text-size);
   font-weight: bold;
   margin-bottom: 3pt;
   float: left;
@@ -166,7 +172,7 @@ i {
   font-weight: 100;
 }
 .question-text {
-  font-size: 11pt;
+  font-size: var(--text-size);
   border: solid 1pt silver;
   margin-top: 14pt;
   margin-bottom: 14pt;
@@ -185,7 +191,7 @@ i {
   height: 2cm;
 }
 .action-info {
-  font-size: 11pt;
+  font-size: var(--text-size);
   -font-weight: bold;
   padding: 24pt;
   vertical-align: top;
@@ -206,10 +212,10 @@ svg {
 }
 .icon {
   display: inline-block;
-  width: 11pt;
-  height: 11pt;
+  width: var(--text-size);
+  height: var(--text-size);
   vertical-align: baseline;
-  margin-bottom: -1.2pt;
+  margin-bottom: var(--icon-align);
 }
 .appendixes {
   padding: 0 1in;
@@ -227,8 +233,13 @@ svg {
   margin: 7pt 0;
 }
 .appendix-name {
-  font-size: 11pt;
+  font-size: var(--text-size);
 }
 .appendix-image {
   text-align: center; /* aligns images to center as well */
+}
+a {
+  color: inherit;
+  font-weight: bold;
+  text-decoration: inherit;
 }
