@@ -44,6 +44,11 @@ Route::get('/download-collection/{collection}', [CollectionController::class, 's
 Route::get('/download-collection-html/{collection}', [CollectionController::class, 'showCollectionQuestionsHtml']);
 Route::get('/download-collection-pdf/{collection}', [CollectionController::class, 'showCollectionQuestionsPdf']);
 
+
+Route::get('/download-topic-html/{topic}', [TopicController::class, 'html']);
+Route::get('/download-topic-pdf/{topic}', [TopicController::class, 'pdf']);
+
+
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy']);
     Route::get('/user', [AuthenticatedSessionController::class, 'show']);
@@ -58,7 +63,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('/cart', [CartController::class, 'index']);
 
     Route::post('/collections', [CollectionController::class, 'store']);
-    // Temporary route, because /collections/{collection}/file conflicts with the public route
+    
     //Route::get('/download-collection/{collection}', [CollectionController::class, 'showCollectionQuestionsDocument']);
     //Route::get('/download-collection-html/{collection}', [CollectionController::class, 'showCollectionQuestionsHtml']);
 
