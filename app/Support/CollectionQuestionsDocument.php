@@ -194,16 +194,18 @@ class CollectionQuestionsDocument
             }
         }
 
-        $this->addSection(true);
-        $this->addAppendixesTitle();
-        $this->added = [];
-        $first = null;
-        //$this->addAppendixesTitle($this->collection);
-        foreach($this->topics as $topic) {
-            foreach($topic['questions'] as $question) {
-                $id = $question->id;
-                if (array_key_exists($id, $appendixes)) {
-                    $this->addQuestionAppendixes($question);
+        if (count($appendixes)) {
+            $this->addSection(true);
+            $this->addAppendixesTitle();
+            $this->added = [];
+            $first = null;
+            //$this->addAppendixesTitle($this->collection);
+            foreach($this->topics as $topic) {
+                foreach($topic['questions'] as $question) {
+                    $id = $question->id;
+                    if (array_key_exists($id, $appendixes)) {
+                        $this->addQuestionAppendixes($question);
+                    }
                 }
             }
         }
@@ -222,7 +224,6 @@ class CollectionQuestionsDocument
         $row = $table->addRow();
 
         $left = $row->addCell();
-        //$left->addText('ExamenFit', ['size' => 32]);
         $left->addText('Uitwerkbijlage', ['size' => 14, 'bold' => true]);
     }
 
@@ -287,6 +288,18 @@ class CollectionQuestionsDocument
 
     function addCollectionTitle($collection)
     {
+        $section = $this->currentSection();
+        $table = $section->addTable([
+            'unit' => \PhpOffice\PhpWord\Style\Table::WIDTH_PERCENT,
+            'width' => 100 * 50,
+            'Spacing' => 0,
+            'cellSpacing' => 0,
+            'borderBottomSize' => 32
+        ]);
+        $row = $table->addRow();
+        $cell = $row->addCell();
+
+        $topics = count($this->collection->topics);
         $questions = 0;
         $points = 0;
         $time_in_minutes = 0;
@@ -297,65 +310,22 @@ class CollectionQuestionsDocument
             $time_in_minutes += $question->time_in_minutes;
         }
 
-        date_default_timezone_set('CET');
-        $timestamp = date('Y-m-d H:i');
-
-        $section = $this->currentSection();
-        $table = $section->addTable([
-            'unit' => \PhpOffice\PhpWord\Style\Table::WIDTH_PERCENT,
-            'width' => 100 * 50,
-            'Spacing' => 0,
-            'cellSpacing' => 0,
-            'borderBottomSize' => 32
-        ]);
-        $row = $table->addRow();
-
-        $left = $row->addCell();
-        $left->addText('ExamenFit', ['size' => 32]);
-        $left->addText('examenvragen op maat', ['size' => 14, 'bold' => true]);
-
-        $right = $row->addCell();
-        $right->addText($this->collection->name, ['size' => 16, 'bold' => true], ['align' => 'right']);
-        $txt = $right->addTextRun([
-            'align' => 'right',
-            'spaceAfter' => \PhpOffice\PhpWord\Shared\Converter::pointToTwip(0),
-            'spacing' => 120,
-            'lineHeight' => 2,
-        ]);
+        $title = $cell->addTextRun();
+        $title->addText($this->collection->name, ['size' => 16, 'bold' => true]);
+        $txt = $cell->addTextRun();
+        $txt->addText("$topics opgaven");
+        $txt->addText('  |  ');
         $txt->addText("$questions vragen");
         $txt->addText('  |  ');
         $txt->addText("$points punten");
         $txt->addText('  |  ');
         $txt->addText("$time_in_minutes min.");
 
-        $right->addText("Download: {$timestamp}", ['size' => 10, 'italic' => true], ['align' => 'right']);
         $section->addTextRun()->addTextBreak(2);
     }
 
     function addCollectionEnd()
     {
-        $section = $this->currentSection();
-        $section->addTextRun()->addTextBreak(2);
-        $table = $section->addTable([
-            'unit' => \PhpOffice\PhpWord\Style\Table::WIDTH_PERCENT,
-            'width' => 100 * 50,
-            'Spacing' => 0,
-            'cellSpacing' => 0,
-            'borderTopSize' => 32
-        ]);
-        $row = $table->addRow();
-
-        $left = $row->addCell();
-        $left->addText('ExamenFit', ['size' => 32]);
-
-        $right = $row->addCell();
-        $right->getStyle()->setVAlign('center');
-        $txt = $right->addTextRun(['align' => 'right']);
-        $txt->addText('Met ExamenFit kun je eenvoudig vragen samenstellen en gericht vragen oefenen.', ['size' => 8]);
-        $txt->addtextBreak();
-        $txt->addText('Kijk op ', ['size' => 8]);
-        $txt->addText('www.examenfit.nl', ['bold' => true, 'size' => 8]);
-        $txt->addText(' voor meer informatie.', ['size' => 8]);
     }
 
     function addTopicTitle($topic)
@@ -463,6 +433,7 @@ class CollectionQuestionsDocument
         // Question text
         if ($use_text) {
             $this->addQuestionTitle($question);
+            $this->addQuestionText($question);
             $textRun = $section->addTextRun(['alignment' => 'left']);
             $textRun->addTextBreak(1);
             $this->formatText($question->text, $textRun);
@@ -477,6 +448,24 @@ class CollectionQuestionsDocument
         }
     }
 
+    function addQuestionText($question) {
+        $section = $this->currentSection();
+        $table = $section->addTable([
+            'unit' => \PhpOffice\PhpWord\Style\Table::WIDTH_PERCENT,
+            'width' => 100 * 50,
+            'Spacing' => 0,
+            'cellSpacing' => 0,
+            'cellMargin' => 100,
+            'marginBottom' => 100,
+        ]);
+        $row = $table->addRow();
+        $cell = $row->addCell(5000, [
+            'borderSize' => 12
+        ]);
+        $txt = $cell->addTextRun();
+        $txt->addText($question->text);
+    }
+
     function addQuestionTitle($question)
     {
         //$this->currentSection()->addTitle($title);
@@ -487,7 +476,6 @@ class CollectionQuestionsDocument
         ];
         $complexity = 'complexiteit: '.$COMPLEXITY[$question->complexity];
         $section = $this->currentSection();
-        $section->addTitle("Vraag {$question->number}", 2);
         $table = $section->addTable([
             'unit' => \PhpOffice\PhpWord\Style\Table::WIDTH_PERCENT,
             'width' => 100 * 50,
@@ -497,15 +485,16 @@ class CollectionQuestionsDocument
         ]);
         $row = $table->addRow();
 
-        $left = $row->addCell();
+        $left = $row->addCell(2500);
         $txt = $left->addTextRun(['align' => 'left']);
-        $txt->addText("{$question->points} punten", ['size' => 10, 'bold' => true]);
+        $txt->addText("Vraag {$question->number} ", ['size' => 11, 'bold' => true]);
+        $txt->addText(" {$question->points} punten", ['size' => 11]);
 
-        $right = $row->addCell();
+        $right = $row->addCell(2500);
         $txt = $right->addTextRun(['align' => 'right']);
-        $txt->addText("{$question->time_in_minutes} min.", ['size' => 10, 'bold' => true]);
+        $txt->addText("{$question->time_in_minutes} min.", ['size' => 11]);
         $txt->addText('   ');
-        $txt->addText("$complexity", ['size' => 10, 'bold' => true]);
+        $txt->addText("$complexity", ['size' => 11]);
     }
 
     function createQrUrl($question)
