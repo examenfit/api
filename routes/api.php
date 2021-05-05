@@ -45,8 +45,8 @@ Route::get('/download-collection-html/{collection}', [CollectionController::clas
 Route::get('/download-collection-pdf/{collection}', [CollectionController::class, 'showCollectionQuestionsPdf']);
 
 
-Route::get('/download-topic-html/{topic}', [TopicController::class, 'html']);
-Route::get('/download-topic-pdf/{topic}', [TopicController::class, 'pdf']);
+Route::get('/download-appendixes-html/{topic}', [TopicController::class, 'html']);
+Route::get('/download-appendixes-pdf/{topic}', [TopicController::class, 'pdf']);
 
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
