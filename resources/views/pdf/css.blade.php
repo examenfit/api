@@ -11,7 +11,6 @@ body {
   font-family: Helvetica, Arial, sans-serif;
   font-size: 0;
 }
-
 p {
   margin: 7pt 0;
 }
@@ -187,7 +186,7 @@ i {
 }
 .action-info {
   font-size: 11pt;
-  font-weight: bold;
+  -font-weight: bold;
   padding: 24pt;
   vertical-align: top;
 }
