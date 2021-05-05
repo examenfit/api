@@ -258,9 +258,10 @@ class CollectionQuestionsDocument
 
             // Add image to the textbox
             Log::info($attachment->url);
+            $scale = 1;
             $textRun->addImage($attachment->url, [
-                'width' => $attachment->image_width,
-                'height' => $attachment->image_height,
+                'width' => $attachment->image_width * $scale,
+                'height' => $attachment->image_height * $scale
             ]);
         }
     }
