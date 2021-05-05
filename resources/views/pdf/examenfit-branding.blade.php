@@ -1,8 +1,8 @@
 <div class=examenfit-branding>
   <div class=examenfit-logo>
-    <img src="{{ asset('img/examenfit.png') }}"/>
+    <img src="{{ asset('img/examenfit-bw.png') }}"/>
   </div>
   <div class=examenfit-punchline>
-    examenvragen op maat
+    EXAMENVOORBEREIDING OP MAAT
   </div>
 </div>

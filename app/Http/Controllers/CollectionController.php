@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use DateTime;
+use DateTimeZone;
+
 use App\Models\Topic;
 use App\Models\Question;
 use App\Models\Collection;
@@ -178,6 +181,11 @@ class CollectionController extends Controller
         $collection['time_in_minutes'] = $time_in_minutes;
 
         $collection['appendixes'] = $appendixes;
+
+        date_default_timezone_set('CET');
+        $timestamp = date('Y-m-d H:i');
+
+        $collection['timestamp'] = $timestamp;
 
         return view('pdf', $collection);
     }

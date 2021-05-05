@@ -14,4 +14,3 @@
   onbekend
 @endif
 </span>
-&nbsp;

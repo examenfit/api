@@ -11,9 +11,6 @@ body {
   font-family: Helvetica, Arial, sans-serif;
   font-size: 0;
 }
-img {
-  -border: dashed 1px red;
-}
 
 p {
   margin: 7pt 0;
@@ -28,24 +25,32 @@ i {
   padding: 0 1in;
 }
 .collection-header {
-  border-bottom: solid 8pt #bed62f;
+  border-bottom: solid 8pt gray;
   margin-bottom: 28pt;
 }
 .collection-header > * {
-  width: 50%;
   display: inline-block;
+}
+.collection-info {
+  width: 66%;
+}
+.examenfit-branding {
+  width: 34%;
+}
+.collection-header .examenfit-branding {
+  text-align: right;
 }
 .examenfit-logo > * {
   width: 150pt;
   margin-bottom: 7pt;
 }
 .examenfit-punchline {
-  font-size: 14pt;
+  font-size: 8.5pt;
   font-weight: 400;
+  color: #999;
   margin-bottom: 14pt;
 }
 .collection-info {
-  text-align: right;
 }
 .collection-name {
   font-size: 21pt;
@@ -67,6 +72,20 @@ i {
   font-size: 9pt;
   font-style: italic;
   font-weight: 100;
+}
+.collection-footer {
+  border-top: solid 1pt silver;
+  padding-top: 7pt;
+}
+.collection-footer > * {
+  display: inline-block;
+  vertical-align: top;
+}
+.examenfit-info {
+  width: 66%;
+  font-size: 9pt;
+  text-align: right;
+  padding-top: 3pt;
 }
 .topic-header {
   padding-bottom: 7pt;
@@ -106,6 +125,10 @@ i {
 .large-attachment {
   clear: both;
   width: 6in;
+  margin: 21pt 0;
+}
+.question {
+  margin-bottom: 28pt;
 }
 .question-intro {
   clear: both;
@@ -122,7 +145,6 @@ i {
 .question-header {
   clear: both;
   margin-top: 14pt;
-  margin-left: 28pt;
   margin-bottom: 7pt;
   text-align: right;
 }
@@ -138,7 +160,7 @@ i {
 }
 .question-header .points {
   float: left;
-  padding-left: 21pt;
+  padding-left: 7pt;
 }
 .complexity:before {
   content: " | ";
@@ -146,7 +168,7 @@ i {
 }
 .question-text {
   font-size: 11pt;
-  border: dashed 1pt black;
+  border: solid 1pt silver;
   margin-top: 14pt;
   margin-bottom: 14pt;
   padding: 7pt 26pt;
@@ -155,7 +177,6 @@ i {
 .action {
   clear: both;
   margin-top: 11pt;
-  margin-left: 28pt;
 }
 .action > * {
   display: inline-block;
@@ -165,9 +186,9 @@ i {
   height: 2cm;
 }
 .action-info {
-  font-size: 12pt;
+  font-size: 11pt;
   font-weight: bold;
-  padding: 18pt;
+  padding: 24pt;
   vertical-align: top;
 }
 svg {

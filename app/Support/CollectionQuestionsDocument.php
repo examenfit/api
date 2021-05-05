@@ -297,9 +297,8 @@ class CollectionQuestionsDocument
             $time_in_minutes += $question->time_in_minutes;
         }
 
-        $ts = new DateTime();
-        $ts->setTimeZOne(new DateTimeZone('CET'));
-        $timestamp = $ts->format('Y-m-d H:i:s');
+        date_default_timezone_set('CET');
+        $timestamp = date('Y-m-d H:i');
 
         $section = $this->currentSection();
         $table = $section->addTable([

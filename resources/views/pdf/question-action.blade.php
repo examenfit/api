@@ -3,7 +3,6 @@
     @include('pdf.qr-code')
   </div>
   <div class=action-info>
-    Gebruik de QR-code om na te kijken<br>
-    of om tips te krijgen
+    Gebruik de QR-code om na te kijken of om tips te krijgen
   </div>
 </div>

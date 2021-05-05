@@ -1,10 +1,12 @@
 <div class=collection-header>
-  @include('pdf.examenfit-branding')
   <div class=collection-info>
     <div class=collection-name>
       {{ $name ?? '' }}
     </div>
     <div class=collection-meta>
+      <div class=topic-count>
+        @include('pdf.topic-count')
+      </div>
       <div class=question-count>
         @include('pdf.question-count')
       </div>
@@ -16,7 +18,8 @@
       </div>
     </div>
     <div class=collection-download>
-      gedownload {{ date("Y-m-d H:i:s") }}
+      gedownload {{ $timestamp }}
     </div>
   </div>
+  @include('pdf.examenfit-branding')
 </div>
