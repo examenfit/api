@@ -65,7 +65,7 @@ class TopicController extends Controller
         // currently ssh authentication goes with public key authentication
         // in the future this may need to become ssh -i id_rsa or something alike
         $generate = "ssh examenfit@$server make/appendixes-pdf $hash $api";
-        $retrieve = "scp examenfit@$server:pdf/$pdf $tmp";
+        $retrieve = "scp examenfit@$server:pdf/uitwerkbijlage-$pdf $tmp";
 
         shell_exec($generate);
         shell_exec($retrieve);
