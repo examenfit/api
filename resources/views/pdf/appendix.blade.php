@@ -3,6 +3,6 @@
     <b>{{ $name }}</b>
   </div>
   <div class=appendix-image>
-    <img src="{{ Storage::url($path) }}" style="width: 80%">
+    <img src="{{ Storage::url($path) }}" style="width: 95%">
   </div>
 </div>
