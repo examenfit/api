@@ -120,7 +120,7 @@ class CollectionController extends Controller
 
             $id = $question['id'];
             $use_text[$id] = true;
-            $use_introductions[$id] = true;
+            $use_introduction[$id] = true;
             $use_attachments[$id] = true;
             $use_appendixes[$id] = true;
 
