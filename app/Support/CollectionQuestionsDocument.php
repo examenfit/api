@@ -457,7 +457,7 @@ class CollectionQuestionsDocument
             'borderSize' => 12
         ]);
         $txt = $cell->addTextRun();
-        $txt->addText($question->text);
+        $this->formatText($question->text, $txt);
     }
 
     function addQuestionTitle($question)
