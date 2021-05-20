@@ -27,6 +27,16 @@ input {
   appearance: none;
 }
 
+/* fix unwanted input styling on autofill */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active  {
+  -webkit-box-shadow: 0 0 0 60px #fafafa inset !important;
+  background-color: #fafafa !important;
+  background-clip: content-box !important;
+}
+
 input,
 input ~ i {
   border: none;
@@ -39,7 +49,7 @@ input ~ i {
 [type=email] {
   display: block;
   width: 100%;
-  background: #f7f7f7;
+  background: #f7f7f7 !important;
   padding: 10px;
   text-indent: 1ex;
 }
