@@ -19,6 +19,7 @@ Route::get('/', function () {
 });
 
 Route::get('/register', [RegistrationController::class, 'form']);
+Route::get('/register-mail', [RegistrationController::class, 'mail']);
 Route::post('/register', [RegistrationController::class, 'store']);
 
 Route::get('/word', function() {

@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use Mail;
 use Exception;
 
+use App\Mail\Test;
 use App\Models\Registration;
 use App\Http\Requests\RegistrationRequest;
 use App\Http\Resources\RegistrationResource;
@@ -37,6 +39,17 @@ class RegistrationController extends Controller
         {
             return view('registration.failure', [ 'message' => $error->getMessage() ]);
         }
+    }
+
+    public function mail()
+    {
+        $content = 'Dit is een test';
+        $mail = new Test([
+            'first_name' => 'Giel',
+            'last_name' => 'Stekelenburg',
+        ]);
+        Mail::to('stekelenburg@gmail.com')->send($mail);
+        return 'ok';
     }
 
 }
