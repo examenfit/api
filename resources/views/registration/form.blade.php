@@ -2,6 +2,12 @@
 @section('main')
 <form method=post>
 
+@if ($errors->any()) {
+<!--
+$errors = {{ json_encode($errors) }}
+-->
+@endif
+
   <button disabled class=google>
     Aanmelden met Google
   </button>
@@ -40,16 +46,16 @@
     <span>Ik ga akkoord met de <a target=_blank href="https://examenfit.nl/algemene-voorwaarden">algemene voorwaarden</a>.*</span>
   </label>
 
-  <input type=hidden name=newsletter value=0>
   <label>
-    <span><input name=newsletter type=checkbox><i></i></span>
+    <input name=newsletter type=hidden><i></i>
+    <input onchange="this.form.newsletter.value=+this.matches(':checked')" type=checkbox><i></i>
     <span>Ik wil graag eens per maand een nieuwsbrief ontvangen.</span>
   </label>
 
   <input name=license type=hidden value="trial">
   <input type=submit value="Versturen">
 
-  <p>Je ontvangt op het door jou opgegeven emailadres een link om je account te activeren.
+  <p>Je ontvangt op het door jou opgegeven emailadres een link om je account te activeren.</p>
 
 </form>
 @stop
