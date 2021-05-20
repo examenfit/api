@@ -47,11 +47,11 @@ $errors = {{ json_encode($errors) }}
   </label>
 
   <label>
-    <input name=newsletter type=hidden><i></i>
     <input onchange="this.form.newsletter.value=+this.matches(':checked')" type=checkbox><i></i>
     <span>Ik wil graag eens per maand een nieuwsbrief ontvangen.</span>
   </label>
 
+  <input name=newsletter type=hidden value="0">
   <input name=license type=hidden value="trial">
   <input type=submit value="Versturen">
 
