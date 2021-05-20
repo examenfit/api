@@ -89,6 +89,15 @@ a:hover {
   margin: 0 auto;
 }
 
+[type=submit] ~ sub {
+  display: none;
+  width: 300px;
+  margin: 0 auto;
+}
+:invalid [type=submit]:hover ~ sub {
+  display: block;
+}
+
 :valid [type=submit]:focus,
 :valid [type=submit]:hover {
   background: #8a0435;
