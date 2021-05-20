@@ -31,6 +31,7 @@ class RegistrationMail extends Mailable
     public function build()
     {
         return $this->from('info@examenfit.nl')
+                    ->subject('Aanmelding ExamenFit')
                     ->view('mail.registration');
     }
 }
