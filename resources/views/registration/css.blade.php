@@ -20,6 +20,13 @@ label {
   margin-bottom: 24px;
 }
 
+/* fix rendering issues on iPhone */
+input {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
 input,
 input ~ i {
   border: none;
