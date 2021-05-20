@@ -29,8 +29,6 @@ class RegistrationController extends Controller
         $data = $request->validated();
         try
         {
-            throw new \ErrorException('test error handling');
-
             $registration = Registration::create($data);
             $registration->save();
             return view('registration.success', $registration);
