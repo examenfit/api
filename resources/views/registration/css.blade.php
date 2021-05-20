@@ -23,6 +23,7 @@ label {
 input,
 input ~ i {
   border: none;
+  border-radius: 0;
   transition: all 200ms ease-in-out;
   outline: none !important;
 }
@@ -133,4 +134,31 @@ sub {
 
 p {
   margin: 14px 21px;
+}
+
+button.google,
+button.office365 {
+  cursor: not-allowed;
+  display: block;
+  width: 300px;
+  height: 64px;
+  margin-bottom: 14px;
+  background-color: #f7f7f7;
+  background-size: 48px 48px;
+  background-repeat: no-repeat;
+  background-position: 16px 8px;
+  border: none;
+  text-align: left;
+  padding-left: 80px;
+}
+
+button.google {
+  background-image: url("/sso/google.png");
+}
+button.office365 {
+  background-image: url("/sso/office365.png");
+}
+p.separator {
+  text-align: center;
+  margin: 24px;
 }

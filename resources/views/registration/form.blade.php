@@ -2,6 +2,16 @@
 @section('main')
 <form method=post>
 
+  <button class=google>
+    Aanmelden met Google
+  </button>
+
+  <button class=office365>
+    Aanmelden met Office 365
+  </button>
+
+  <p class=separator>of</p>
+
   @csrf
 
   <label>
