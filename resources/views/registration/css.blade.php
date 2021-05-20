@@ -61,29 +61,31 @@ input ~ i {
   display: inline-block;
   width: 22px;
   height: 22px;
-  background: #f7f7f7;
-  background: #ffffff;
-  vertical-align: -6px;
+  border-radius: 11px;
+  background: #fff;
+  border: 1px solid #e7e7e7;
+  vertical-align: -5px;
   margin-right: 6px;
   cursor: pointer;
-  background: #f7f7f7;
 }
 
 [type=checkbox]:checked ~ i {
   background: #c9d25b;
+  border-color: #c9d25b;
 }
 
 [type=checkbox]:invalid:focus ~ i {
-  box-shadow: 0 1px 0 #e50054;
+  border-color: #e50054;
 }
 
 [type=checkbox]:valid:focus ~ i {
-  box-shadow: 0 1px 0 #c9d25b;
+  border-color: #c9d25b;
 }
 
 a {
   color: #e50054;
 }
+
 a:hover {
   color: #8a0435;
 }
@@ -111,6 +113,8 @@ a:hover {
 :valid [type=submit]:focus,
 :valid [type=submit]:hover {
   cursor: pointer;
+  background: #b9c24b;
+  text-decoration: underline;
 }
 
 :invalid [type=submit] {
@@ -118,7 +122,6 @@ a:hover {
 }
 
 sub {
-  color: #8a0435;
   color: #e50054;
   font-size: 13px;
   display: block;
@@ -150,6 +153,7 @@ button.office365 {
   border: none;
   text-align: left;
   padding-left: 80px;
+  opacity: 0.1; /* fixme */
 }
 
 button.google {
@@ -161,4 +165,5 @@ button.office365 {
 p.separator {
   text-align: center;
   margin: 24px;
+  opacity: 0.1; /* fixme */
 }

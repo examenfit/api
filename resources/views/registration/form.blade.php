@@ -2,11 +2,11 @@
 @section('main')
 <form method=post>
 
-  <button class=google>
+  <button disabled class=google>
     Aanmelden met Google
   </button>
 
-  <button class=office365>
+  <button disabled class=office365>
     Aanmelden met Office 365
   </button>
 

@@ -1,6 +1,4 @@
-<?php
-
-namespace App\Models;
+<?php namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -14,6 +12,7 @@ class Registration extends Model
         'last_name',
         'email',
         'newsletter',
-        'license'
+        'license',
+        'activation_code'
     ];
 }
