@@ -10,8 +10,7 @@ body {
   margin: 0px;
   background: #ffffff;
 
-  font-family: sans-serif;
-  font-family: Source Sans Pro;
+  font-family: "Source Sans Pro", sans-serif;
   font-size: 17px;
   font-weight: 400;
 }
@@ -37,9 +36,13 @@ input ~ i {
   text-indent: 1ex;
 }
 
-[type=text]:focus,
-[type=email]:focus {
+[type=text]:invalid:focus,
+[type=email]:invalid:focus {
   box-shadow: 0 1px 0 #e50054;
+}
+[type=text]:valid:focus,
+[type=email]:valid:focus {
+  box-shadow: 0 1px 0 #c9d25b;
 }
 
 ::placeholder {
@@ -69,8 +72,12 @@ input ~ i {
   background: #c9d25b;
 }
 
-[type=checkbox]:focus ~ i {
+[type=checkbox]:invalid:focus ~ i {
   box-shadow: 0 1px 0 #e50054;
+}
+
+[type=checkbox]:valid:focus ~ i {
+  box-shadow: 0 1px 0 #c9d25b;
 }
 
 a {
@@ -81,6 +88,7 @@ a:hover {
 }
 
 [type=submit] {
+  border: none;
   display: block;
   color: #fff;
   background: #e50054;
@@ -94,13 +102,14 @@ a:hover {
   width: 300px;
   margin: 0 auto;
 }
-:invalid [type=submit]:hover ~ sub {
-  display: block;
+
+:valid [type=submit] {
+  background: #c9d25b;
 }
 
 :valid [type=submit]:focus,
 :valid [type=submit]:hover {
-  background: #8a0435;
+  cursor: pointer;
 }
 
 :invalid [type=submit] {

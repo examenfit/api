@@ -3,6 +3,6 @@
   <section class=success>
     <p>Beste {{ $first_name }} {{ $last_name }},
     <br>bedankt voor je aanmelding!
-    <p>Je ontvangt ons zo spoedig mogelijk een email met een link om je account aan te maken en direct aan de slag te gaan.
+    <p>Je ontvangt op het door jou opgegeven emailadres een link om je account te activeren. 
   </section>
 @stop

@@ -39,7 +39,7 @@
   <input name=license type=hidden value="trial">
   <input type=submit value="Versturen">
 
-  <p>Je ontvangt op het door jou opgegeven emailadres een link om je emailadres te bevestigen.
+  <p>Je ontvangt op het door jou opgegeven emailadres een link om je account te activeren.
 
 </form>
 @stop
