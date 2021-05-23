@@ -147,8 +147,8 @@ p {
   margin: 14px 21px;
 }
 
-button.google,
-button.office365 {
+.google,
+.office365 {
   cursor: not-allowed;
   display: block;
   width: 300px;
@@ -159,15 +159,15 @@ button.office365 {
   background-repeat: no-repeat;
   background-position: 16px 8px;
   border: none;
+  line-height: 64px;
   text-align: left;
   padding-left: 80px;
   opacity: 0.1; /* fixme */
 }
-
-button.google {
+.google {
   background-image: url("/sso/google.png");
 }
-button.office365 {
+.office365 {
   background-image: url("/sso/office365.png");
 }
 p.separator {
