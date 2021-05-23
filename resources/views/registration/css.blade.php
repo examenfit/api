@@ -64,8 +64,9 @@ input ~ i {
   position: absolute;
 }
 
-[type=checkbox] ~ i {
+[type=checkbox] ~ span:before {
   display: inline-block;
+  content: '';
   width: 22px;
   height: 22px;
   border-radius: 11px;
@@ -76,16 +77,16 @@ input ~ i {
   cursor: pointer;
 }
 
-[type=checkbox]:checked ~ i {
+[type=checkbox]:checked ~ span:before {
   background: #c9d25b;
   border-color: #c9d25b;
 }
 
-[type=checkbox]:invalid:focus ~ i {
+[type=checkbox]:invalid:focus ~ span:before {
   border-color: #e50054;
 }
 
-[type=checkbox]:valid:focus ~ i {
+[type=checkbox]:valid:focus ~ span:before {
   border-color: #c9d25b;
 }
 

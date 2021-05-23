@@ -2,19 +2,8 @@
 @section('main')
 <form method=post>
 
-@if ($errors->any()) {
-<!--
-$errors = {{ json_encode($errors) }}
--->
-@endif
-
-  <button disabled class=google>
-    Aanmelden met Google
-  </button>
-
-  <button disabled class=office365>
-    Aanmelden met Office 365
-  </button>
+  @include('registration.google-sso')
+  @include('registration.office365-sso')
 
   <p class=separator>of</p>
 
@@ -42,12 +31,12 @@ $errors = {{ json_encode($errors) }}
   </label>
 
   <label>
-    <input name=consent type=checkbox required><i></i>
+    <input name=consent type=checkbox required>
     <span>Ik ga akkoord met de <a target=_blank href="https://examenfit.nl/algemene-voorwaarden">algemene voorwaarden</a>.*</span>
   </label>
 
   <label>
-    <input onchange="this.form.newsletter.value=+this.matches(':checked')" type=checkbox><i></i>
+    <input onchange="this.form.newsletter.value=+this.matches(':checked')" type=checkbox>
     <span>Ik wil graag eens per maand een nieuwsbrief ontvangen.</span>
   </label>
 
@@ -58,4 +47,7 @@ $errors = {{ json_encode($errors) }}
   <p>Je ontvangt op het door jou opgegeven emailadres een link om je account te activeren.</p>
 
 </form>
+@if($errors->any())
+  <!-- $errors = {{ json_encode($errors) }} -->
+@endif
 @stop
