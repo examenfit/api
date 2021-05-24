@@ -1,10 +1,13 @@
 <?php namespace App\Http\Controllers;
 
-use Mail;
+use DateTime;
+use ErrorException;
 use Exception;
+use Mail;
 
 use App\Mail\RegistrationMail;
 use App\Models\Registration;
+use App\Models\User;
 use App\Http\Requests\RegistrationRequest;
 use App\Http\Resources\RegistrationResource;
 
@@ -12,7 +15,6 @@ use Illuminate\Http\Request;
 
 class RegistrationController extends Controller
 {
-
     public function form()
     {
         return view('registration.form');
@@ -50,6 +52,84 @@ class RegistrationController extends Controller
         catch (Exception $error)
         {
             return view('registration.failure', [ 'message' => $error->getMessage() ]);
+        }
+    }
+
+    private function getRegistration(Request $request)
+    {
+        $activation_code = $request->activation_code;
+        if ($activation_code) {
+            $registration = Registration::where('activation_code', $activation_code)->first();
+            return $registration;
+        }
+    }
+
+    private function lookupUser(Registration $registration)
+    {
+        $user = User::where('email', $registration->email)->first();
+        return $user;
+    }
+
+    public function activationStatus(Request $request)
+    {
+        $registration = $this->getRegistration($request);
+        if (!$registration) {
+            return response()->json(['info' => 'registration not found']);
+        }
+        $user = $this->lookupUser($registration);
+        if ($user) {
+            return response()->json(['info' => 'user exists']);
+        }
+        return response()->json(['info' => 'registration exists']);
+    }
+
+    public function activateAccount(Request $request)
+    {
+        try {
+            $password = $request->password;
+            if (!$password) {
+                return response()->json(['message' => 'password required'], 400);
+            }
+            $registration = $this->getRegistration($request);
+            if (!$registration) {
+                return response()->json(['message' => 'activation_code invalid'], 406);
+            }
+            $now = new DateTime();
+            $user = User::create([
+                'first_name' => $registration->first_name,
+                'last_name' => $registration->last_name,
+                'email' => $registration->email,
+                'password' => bcrypt($password),
+                'email_verified_at' => $now, // fixme
+                'role' => ''
+            ]);
+            $user->save();
+            return $registration;
+        } catch (Exception $err) {
+            return response()->json(['message' => $err->getMessage()], 500);
+        }
+    }
+
+    public function activateLicense(Request $request)
+    {
+        try {
+            $registration = $this->getRegistration($request);
+            if (!$registration) {
+                return response()->json(['message' => 'activation_code invalid'], 406);
+            }
+            $user = $this->lookupUser($registration);
+            if (!$user) {
+                return response()->json(['message' => 'user does not exist'], 406);
+            }
+            if ($registration->license === 'trial') {
+                $user->role = 'participant';
+                $user->save();
+                $registration->activation_code = '';
+                $registration->save();
+            }
+            return $registration;
+        } catch (Exception $err) {
+            return response()->json(['message' => $err->getMessage()], 500);
         }
     }
 

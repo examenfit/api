@@ -8,6 +8,7 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\Admin\TipController;
 use App\Http\Controllers\Admin\ExamController;
 use App\Http\Controllers\CollectionController;
+use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\Admin\AnswerController;
 use App\Http\Controllers\Admin\QuestionController;
 use App\Http\Controllers\Admin\AttachmentController;
@@ -48,6 +49,9 @@ Route::get('/download-collection-pdf/{collection}', [CollectionController::class
 Route::get('/download-appendixes-html/{topic}', [TopicController::class, 'html']);
 Route::get('/download-appendixes-pdf/{topic}', [TopicController::class, 'pdf']);
 
+Route::get('/activation-status', [RegistrationController::class, 'activationStatus']);
+Route::post('/activate-account', [RegistrationController::class, 'activateAccount']);
+Route::post('/activate-license', [RegistrationController::class, 'activateLicense']);
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy']);
