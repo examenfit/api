@@ -1,6 +1,6 @@
 <!-- @see https://developers.google.com/identity/sign-in/web/build-button -->
 <div disabled class=google>
-  Aanmelden via Google
+  <span>Aanmelden via Google</span>
 </div>
 <script src="https://apis.google.com/js/api:client.js"></script>
 <script>

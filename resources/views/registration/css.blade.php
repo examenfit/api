@@ -163,6 +163,17 @@ p {
   text-align: left;
   padding-left: 80px;
   opacity: 0.1; /* fixme */
+  position: relative;
+}
+.google span,
+.office365 span {
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 80px;
+  transform: translate(0,-50%);
+  line-height: 20px;
+  background: none;
 }
 .google {
   background-image: url("/sso/google.png");
@@ -182,5 +193,9 @@ p.separator {
   .office365 {
     width: 100%;
   }
-}
 
+  .google,
+  .office365 {
+    line-height: 24px;
+  }
+}

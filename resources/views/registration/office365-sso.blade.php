@@ -1,3 +1,3 @@
-<button disabled class=office365>
-  Aanmelden via Office 365
-</button>
+<div disabled class=office365>
+  <span>Aanmelden via Office 365</span>
+</div>
