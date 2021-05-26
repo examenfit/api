@@ -104,7 +104,7 @@ a:hover {
   color: #fff;
   background: #e50054;
   line-height: 48px;
-  width: 300px;
+  max-width: 300px;
   margin: 0 auto;
 }
 
@@ -151,7 +151,7 @@ p {
 .office365 {
   cursor: not-allowed;
   display: block;
-  width: 300px;
+  max-width: 300px;
   height: 64px;
   margin-bottom: 14px;
   background-color: #f7f7f7;
