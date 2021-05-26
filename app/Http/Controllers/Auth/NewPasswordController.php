@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Models\User;
+use App\Models\PasswordReset;
 use App\Http\Controllers\Controller;
-use Illuminate\Auth\Events\PasswordReset;
+//use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Str;
+//use Illuminate\Support\Facades\Hash;
+//use Illuminate\Support\Facades\Password;
+//use Illuminate\Support\Str;
 
 class NewPasswordController extends Controller
 {
@@ -21,6 +23,26 @@ class NewPasswordController extends Controller
         return view('auth.reset-password', ['request' => $request]);
     }
 
+
+    public function save(Request $request)
+    {
+        $request->validate([
+            'token' => 'required',
+            'password' => 'required|string',
+        ]);
+        $ticket = PasswordReset::where('token', $request->token)->first();
+        if ($ticket) {
+            $user = User::where('email', $ticket->email)->first();
+            $user->password = bcrypt($request->password);
+            $user->save();
+            PasswordReset::where('token', $request->token)->delete();
+            return response()->json([ 'message' => 'password saved' ]);
+        } else {
+            return response()->json([ 'message' => 'invalid token', ], 400);
+        }
+    }
+
+
     /**
      * Handle an incoming new password request.
      *
@@ -29,6 +51,7 @@ class NewPasswordController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
+/*
     public function store(Request $request)
     {
         $request->validate([
@@ -60,4 +83,5 @@ class NewPasswordController extends Controller
                     : back()->withInput($request->only('email'))
                             ->withErrors(['email' => __($status)]);
     }
+*/
 }
