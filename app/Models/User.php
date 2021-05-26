@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use Mail;
+use App\Mail\PasswordResetMail;
+
 use App\Support\HashID;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -52,5 +55,11 @@ class User extends Authenticatable
     public function isAdmin()
     {
         return $this->role === "admin";
+    }
+
+    public function sendPasswordResetNotification($token)
+    {
+        $mail = new PasswordResetMail($this, $token);
+        Mail::to($this->email)->send($mail);
     }
 }

@@ -5,6 +5,8 @@ use ErrorException;
 use Exception;
 use Mail;
 
+use Illuminate\Support\Str;
+
 use App\Mail\RegistrationMail;
 use App\Models\Registration;
 use App\Models\User;
@@ -34,7 +36,7 @@ class RegistrationController extends Controller
 
     private function createRegistration($data)
     {
-        $data['activation_code'] = md5($data['email'].rand(0, 999999999));
+        $data['activation_code'] = Str::random(32);
         $registration = Registration::create($data);
         $registration->save();
         return $registration;
@@ -75,6 +77,9 @@ class RegistrationController extends Controller
         $registration = $this->getRegistration($request);
         if (!$registration) {
             return response()->json(['info' => 'registration not found']);
+        }
+        if ($registration->activated) {
+            return response()->json(['info' => 'registration activated already', 'activated' => $registration->activated ]);
         }
         $user = $this->lookupUser($registration);
         if ($user) {
@@ -124,7 +129,7 @@ class RegistrationController extends Controller
             if ($registration->license === 'trial') {
                 $user->role = 'participant';
                 $user->save();
-                $registration->activation_code = '';
+                $registration->activated = new DateTime();
                 $registration->save();
             }
             return $registration;
