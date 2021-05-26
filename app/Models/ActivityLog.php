@@ -3,17 +3,17 @@
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Registration extends Model
+class ActivityLog extends Model
 {
     use HasFactory;
 
     public $fillable = [
-        'first_name',
-        'last_name',
-        'email',
-        'newsletter',
-        'license',
-        'activation_code',
-        'activated'
+      'origin',
+      'device_key',
+      'session_key',
+      'activity',
+      'collection_id',
+      'question_id',
+      'topic_id'
     ];
 }
