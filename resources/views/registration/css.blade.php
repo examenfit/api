@@ -104,7 +104,7 @@ a:hover {
   color: #fff;
   background: #e50054;
   line-height: 48px;
-  max-width: 300px;
+  width: 300px;
   margin: 0 auto;
 }
 
@@ -151,7 +151,7 @@ p {
 .office365 {
   cursor: not-allowed;
   display: block;
-  max-width: 300px;
+  width: 300px;
   height: 64px;
   margin-bottom: 14px;
   background-color: #f7f7f7;
@@ -175,3 +175,12 @@ p.separator {
   margin: 24px;
   opacity: 0.1; /* fixme */
 }
+
+@media only screen and (max-width: 320px) {
+  [type=submit],
+  .google,
+  .office365 {
+    width: 100%;
+  }
+}
+
