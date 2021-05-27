@@ -54,7 +54,7 @@ input ~ i {
 }
 
 ::placeholder {
-  opacity: 0.25;
+  opacity: 0.5;
 }
 
 [type=checkbox] {
