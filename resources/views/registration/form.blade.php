@@ -34,12 +34,12 @@
 
   <label>
     <input name=consent type=checkbox required>
-    <span>Ik ga akkoord met de <a target=_blank href="https://examenfit.nl/algemene-voorwaarden">algemene voorwaarden</a>.*</span>
+    <span>ExamenFit mag (via bovenstaand emailadres) contact met mij opnemen voor een gebruikersevaluatie.*
   </label>
 
   <label>
     <input onchange="this.form.newsletter.value=+this.matches(':checked')" type=checkbox>
-    <span>Ik wil graag eens per maand een nieuwsbrief ontvangen.</span>
+    <span>Ik wil graag een nieuwsbrief ontvangen.</span>
   </label>
 
   <input name=newsletter type=hidden value="0">
