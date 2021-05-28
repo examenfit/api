@@ -128,6 +128,7 @@ class RegistrationController extends Controller
             }
             if ($registration->license === 'trial') {
                 $user->role = 'participant';
+                $user->newsletter = $registration->newsletter;
                 $user->save();
                 $registration->activated = new DateTime();
                 $registration->save();

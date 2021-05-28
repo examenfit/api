@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\TopicController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\Admin\TipController;
 use App\Http\Controllers\Admin\ExamController;
@@ -66,6 +67,9 @@ Route::post('/activate-license', [RegistrationController::class, 'activateLicens
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy']);
     Route::get('/user', [AuthenticatedSessionController::class, 'show']);
+
+    Route::get('/profile', [ProfileController::class, 'show']);
+    Route::post('/profile', [ProfileController::class, 'store']);
 
     Route::get('/topics/{topic}', [TopicController::class, 'show']);
 
