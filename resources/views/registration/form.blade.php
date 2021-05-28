@@ -39,7 +39,7 @@
 
   <label>
     <input onchange="this.form.newsletter.value=+this.matches(':checked')" type=checkbox>
-    <span>Ik wil graag een nieuwsbrief ontvangen.</span>
+    <span>Ik wil graag via de nieuwsbrief op de hoogte worden gehouden over ExamenFit.</span>
   </label>
 
   <input name=newsletter type=hidden value="0">
