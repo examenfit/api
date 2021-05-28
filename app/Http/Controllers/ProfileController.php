@@ -17,7 +17,6 @@ class ProfileController extends Controller
     {
         $user = auth()->user();
         $user->data = json_encode($request->all());
-        $user->newsletter = (bool)$request->newsletter;
         $user->save();
 
         return response()->json(['message' => 'ok'], 200);
