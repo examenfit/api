@@ -34,7 +34,7 @@
 
   <label>
     <input name=consent type=checkbox required>
-    <span>ExamenFit mag (via bovenstaand emailadres) contact met mij opnemen voor een gebruikersevaluatie.*
+    <span>ExamenFit mag contact met mij opnemen voor een gebruikersevaluatie.*
   </label>
 
   <label>
