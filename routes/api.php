@@ -1,18 +1,24 @@
 <?php
 
+
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\TopicController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\Admin\TipController;
 use App\Http\Controllers\Admin\ExamController;
+use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\CollectionController;
+use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\Admin\AnswerController;
 use App\Http\Controllers\Admin\QuestionController;
 use App\Http\Controllers\Admin\AttachmentController;
 use App\Http\Controllers\Admin\TeacherDocumentController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Admin\TopicController as AdminTopicController;
 use App\Http\Controllers\Admin\CourseController as AdminCourseController;
 use App\Http\Controllers\Admin\IndexController as AdminIndexController;
@@ -36,6 +42,12 @@ use App\Http\Controllers\Admin\TagController as AdminTagController;
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])
     ->middleware('guest');
 
+
+Route::get('/log', [ActivityLogController::class, 'index']);
+Route::post('/log', [ActivityLogController::class, 'store']);
+Route::post('/forgot-password', [PasswordResetLinkController::class, 'store']);
+Route::post('/reset-password', [NewPasswordController::class, 'save'])->name('password.reset');
+
 //Route::get('/collections/{collection}', [CollectionController::class, 'show']);
 Route::get('/collections/{collection}/{topic?}', [CollectionController::class, 'show']);
 Route::post('/collections/{collection}/{question}/elaborations', [CollectionController::class, 'storeElaboration']);
@@ -48,10 +60,16 @@ Route::get('/download-collection-pdf/{collection}', [CollectionController::class
 Route::get('/download-appendixes-html/{topic}', [TopicController::class, 'html']);
 Route::get('/download-appendixes-pdf/{topic}', [TopicController::class, 'pdf']);
 
+Route::get('/activation-status', [RegistrationController::class, 'activationStatus']);
+Route::post('/activate-account', [RegistrationController::class, 'activateAccount']);
+Route::post('/activate-license', [RegistrationController::class, 'activateLicense']);
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy']);
     Route::get('/user', [AuthenticatedSessionController::class, 'show']);
+
+    Route::get('/profile', [ProfileController::class, 'show']);
+    Route::post('/profile', [ProfileController::class, 'store']);
 
     Route::get('/topics/{topic}', [TopicController::class, 'show']);
 
