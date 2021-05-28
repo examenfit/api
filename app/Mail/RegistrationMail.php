@@ -12,6 +12,7 @@ class RegistrationMail extends Mailable
     use Queueable, SerializesModels;
 
     public $registration;
+    public $link;
 
     /**
      * Create a new message instance.
@@ -20,6 +21,9 @@ class RegistrationMail extends Mailable
      */
     public function __construct($registration)
     {
+        $app_url = config(app.dashboard_url);
+        $token = $registration->activation_code;
+        $this->link = "{$app_url}/activate/{$token}";
         $this->registration = $registration;
     }
 

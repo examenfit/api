@@ -6,6 +6,4 @@
   Klik op onderstaande link om je proefaccount te activeren.
 <p>
   <!-- fixme -->
-  <a href="https://staging-app.examenfit.nl/activate/{{ $registration->activation_code }}">
-    https://staging-app.examenfit.nl/activate/{{ $registration->activation_code }}
-  </a>
+  <a href="{{ $link }}">{{ $link }}</a>
