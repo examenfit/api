@@ -2,10 +2,12 @@
 @section('main')
 <form method=post>
 
+{{--
   @include('registration.google-sso')
   @include('registration.office365-sso')
 
   <p class=separator>of</p>
+--}}
 
   @csrf
 
