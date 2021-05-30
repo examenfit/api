@@ -285,7 +285,8 @@ class CollectionController extends Controller
                   e.id = t.exam_id and
                   ec.id = e.course_id
                 group by
-                  t.id
+                  t.id,
+                  t.name, t.cache, t.exam_id, e.year, e.term, e.level, ec.name
                 order by t.id
               ", [ $collection->id ]))
           ];
@@ -299,42 +300,5 @@ class CollectionController extends Controller
           order by 1 desc
           limit ?
         ", [ $user_id, $count ]));
-
-
-/*
-        return DB::select("
-          select
-            c.id,
-            c.name as collection,
-            c.created_at,
-            count(q.text) as question_count,
-            sum(q.points) as points,
-            sum(q.time_in_minutes) as time_in_minutes,
-            t.name as topic,
-            t.cache as topic_data,
-            e.year as year,
-            e.term as term,
-            e.level as level,
-            ec.name as course
-          from
-            collections c,
-            collection_question cq,
-            questions q,
-            topics t,
-            exams e,
-            courses ec
-          where
-            c.id in (?,?,?) and
-            c.id = cq.collection_id and
-            q.id = cq.question_id and
-            t.id = q.topic_id and
-            e.id = t.exam_id and
-            ec.id = e.course_id
-          group by
-            c.id,
-            t.id
-          order by 1 desc
-        ", $top3);
-*/
     }
 }
