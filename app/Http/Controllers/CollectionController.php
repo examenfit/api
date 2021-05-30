@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use DateTime;
 use DateTimeZone;
 
+use Exception;
+
 use App\Models\Topic;
 use App\Models\Question;
 use App\Models\Collection;
@@ -13,6 +15,7 @@ use App\Rules\HashIdExists;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\DB;
 use Vinkla\Hashids\Facades\Hashids;
 use App\Http\Resources\CollectionResource;
 use App\Support\CollectionQuestionsDocument;
@@ -228,5 +231,115 @@ class CollectionController extends Controller
         ]);
 
         return response()->isSuccessful();
+    }
+
+    public function latest()
+    {
+        $count = 5;
+
+        try {
+          $user_id = auth()->user()->id;
+        } catch (Exception $e) {
+          $user_id = 59;
+        }
+
+        return array_map(function($collection) {
+          return [
+            'id' => Hashids::encode($collection->id),
+            'name' => $collection->name,
+            'date' => $collection->created_at,
+            'topics' => array_map(function($topic) {
+                return [
+                  'id' => Hashids::encode($topic->id),
+                  'name' => $topic->topic,
+                  'questions' => json_decode($topic->topic_data)->questionCount,
+                  'selected' => $topic->question_count,
+                  'points' => (int)$topic->points,
+                  'time_in_minutes' => (int)$topic->time_in_minutes,
+                  'exam' => [
+                    'id' => Hashids::encode($topic->exam_id),
+                    'level' => $topic->level,
+                    'course' => $topic->course,
+                    'year' => $topic->year,
+                    'term' => $topic->term,
+                  ]
+                ];
+              }, DB::select("
+                select
+                  count(q.text) as question_count,
+                  sum(q.points) as points,
+                  sum(q.time_in_minutes) as time_in_minutes,
+                  t.name as topic,
+                  t.cache as topic_data,
+                  t.id,
+                  t.exam_id,
+                  e.year as year,
+                  e.term as term,
+                  e.level as level,
+                  ec.name as course
+                from
+                  collection_question cq,
+                  questions q,
+                  topics t,
+                  exams e,
+                  courses ec
+                where
+                  ? = cq.collection_id and
+                  q.id = cq.question_id and
+                  t.id = q.topic_id and
+                  e.id = t.exam_id and
+                  ec.id = e.course_id
+                group by
+                  t.id
+                order by t.id
+              ", [ $collection->id ]))
+          ];
+        }, DB::select("
+          select
+            id, name, created_at
+          from
+            collections
+          where
+            user_id = ?
+          order by 1 desc
+          limit ?
+        ", [ $user_id, $count ]));
+
+
+/*
+        return DB::select("
+          select
+            c.id,
+            c.name as collection,
+            c.created_at,
+            count(q.text) as question_count,
+            sum(q.points) as points,
+            sum(q.time_in_minutes) as time_in_minutes,
+            t.name as topic,
+            t.cache as topic_data,
+            e.year as year,
+            e.term as term,
+            e.level as level,
+            ec.name as course
+          from
+            collections c,
+            collection_question cq,
+            questions q,
+            topics t,
+            exams e,
+            courses ec
+          where
+            c.id in (?,?,?) and
+            c.id = cq.collection_id and
+            q.id = cq.question_id and
+            t.id = q.topic_id and
+            e.id = t.exam_id and
+            ec.id = e.course_id
+          group by
+            c.id,
+            t.id
+          order by 1 desc
+        ", $top3);
+*/
     }
 }

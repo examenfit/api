@@ -45,10 +45,11 @@ Route::post('/login', [AuthenticatedSessionController::class, 'store'])
 
 Route::get('/log', [ActivityLogController::class, 'index']);
 Route::post('/log', [ActivityLogController::class, 'store']);
-Route::post('/forgot-password', [PasswordResetLinkController::class, 'store']);
+
+Route::post('/forgot-password', [PasswordResetLinkController::class, 'store']); // csrf?
 Route::post('/reset-password', [NewPasswordController::class, 'save'])->name('password.reset');
 
-//Route::get('/collections/{collection}', [CollectionController::class, 'show']);
+Route::get('/latest', [CollectionController::class, 'latest']);
 Route::get('/collections/{collection}/{topic?}', [CollectionController::class, 'show']);
 Route::post('/collections/{collection}/{question}/elaborations', [CollectionController::class, 'storeElaboration']);
 
