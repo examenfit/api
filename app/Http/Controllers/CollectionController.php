@@ -235,7 +235,7 @@ class CollectionController extends Controller
 
     public function latest()
     {
-        $count = 5;
+        $count = 999;
         $user_id = auth()->user()->id;
 
         return array_map(function($collection) {
