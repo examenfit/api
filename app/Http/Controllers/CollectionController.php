@@ -233,24 +233,29 @@ class CollectionController extends Controller
         return response()->isSuccessful();
     }
 
-    public function latest()
+    public function latest(Request $request)
     {
-        $count = 999;
+        $request->validate([
+            'count' => 'integer|min:0'
+        ]);
+        $count = $request->query('count', 100);
         $user_id = auth()->user()->id;
 
         return array_map(function($collection) {
           return [
             'id' => Hashids::encode($collection->id),
             'name' => $collection->name,
-            'date' => $collection->created_at,
+            'date' => (new DateTime($collection->created_at))->format('c'),
             'topics' => array_map(function($topic) {
                 return [
                   'id' => Hashids::encode($topic->id),
                   'name' => $topic->topic,
                   'questions' => json_decode($topic->topic_data)->questionCount,
-                  'selected' => $topic->question_count,
                   'points' => (int)$topic->points,
                   'time_in_minutes' => (int)$topic->time_in_minutes,
+                  'selected' => array_map(function($id) {
+                    return Hashids::encode($id);
+                  }, explode(',', $topic->selected)),
                   'exam' => [
                     'id' => Hashids::encode($topic->exam_id),
                     'level' => $topic->level,
@@ -261,9 +266,9 @@ class CollectionController extends Controller
                 ];
               }, DB::select("
                 select
-                  count(q.text) as question_count,
                   sum(q.points) as points,
                   sum(q.time_in_minutes) as time_in_minutes,
+                  group_concat(q.id) as selected,
                   t.name as topic,
                   t.cache as topic_data,
                   t.id,
