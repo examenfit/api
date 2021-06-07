@@ -71,6 +71,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 
     Route::get('/profile', [ProfileController::class, 'show']);
     Route::post('/profile', [ProfileController::class, 'store']);
+    Route::post('/userprofile', [ProfileController::class, 'store_userprofile']);
 
     Route::get('/topics/{topic}', [TopicController::class, 'show']);
 
