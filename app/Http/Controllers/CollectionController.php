@@ -252,6 +252,7 @@ class CollectionController extends Controller
                   'name' => $topic->topic,
                   'questions' => json_decode($topic->topic_data)->questionCount,
                   'points' => (int)$topic->points,
+                  'has_answers' => (int)$topic->has_answers,
                   'time_in_minutes' => (int)$topic->time_in_minutes,
                   'selected' => array_map(function($id) {
                     return Hashids::encode($id);
@@ -270,6 +271,7 @@ class CollectionController extends Controller
                   sum(q.time_in_minutes) as time_in_minutes,
                   group_concat(q.id) as selected,
                   t.name as topic,
+                  t.has_answers as has_answers,
                   t.cache as topic_data,
                   t.id,
                   t.exam_id,
@@ -291,7 +293,7 @@ class CollectionController extends Controller
                   ec.id = e.course_id
                 group by
                   t.id,
-                  t.name, t.cache, t.exam_id, e.year, e.term, e.level, ec.name
+                  t.name, t.has_answers, t.cache, t.exam_id, e.year, e.term, e.level, ec.name
                 order by t.id
               ", [ $collection->id ]))
           ];

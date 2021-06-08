@@ -22,6 +22,7 @@ class TopicResource extends JsonResource
             'popularity' => $this->popularity,
             'name' => $this->name,
             'introduction' => $this->introduction,
+            'has_answers' => $this->has_answers,
             'attachments' => AttachmentResource::collection($this->attachments),
             'exam' => new ExamResource($this->whenLoaded('exam')),
             'questions' => QuestionResource::collection($this->whenLoaded('questions')),
