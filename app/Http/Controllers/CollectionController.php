@@ -293,7 +293,7 @@ class CollectionController extends Controller
                   ec.id = e.course_id
                 group by
                   t.id,
-                  t.name, t.cache, t.exam_id, e.year, e.term, e.level, ec.name
+                  t.name, t.has_answers, t.cache, t.exam_id, e.year, e.term, e.level, ec.name
                 order by t.id
               ", [ $collection->id ]))
           ];
