@@ -40,11 +40,17 @@ class UpdateTopicFlags extends Command
     {
         DB::update("
             UPDATE topics
+            SET has_answers = NULL
+        ");
+        DB::update("
+            UPDATE topics
             SET has_answers = 1
             WHERE id IN (
                 SELECT q.topic_id
-                FROM questions q, answers a
+                FROM questions q, answers a, answer_sections s
                 WHERE a.question_id = q.id
+                  AND a.id = s.answer_id
+                  AND s.text > ''
             )
         ");
     }
