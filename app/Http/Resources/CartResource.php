@@ -18,6 +18,7 @@ class CartResource extends JsonResource
             'id' => $this->hash_id,
             'name' => $this->name,
             'introduction' => $this->introduction,
+            'has_answers' => $this->has_answers,
             'exam' => new ExamResource($this->whenLoaded('exam')),
             'questions' => QuestionResource::collection($this->questions),
             'cache' => new TopicCacheResource($this->cache),
