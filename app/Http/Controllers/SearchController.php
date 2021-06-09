@@ -112,6 +112,13 @@ class SearchController extends Controller
             'terms' => $terms,
             'complexities' => $complexities,
             'methodologies' => MethodologyResource::collection($course->methodologies),
+            'xyz' => 'XYZ'
+/*
+            'has_answers' => [
+              [ 'id' => null, 'name' => 'exclusief tips/nakijken', 'topics_count' => 1 ],
+              [ 'id' => 1, 'name' => 'inclusief tips/nakijken', 'topics_count' => 1 ],
+            ]
+*/
         ];
     }
 

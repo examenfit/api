@@ -111,6 +111,8 @@ class CollectionController extends Controller
         $time_in_minutes = 0;
 
         $topics = [];
+        $questions = [];
+
         $use_text = [];
         $use_introduction = [];
         $use_attachments = [];
@@ -141,6 +143,9 @@ class CollectionController extends Controller
                 $topics[] = $topic;
                 $topic_id = $topic['id'];
             }
+
+            $question['has_answers'] = $topic['has_answers'];
+            $questions[] = $question;
         }
 
         $appendixes = [];
@@ -180,6 +185,7 @@ class CollectionController extends Controller
         }
 
         $collection['topics'] = $topics;
+        $collection['questions'] = $questions;
         $collection['points'] = $points;
         $collection['time_in_minutes'] = $time_in_minutes;
 
