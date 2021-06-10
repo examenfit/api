@@ -40,7 +40,7 @@ class UpdateTopicFlags extends Command
     {
         DB::update("
             UPDATE topics
-            SET has_answers = NULL
+            SET has_answers = 0
         ");
         DB::update("
             UPDATE topics

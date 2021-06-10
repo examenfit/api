@@ -105,6 +105,27 @@ class SearchController extends Controller
             })
             ->values();
 
+        $has_answers_count = $course->topics
+            ->where('has_answers', 1)
+            ->count();
+
+        $has_no_answers_count = $course->topics
+            ->where('has_answers', 0)
+            ->count();
+
+        $has_answers = [
+            [
+                'id' => 1,
+                'name' => 'Inclusief tips/nakijken voor leerlingen',
+                'topics_count' => $has_answers_count
+            ],
+            [
+                'id' => 0,
+                'name' => 'Exclusief tips/nakijken voor leerlingen',
+                'topics_count' => $has_no_answers_count
+            ]
+        ];
+
         return [
             'domains' => DomainResource::collection($course->domains),
             'questionTypes' => QuestionTypeResource::collection($course->questionTypes),
@@ -112,13 +133,10 @@ class SearchController extends Controller
             'terms' => $terms,
             'complexities' => $complexities,
             'methodologies' => MethodologyResource::collection($course->methodologies),
-            'xyz' => 'XYZ'
-/*
-            'has_answers' => [
-              [ 'id' => null, 'name' => 'exclusief tips/nakijken', 'topics_count' => 1 ],
-              [ 'id' => 1, 'name' => 'inclusief tips/nakijken', 'topics_count' => 1 ],
-            ]
-*/
+            'has_answers' => $has_answers
+            //'has_answers' => [
+               //[ 'id' => 1, 'name' => 'Inclusief tips/nakijken voor leerlingen', 'topics_count' => 123 ],
+            //]
         ];
     }
 
@@ -170,6 +188,9 @@ class SearchController extends Controller
             }),
             AllowedFilter::callback('complexity', function (Builder $query, $value) {
                 $query->whereIn('complexity', $value);
+            }),
+            AllowedFilter::callback('has_answers', function (Builder $query, $value) {
+                $query->whereIn('has_answers', $value);
             }),
             AllowedFilter::callback('tags', function (Builder $query, $value) {
                 $ids = collect($value)->map(
