@@ -22,8 +22,8 @@ class TopicCacheResource extends JsonResource
     {
         return [
             //'stream' => $this->resource['stream'],
-            'course' => $this->resource['course'],//remove?
-            'level' => $this->resource['level'],//remove?
+            //'course' => $this->resource['course'],//remove?
+            //'level' => $this->resource['level'],//remove?
             'year' => $this->resource['year'],
             'term' => $this->resource['term'],
             'totalPoints' => $this->resource['totalPoints'],
