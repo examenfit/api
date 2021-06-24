@@ -45,12 +45,17 @@ class SetTopicCache extends Command
             'questions.chapters',
             'questions.highlights',
             'exam',
+            'exam.stream.course',
+            'exam.stream.level',
         ])->get()->each(function ($topic) {
             $proportionSum = 0;
             $cache = collect([
-                'course_id' => $topic->exam->course_id,
+                'stream_id' => $topic->exam->stream->id,
+                'course_id' => $topic->exam->stream->course_id,
+                'level_id' => $topic->exam->stream->level_id,
                 'examStatus' => $topic->exam->status,
-                'level' => $topic->exam->level,
+                'course' => $topic->exam->stream->course->name,
+                'level' => $topic->exam->stream->level->name,
                 'year' => $topic->exam->year,
                 'term' => $topic->exam->term,
                 'totalPoints' => 0,

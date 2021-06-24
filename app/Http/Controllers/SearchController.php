@@ -3,14 +3,18 @@
 namespace App\Http\Controllers;
 
 use Closure;
+use App\Models\Tag;
 use App\Models\Topic;
-use App\Models\Course;
+use App\Models\Stream;
+use App\Models\Methodology;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Spatie\QueryBuilder\Sorts\Sort;
 use Vinkla\Hashids\Facades\Hashids;
 use Spatie\QueryBuilder\AllowedSort;
+use App\Http\Resources\TagResource;
 use App\Http\Resources\TopicResource;
+use App\Http\Resources\ChapterResource;
 use Spatie\QueryBuilder\QueryBuilder;
 use App\Http\Resources\CourseResource;
 use App\Http\Resources\DomainResource;
@@ -22,54 +26,42 @@ use App\Models\Exam;
 
 class SearchController extends Controller
 {
-    private function topicFilter($query)
+
+    public function search(Request $request, Stream $stream)
     {
-        $levels = [1, 'havo'];
-
-        //vwo
-        if (request()->level === 'pNQ8O') {
-            $levels = [2, 'vwo'];
-        }
-
-        return $query->whereIn('cache->level', $levels)
-            ->where('cache->examStatus', 'published');
-    }
-
-    public function index(Request $request, Course $course)
-    {
-        $level = Hashids::decode(request()->level)[0] ?? 2;
-
-        $course->load([
-            'domains' => function ($query) use ($level) {
+        $stream->load([
+            'domains' => function ($query) {
                 $query
-                    ->withCount(['topics' => fn ($query) => $this->topicFilter($query)])
+                    ->where('parent_id', null)
+                    ->withCount(['topics'])
                     ->with(['children' => function ($query) {
-                        $query->withCount(['topics' => fn ($query) => $this->topicFilter($query)]);
+                        $query->withCount(['topics']);
+                    }]);
+            },
+            'questionTypes' => function ($query) {
+                $query->withCount(['topics']);
+            },
+            'topics',
+/*
+            'methodologies' => function ($query) {
+                $query
+                    ->with(['chapters' => function ($query) {
+                        $query
+                            ->with(['children' => function ($query) {
+                                $query
+                                    ->withCount(['topics'])
+                                    ->orderBy('name');
+                            }])
+                            ->withCount(['topics'])
+                            ->orderBy('name');
                     }])
-                    ->where('level_id', $level);
-            },
-            'questionTypes' => function ($query) use ($level) {
-                $query->where('level_id', $level)
-                    ->withCount([
-                        'topics' => fn ($query) => $this->topicFilter($query)
-                    ]);
-            },
-            'topics' => fn ($query) => $this->topicFilter($query),
-            'methodologies' => function ($query) use ($level) {
-                $query->with(['chapters' => function ($query) use ($level) {
-                    $query->where('level_id', $level)
-                        ->with(['children' => function ($query) {
-                            $query->withCount([
-                                'topics' => fn ($query) => $this->topicFilter($query)
-                            ])->orderBy('name');
-                        }])->withCount([
-                            'topics' => fn ($query) => $this->topicFilter($query)
-                        ])->orderBy('name');
-                }])->withCount(['topics' => fn ($query) => $this->topicFilter($query)]);
-            },
+                    ->withCount(['topics']);
+            }
+*/
         ]);
 
-        $years = $course->topics
+        $years = $stream->topics
+            ->where('exam.status', 'published')
             ->countBy(fn ($topic) => $topic->cache['year'])
             ->transform(function ($item, $key) {
                 return [
@@ -80,7 +72,8 @@ class SearchController extends Controller
             })->sortByDesc('id')->values();
 
 
-        $terms = $course->topics
+        $terms = $stream->topics
+            ->where('exam.status', 'published')
             ->countBy(fn ($topic) => $topic->cache['term'])
             ->transform(function ($item, $key) {
                 return [
@@ -90,7 +83,8 @@ class SearchController extends Controller
                 ];
             })->sortBy('id')->values();
 
-        $complexities = $course->topics
+        $complexities = $stream->topics
+            ->where('exam.status', 'published')
             ->countBy(fn ($topic) => $topic->complexity)
             ->sortDesc()
             ->transform(function ($item, $key) {
@@ -105,11 +99,13 @@ class SearchController extends Controller
             })
             ->values();
 
-        $has_answers_count = $course->topics
+        $has_answers_count = $stream->topics
+            ->where('exam.status', 'published')
             ->where('has_answers', 1)
             ->count();
 
-        $has_no_answers_count = $course->topics
+        $has_no_answers_count = $stream->topics
+            ->where('exam.status', 'published')
             ->where('has_answers', 0)
             ->count();
 
@@ -126,13 +122,27 @@ class SearchController extends Controller
             ]
         ];
 
+        $methodologies = Methodology::all()->load(
+            ['chapters' => fn($q) => $q
+                ->where('chapter_id', null)
+                ->where('stream_id', $stream->id)
+                ->withCount('topics')
+                ->with(['children' => fn($q) => $q
+                    ->withCount('topics')
+                    ->orderBy('id')
+                ])
+                ->orderBy('name')
+            ]
+        );
+
         return [
-            'domains' => DomainResource::collection($course->domains),
-            'questionTypes' => QuestionTypeResource::collection($course->questionTypes),
+            'methodologies' => MethodologyResource::collection($methodologies),
+            'domains' => DomainResource::collection($stream->domains),
+            'questionTypes' => QuestionTypeResource::collection($stream->questionTypes),
             'years' => $years,
             'terms' => $terms,
             'complexities' => $complexities,
-            'methodologies' => MethodologyResource::collection($course->methodologies),
+            //'methodologies' => MethodologyResource::collection($stream->methodologies),
             'has_answers' => $has_answers
             //'has_answers' => [
                //[ 'id' => 1, 'name' => 'Inclusief tips/nakijken voor leerlingen', 'topics_count' => 123 ],
@@ -140,19 +150,10 @@ class SearchController extends Controller
         ];
     }
 
-    public function results(Request $request, Course $course)
+    public function search_results(Request $request, Stream $stream)
     {
-        $topics = QueryBuilder::for(Topic::class)->allowedFilters([
-            AllowedFilter::callback('level', function (Builder $query, $value) {
-                $level = 'havo';
-
-                //vwo
-                if ($value === 'pNQ8O') {
-                    $level = 'vwo';
-                }
-
-                $query->where('cache->level', $level);
-            }),
+        $topics = QueryBuilder::for(Topic::class)
+        ->allowedFilters([
             AllowedFilter::callback('domain', function (Builder $query, $value) {
                 $query->whereHas('questions.domains', function (Builder $subQuery) use ($value) {
                     $ids = collect($value)->map(
@@ -275,7 +276,7 @@ class SearchController extends Controller
                 }
             }),
         ])
-            ->where('cache->course_id', $course->id)
+            ->where('cache->stream_id', $stream->id)
             ->where('cache->examStatus', 'published');
 
         return TopicResource::collection($topics->get());

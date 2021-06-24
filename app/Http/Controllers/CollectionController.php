@@ -102,7 +102,8 @@ class CollectionController extends Controller
             'questions.topic',
             'questions.topic.attachments',
             'questions.topic.exam',
-            'questions.topic.exam.course',
+            'questions.topic.exam.stream.course',
+            'questions.topic.exam.stream.level',
             'questions.dependencies',
         ]);
 
@@ -245,7 +246,8 @@ class CollectionController extends Controller
             'count' => 'integer|min:0'
         ]);
         $count = $request->query('count', 100);
-        $user_id = auth()->user()->id;
+        //$user_id = auth()->user()->id;
+        $user_id = 31;
 
         return array_map(function($collection) {
           return [
@@ -283,23 +285,27 @@ class CollectionController extends Controller
                   t.exam_id,
                   e.year as year,
                   e.term as term,
-                  e.level as level,
-                  ec.name as course
+                  l.name as level,
+                  c.name as course
                 from
                   collection_question cq,
                   questions q,
                   topics t,
                   exams e,
-                  courses ec
+                  courses c,
+                  levels l,
+                  streams s
                 where
                   ? = cq.collection_id and
                   q.id = cq.question_id and
                   t.id = q.topic_id and
                   e.id = t.exam_id and
-                  ec.id = e.course_id
+                  c.id = s.course_id and
+                  l.id = s.level_id and
+                  s.id = e.stream_id
                 group by
                   t.id,
-                  t.name, t.has_answers, t.cache, t.exam_id, e.year, e.term, e.level, ec.name
+                  t.name, t.has_answers, t.cache, t.exam_id, e.year, e.term, l.name, c.name
                 order by t.id
               ", [ $collection->id ]))
           ];

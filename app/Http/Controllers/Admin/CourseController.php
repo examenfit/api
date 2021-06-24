@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Course;
+use App\Models\Stream;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\CourseResource;
+use App\Http\Resources\StreamResource;
 use App\Http\Resources\FacetResource;
+use Vinkla\Hashids\Facades\Hashids;
 
 class CourseController extends Controller
 {
@@ -15,27 +18,31 @@ class CourseController extends Controller
         return CourseResource::collection(Course::all());
     }
 
-    public function show(Course $course)
+    public function show(Stream $stream)
     {
-        $course->load([
-            'levels',
+        $stream->load([
+            'course',
+            'level',
             'exams'
         ]);
 
-        return new CourseResource($course);
+        return new StreamResource($stream);
     }
 
-    public function showMeta(Course $course)
+    public function showMeta(Stream $stream)
     {
-        $course->load([
+        $stream->load([
             'tags',
             'domains',
             'questionTypes',
-            'methodologies.chapters' => function ($query) {
-                $query->orderBy('name');
+            'chapters' => function ($query) {
+                $query
+                ->where('chapter_id', null)
+                ->orderBy('name')
+                ->orderBy('methodology_id');
             }
         ]);
 
-        return new CourseResource($course);
+        return new StreamResource($stream);
     }
 }

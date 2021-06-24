@@ -18,9 +18,8 @@ class ExamResource extends JsonResource
     {
         return [
             'id' => $this->hash_id,
-            'course_id' => Hashids::encode($this->course_id),
+            'stream_id' => Hashids::encode($this->stream_id),
             'status' => $this->status,
-            'level' => $this->level,
             'year' => $this->year,
             'term' => $this->term,
             'standardization_value' => $this->standardization_value,
@@ -28,7 +27,8 @@ class ExamResource extends JsonResource
             'introduction' => $this->introduction,
             'topics' => TopicResource::collection($this->whenLoaded('topics')),
             'files' => ExamSourceFileResource::collection($this->whenLoaded('files')),
-            'course' => new CourseResource($this->whenLoaded('course')),
+            'stream' => new StreamResource($this->whenLoaded('stream')),
+            'level' => new LevelResource($this->whenLoaded('level')),
             'assignment_contents' => $this->when(Auth::user()->isAdmin(), $this->assignment_contents),
         ];
     }

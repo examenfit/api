@@ -56,7 +56,8 @@ class CollectionQuestionsDocument
             'questions' => fn ($q) => $q->orderBy('topic_id', 'ASC')->orderBy('number', 'ASC'),
             'questions.topic',
             'questions.topic.exam',
-            'questions.topic.exam.course',
+            'questions.topic.exam.stream.course',
+            'questions.topic.exam.stream.level',
             'questions.dependencies'
         ]);
     }
@@ -332,8 +333,8 @@ class CollectionQuestionsDocument
     function addTopicTitle($topic)
     {
         $title = $topic->name;
-        $course = $topic->exam->course->name;
-        $level = $topic->exam->level;
+        $course = $topic->exam->stream->course->name;
+        $level = $topic->exam->stream->level->name;
         $year = $topic->exam->year;
         $term = $topic->exam->term;
 

@@ -4,15 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\Tag;
 use App\Models\Topic;
-use App\Models\Course;
+use App\Models\Level;
 use Illuminate\Http\Request;
-use App\Http\Resources\CourseResource;
+use App\Http\Resources\LevelResource;
 use Vinkla\Hashids\Facades\Hashids;
 
-class CourseController extends Controller
+class LevelController extends Controller
 {
     public function index()
     {
-        return CourseResource::collection(Course::all());
+        return LevelResource::collection(Level::all());
     }
 }

@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\Tag;
 use App\Models\Level;
 use App\Models\Topic;
+use App\Models\Stream;
 use App\Models\Course;
 use App\Models\Domain;
 use App\Models\Chapter;
@@ -16,14 +17,17 @@ use App\Imports\MetaDataImport as ImportsMetaDataImport;
 
 class MetaDataImport extends Command
 {
-    public $topic;
+    private $question;
+    private $topic;
+    private $exam;
+    private $stream;
 
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'ef:import:metadata';
+    protected $signature = 'ef:import:metadata {file}';
 
     /**
      * The console command description.
@@ -42,6 +46,105 @@ class MetaDataImport extends Command
         parent::__construct();
     }
 
+    private function askChoice($question, $options)
+    {
+        $count = count($options);
+
+        if ($count < 1) {
+            $this->info($question);
+            die('FOUT: Geen opties');
+        }
+
+        $n = 0;
+        foreach($options as $option) {
+            $choices[++$n] = $option;
+        }
+
+        if ($count === 1) {
+            $this->info("$question -> $option");
+            return $choices[1];
+        }
+
+        $choice = $this->choice($question, $choices);
+        $option = array_search($choice, $options);
+
+        return $option;
+    }
+
+   private function selectCourse()
+   {
+        $courses = Course::all()->mapWithKeys(
+            fn ($row) => [$row->id => $row->name]
+        )->toArray();
+
+        $this->course_id = $this->askChoice("Vak?", $courses);
+   }
+
+   private function selectLevel()
+   {
+        $levels = Level::all()->mapWithKeys(
+            fn ($row) => [$row->id => $row->name]
+        )->toArray();
+
+        $this->level_id = $this->askChoice("Niveau?", $levels);
+    }
+
+    private function getChapters($methodology_id)
+    {
+        $chapters = $this->stream->chapters
+            ->whereNull('chapter_id')
+            ->where('methodology_id', $methodology_id);
+
+        return $chapters;
+    }
+
+    private function getChoices($chapters)
+    {
+        $options = [];
+        foreach($chapters as $row) {
+            $name = $row->name;
+            $title = $row->title;
+            $options[$row->id] = "$name ($title)";
+        }
+        return $options;
+    }
+
+    private function selectGRChapter()
+    {
+        $chapters = $this->getChapters(1);
+        $count = count($chapters);
+
+        if ($count < 1) {
+            die('Geen hoofdstukken voor "Getal & Ruimte" gevonden');
+        }
+
+        $choices = $this->getChoices($chapters);
+
+        $this->gr_exam_chapter_id = $this->askChoice("Getal & Ruimte examenhoofdstuk?", $choices);
+    }
+
+    private function selectMWChapter()
+    {
+        $chapters = $this->getChapters(2);
+        $count = count($chapters);
+
+        if ($count < 1) {
+            die('Geen hoofdstukken voor "Moderne Wiskunde" gevonden');
+        }
+
+        $choices = $this->getChoices($chapters);
+
+        $this->mw_exam_chapter_id = $this->askChoice("Getal & Ruimte examenhoofdstuk?", $choices);
+    }
+
+    private function getStream()
+    {
+        $this->stream = Stream::query()
+           ->where('level_id', $this->level_id)
+           ->where('course_id', $this->course_id)
+           ->first();
+    }
+
     /**
      * Execute the console command.
      *
@@ -49,71 +152,23 @@ class MetaDataImport extends Command
      */
     public function handle()
     {
-        $filePath = $this->ask("What is the path to the file?");
+        //$file = $this->ask("What is the path to the file?");
+        $file = $this->argument('file');
 
-        $courses = Course::all()->mapWithKeys(
-            fn ($row) => [$row->id => $row->name]
-        )->toArray();
+        $this->selectCourse();
+        $this->selectLevel();
 
-        $this->course_id = array_search(
-            $this->choice(
-                "What is the ID of the course?",
-                $courses
-            ),
-            $courses
-        );
+        $this->getStream();
 
-        $levels = Level::query()
-            ->where('course_id', $this->course_id)
-            ->get()
-            ->mapWithKeys(
-                fn ($row) => [$row->id => $row->name]
-            )->toArray();
+        $this->selectGRChapter();
+        $this->selectMWChapter();
 
-        $this->level_id = array_search(
-            $this->choice(
-                "What is the ID of the level?",
-                $levels
-            ),
-            $levels
-        );
+        $this->processFile($file);
+    }
 
-        $chapters = Chapter::query()
-            ->where('level_id', $this->level_id)
-            ->where('methodology_id', 1)
-            ->whereNull('chapter_id')
-            ->get()
-            ->mapWithKeys(
-                fn ($row) => [$row->id => $row->name . ' (' . $row->title . ')']
-            )->toArray();
-
-        $this->gr_exam_chapter_id = array_search(
-            $this->choice(
-                "Whats the Exam Chapter ID of Getal & Ruimte?",
-                $chapters
-            ),
-            $chapters
-        );
-
-        $chapters = Chapter::query()
-            ->where('level_id', $this->level_id)
-            ->where('methodology_id', 2)
-            ->whereNull('chapter_id')
-            ->get()
-            ->mapWithKeys(
-                fn ($row) => [$row->id => $row->name . ' (' . $row->title . ')']
-            )->toArray();
-
-        $this->mw_exam_chapter_id = array_search(
-            $this->choice(
-                "Whats the Exam Chapter ID of Moderne Wiskunde?",
-                $chapters
-            ),
-            $chapters
-        );
-
-        $collection = Excel::toCollection(new ImportsMetaDataImport, $filePath);
-
+    private function processFile($file)
+    {
+        $collection = Excel::toCollection(new ImportsMetaDataImport, $file);
         $collection->each(function ($row) {
             $row->each(function ($item) {
                 $this->processRow($item);
@@ -121,160 +176,264 @@ class MetaDataImport extends Command
         });
     }
 
+    private function warning($message)
+    {
+        $this->info("LET OP: $message");
+    }
+
+    private function getTopics($opgave)
+    {
+        $topics = Topic::query()
+            ->where('name', $opgave)
+            ->whereHas('exam', fn($q) => $q->where('stream_id', $this->stream->id))
+            ->get();
+
+        return $topics;
+    }
+
+    private function processTopicField($opgave)
+    {
+
+        if (is_null($opgave)) {
+            return;
+        }
+        
+        $topics = $this->getTopics($opgave);
+        $count = count($topics);
+
+        if ($count < 1) {
+            $this->topic = null;
+            $this->warning("\"$opgave\" niet gevonden");
+            return;
+        }
+
+        if ($count > 1) {
+            $this->topic = null;
+            $this->warning("\"$opgave\" ambigu ($count voorkomens)");
+            return;
+        }
+
+        $this->topic = $topics[0];
+        $this->topic->load([ 'exam' ]);
+
+        $exam = $this->topic->exam->year.'-'.$this->topic->exam->term;
+        $status = $this->topic->exam->status;
+        $course = $this->stream->course->name;
+        $level = $this->stream->level->name;
+
+        if ($status === 'published') {
+            $this->info("\"$opgave\" ($course $level, $exam)");
+        } else {
+            $this->warning("\"$opgave\" ($course $level, $exam) STATUS = $status");
+        }
+
+        $this->info('');
+    }
+
+    private function getQuestions($vraag_nr)
+    {
+        $questions = $this->topic->questions
+            ->where('number', $vraag_nr);
+ 
+        return $questions;
+    }
+
+    private function processQuestionField($vraag_nr)
+    {
+        if (is_null($vraag_nr)) {
+            return;
+        }
+
+        if (is_null($this->topic)) {
+            $this->warning("Vraag $vraag_nr wordt niet verwerkt");
+            return;
+        }
+
+        $this->question = null;
+
+        $questions = $this->getQuestions($vraag_nr);
+        $count = count($questions);
+
+        if ($count < 1) {
+            $this->warning("Vraag $vraag_nr niet gevonden");
+            return;
+        }
+
+        if ($count > 1) {
+            $this->warning("Vraag $vraag_nr ambigu ($count voorkomens)");
+            return;
+        }
+
+        $status = $this->topic->exam->status;
+        $STATUS = ['published', 'concept'];
+
+        if (in_array($status, $STATUS)) {
+            foreach ($questions as $question) {
+                $this->question = $question;
+            }
+            $this->info("Vraag $vraag_nr");
+        } else {
+            $this->info("overgeslagen: Vraag $vraag_nr");
+        }
+    }
+
     public function processRow($row)
     {
-        if (!is_null($row['opgave'])) {
-            $this->info('Opgave ophalen: ' . $row['opgave']);
-            $this->topic = Topic::where('name', $row['opgave'])
-                ->whereHas('exam', function ($query) {
-                    $level = Level::find($this->level_id);
-                    $query->where('level', strtolower($level->name));
-                })->firstOrFail();
-        }
+        $this->processTopicField($row['opgave']);
+        $this->processQuestionField($row['vraag_nr']);
 
-        if (!is_null($row['vraag_nr'])) {
-            $this->info('Vraag ophalen: ' . $row['vraag_nr']);
-
-            $question = Question::query()
-                ->where('topic_id', $this->topic->id)
-                ->where('number', $row['vraag_nr'])
-                ->firstOrFail();
-
-            // $this->processChapters($question, $row);
-            // $this->processDomains($question, $row['domeinen']);
-            // $this->processTags($question, $row['trefwoorden']);
-            $this->processQuestionType($question, $row['vraagtypen']);
-            // $this->processHighlights($question, $row['highlights']);
+        if (!is_null($this->question)) {
+            $this->processDomains($row['domeinen']);
+            $this->processQuestionType($row['vraagtypen']);
+            $this->processHighlights($row['highlights']);
+            $this->processChapters($row);
+            $this->processTags($row['trefwoorden']);
+            $this->info('');
         }
     }
 
-    public function processChapters($question, $row)
+
+    private function processChapter(&$sync, $chapters, $title)
     {
-        $chapters = [];
+        $count = count($chapters);
+        if ($count !== 1) {
+            $this->warning("Afwijkend aantal voorkomens gevonden voor Hoofdstuk \"$title\" ($count/1)");
+        }
+        foreach($chapters as $chapter) {
+            $id = $chapter->id;
+            $name = $chapter->name;
+            $title = $chapter->title;
+            if (is_null($title)) {
+                $this->info("Hoofdstuk#$id $name");
+            } else {
+                $this->info("Hoofdstuk#$id $name \"$title\"");
+            }
+            $sync[] = $chapter->id;
+        }
+    }
+
+    private function processMainChapter(&$sync, $text, $methodology_id, $exam_chapter_id)
+    {
+        $titles = explode("\n", $text);
+        foreach ($titles as $title) {
+            $chapters = $this->stream->chapters
+                ->where('title', $title)
+                ->where('methodology_id', $methodology_id)
+                ->where('chapter_id', '!=', $exam_chapter_id);
+            $this->processChapter($sync, $chapters, $title);
+        }
+    }
+
+    private function processExamChapter(&$sync, $text, $methodology_id, $exam_chapter_id)
+    {
+        $titles = explode("\n", $text);
+        foreach ($titles as $title) {
+            $chapters = $this->stream->chapters
+                ->where('name', $title)
+                ->where('methodology_id', $methodology_id)
+                ->where('chapter_id', $exam_chapter_id);
+            $this->processChapter($sync, $chapters, $title);
+        }
+    }
+
+    public function processChapters($row)
+    {
+        $sync = [];
 
         // Getal & Ruimte
-        $this->info('Hoofdstuk 1 ophalen: ' . $row['hoofdstuktitel_gr']);
-        $process = explode("\n", $row['hoofdstuktitel_gr']);
-        foreach ($process as $item) {
-            $chapters[] = Chapter::where('methodology_id', 1)
-                ->where('title', $item)
-                ->firstOrFail()
-                ->id;
-        }
+        $this->processMainChapter($sync, $row['hoofdstuktitel_gr'], 1, $this->gr_exam_chapter_id);
+        $this->processExamChapter($sync, $row['examentraining_gr'], 1, $this->gr_exam_chapter_id);
 
-        $this->info('Hoofdstuk 2 ophalen: ' . $row['examentraining_gr']);
-        $process = explode("\n", $row['examentraining_gr']);
-        foreach ($process as $item) {
-            $chapters[] = Chapter::where('methodology_id', 1)
-                ->where('chapter_id', $this->gr_exam_chapter_id) // Examentraining
-                ->where('name', $item)
-                ->firstOrFail()
-                ->id;
-        }
+        // Moderne Wiskunde
+        $this->processMainChapter($sync, $row['hoofdstuktitel_mw'], 2, $this->mw_exam_chapter_id);
+        $this->processExamChapter($sync, $row['examentraining_mw'], 2, $this->mw_exam_chapter_id);
 
-        // Moderne wiskunde
-        $this->info('Hoofdstuk 3 ophalen: "' . trim($row['hoofdstuktitel_mw']) . '"');
-        $process = explode("\n", $row['hoofdstuktitel_mw']);
-        foreach ($process as $item) {
-            $chapters[] = Chapter::where('methodology_id', 2)
-                ->where('title', trim($item))
-                ->firstOrFail()
-                ->id;
-        }
-
-        $this->info('Hoofdstuk 4 ophalen: ' . $row['examentraining_mw']);
-        $process = explode("\n", $row['examentraining_mw']);
-        foreach ($process as $item) {
-            $chapters[] = Chapter::where('methodology_id', 2)
-                ->where('chapter_id', $this->mw_exam_chapter_id) // Examentraining
-                ->where('name', trim($item))
-                ->firstOrFail()
-                ->id;
-        }
-
-        $question->chapters()->sync($chapters);
+        $this->question->chapters()->sync($sync);
     }
 
-    public function processDomains($question, $values)
+    public function processDomains($text)
     {
-        $availableDomains = Domain::query()
-            ->with('children')
-            ->where('level_id', $this->level_id)
-            ->get()
-            ->map(function ($item) {
-                $items = $item->children->pluck('id');
-                return $items->push($item->id);
-            })->flatten();
+        $sync = [];
+        $values = explode("\n", $text);
+        foreach($values as $value) {
 
-        $domains = collect(explode("\n", $values))
-            ->map(function ($domain) {
-                $this->info('Domein splitten: ' . $domain);
-                return explode(': ', $domain)[0];
-            })
-            ->map(function ($domain) use ($availableDomains) {
-                $this->info('Domein ophalen: ' . $domain);
+            $code = explode(': ', $value)[0];
+            $domains = Domain::query()
+                ->where('stream_id', $this->stream->id)
+                ->where('name', 'LIKE', "%($code)")
+                ->get();
 
-                return Domain::where('name', 'LIKE', '%(' . $domain . ')')
-                    ->whereIn('id', $availableDomains)
-                    ->firstOrFail();
-            })
-            ->pluck('id');
-
-        $question->domains()->sync($domains);
-    }
-
-    public function processTags($question, $values)
-    {
-        $tags = [];
-        $tagValues = array_filter(explode("\n", $values));
-
-        foreach ($tagValues as $tagValue) {
-            $this->info('Trefwoord: ' . $tagValue);
-            $tag = Tag::where('name', $tagValue)->first();
-
-            if (!$tag) {
-                $tag = Tag::forceCreate([
-                    'course_id' => $this->course_id,
-                    'level_id' => $this->level_id,
-                    'name' => $tagValue,
-                ]);
+            $count = count($domains);
+            if ($count !== 1) {
+                $this->warning("Afwijkend aantal voorkomens voor Domein \"$code\" ($count/1)");
             }
 
-            $tags[] = $tag->id;
+            foreach ($domains as $domain) {
+               $id = $domain->id;
+               $name = $domain->name;
+               $this->info("Domein#$id $name");
+               $sync[] = $domain->id;
+            }
         }
-
-        $question->tags()->sync($tags);
+        $this->question->domains()->sync($sync);
     }
 
-    public function processQuestionType($question, $value)
+    public function processTags($text)
     {
-        $this->info('Vraagtype verwerken: ' . $value);
+        $tags = [];
+        $names = array_filter(explode("\n", $text));
+
+        foreach ($names as $name) {
+            $tag = Tag::where('name', $name)->first();
+            if (!$tag) {
+                $tag = Tag::forceCreate([
+                    'stream_id' => $this->stream->id,
+                    'name' => $name,
+                ]);
+            }
+            $id = $tag->id;
+            $tags[] = $tag->id;
+            $this->info("Trefwoord#$id \"$name\"");
+        }
+
+        $this->question->tags()->sync($tags);
+    }
+
+    public function processQuestionType($value)
+    {
+        if (is_null($value) || $value === "") {
+            $this->warning("Vraagtype is leeg");
+            return;
+        }
+
         $type = QuestionType::query()
-            ->where('level_id', $this->level_id)
+            ->where('stream_id', $this->stream->id)
             ->where('name', $value)
             ->first();
 
         if (!$type) {
             $type = QuestionType::create([
-                'course_id' => 1,
-                'level_id' => $this->level_id,
+                'stream_id' => $this->stream->id,
                 'name' => $value,
             ]);
         }
 
-        $question->update([
-            'type_id' => $type->id,
-        ]);
+        $this->question->update([ 'type_id' => $type->id, ]);
+        $id = $type->id;
+        $this->info("Vraagtype#$id \"$value\"");
     }
 
-    public function processHighlights($question, $value)
+    public function processHighlights($value)
     {
-        // Delete all highlights
-        $question->highlights()->delete();
+        if (is_null($value) || $value === "") {
+            $this->warning("Highlight is leeg");
+            return;
+        }
 
-        // Store highlight
-        $question->highlights()->create([
-            'text' => $value,
-        ]);
+        $this->question->highlights()->delete();
+        $highlight = $this->question->highlights()->create([ 'text' => $value, ]);
+
+        $id = $highlight->id;
+        $this->info("Highlight#$id \"$value\"");
     }
 }

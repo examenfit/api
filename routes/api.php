@@ -4,7 +4,9 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\TopicController;
+use App\Http\Controllers\StreamController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\LevelController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\Admin\TipController;
@@ -42,30 +44,49 @@ use App\Http\Controllers\Admin\TagController as AdminTagController;
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])
     ->middleware('guest');
 
-
-Route::get('/log', [ActivityLogController::class, 'index']);
-Route::post('/log', [ActivityLogController::class, 'store']);
-
-Route::post('/forgot-password', [PasswordResetLinkController::class, 'store']); // csrf?
-Route::post('/reset-password', [NewPasswordController::class, 'save'])->name('password.reset');
-
-Route::get('/latest', [CollectionController::class, 'latest']);
-Route::get('/collections/{collection}/{topic?}', [CollectionController::class, 'show']);
-Route::post('/collections/{collection}/{question}/elaborations', [CollectionController::class, 'storeElaboration']);
-
 Route::get('/download-collection/{collection}', [CollectionController::class, 'showCollectionQuestionsDocument']);
 Route::get('/download-collection-html/{collection}', [CollectionController::class, 'showCollectionQuestionsHtml']);
 Route::get('/download-collection-pdf/{collection}', [CollectionController::class, 'showCollectionQuestionsPdf']);
 
-
 Route::get('/download-appendixes-html/{topic}', [TopicController::class, 'html']);
 Route::get('/download-appendixes-pdf/{topic}', [TopicController::class, 'pdf']);
 
-Route::get('/activation-status', [RegistrationController::class, 'activationStatus']);
-Route::post('/activate-account', [RegistrationController::class, 'activateAccount']);
-Route::post('/activate-license', [RegistrationController::class, 'activateLicense']);
+Route::get('/invalid_domains/', [StreamController::class, 'invalid_domains']);
+Route::get('/fixable_domains/', [StreamController::class, 'fixable_domains']);
+Route::get('/fix_domains/', [StreamController::class, 'fix_domains']);
+Route::get('/invalid_tags/', [StreamController::class, 'invalid_tags']);
+Route::get('/fixable_tags/', [StreamController::class, 'fixable_tags']);
+Route::get('/fix_tags/', [StreamController::class, 'fix_tags']);
+
+Route::get('/null_stream_chapters/', [StreamController::class, 'null_stream_chapters']);
+Route::get('/fix_null_stream_chapters/', [StreamController::class, 'fix_null_stream_chapters']);
+
+Route::get('/collections/{collection}/{topic?}', [CollectionController::class, 'show']);
+Route::post('/collections/{collection}/{question}/elaborations', [CollectionController::class, 'storeElaboration']);
+
+Route::get('/log', [ActivityLogController::class, 'index']);
+Route::post('/log', [ActivityLogController::class, 'store']);
+
+Route::get('/streams/', [StreamController::class, 'index']);
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
+
+    Route::get('/activation-status', [RegistrationController::class, 'activationStatus']);
+    Route::post('/activate-account', [RegistrationController::class, 'activateAccount']);
+    Route::post('/activate-license', [RegistrationController::class, 'activateLicense']);
+
+    Route::post('/forgot-password', [PasswordResetLinkController::class, 'store']); // csrf?
+    Route::post('/reset-password', [NewPasswordController::class, 'save'])->name('password.reset');
+
+    Route::get('/latest', [CollectionController::class, 'latest']);
+
+    Route::get('/courses/', [CourseController::class, 'index']);
+    Route::get('/levels/', [LevelController::class, 'index']);
+
+    Route::get('/streams/{stream}/search/results', [SearchController::class, 'search_results']);
+    Route::get('/streams/{stream}/search/', [SearchController::class, 'search']);
+    Route::get('/streams/{stream}/tags/', [StreamController::class, 'tags']);
+
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy']);
     Route::get('/user', [AuthenticatedSessionController::class, 'show']);
 
@@ -75,10 +96,8 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 
     Route::get('/topics/{topic}', [TopicController::class, 'show']);
 
-    Route::get('/courses/{course}/search/', [SearchController::class, 'index']);
-    Route::get('/courses/{course}/tags/', [CourseController::class, 'showTags']);
-    Route::get('/courses/{course}/tags/{tag}', [CourseController::class, 'showTag']);
-    Route::get('/courses/{course}/search/results', [SearchController::class, 'results']);
+    Route::get('/streams/{stream}/tags/{tag}', [StreamController::class, 'tag']);
+
 
     Route::get('/cart', [CartController::class, 'index']);
 
@@ -91,12 +110,12 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('/', [AdminIndexController::class, 'index']);
 
         Route::get('/courses', [AdminCourseController::class, 'index']);
-        Route::get('/courses/{course}', [AdminCourseController::class, 'show']);
-        Route::get('/courses/{course}/tags', [AdminTagController::class, 'index']);
-        Route::post('/courses/{course}/tags', [AdminTagController::class, 'store']);
-        Route::get('courses/{course}/meta', [AdminCourseController::class, 'showMeta']);
+        Route::get('/courses/{stream}', [AdminCourseController::class, 'show']);
+        Route::get('/courses/{stream}/tags', [AdminTagController::class, 'index']);
+        Route::post('/courses/{stream}/tags', [AdminTagController::class, 'store']);
+        Route::get('courses/{stream}/meta', [AdminCourseController::class, 'showMeta']);
 
-        Route::get('/courses/{course}/exams', [ExamController::class, 'index']);
+        Route::get('/courses/{stream}/exams', [ExamController::class, 'index']);
         Route::post('/exams', [ExamController::class, 'store']);
         Route::get('/exams/{exam}', [ExamController::class, 'show']);
         Route::put('/exams/{exam}', [ExamController::class, 'update']);

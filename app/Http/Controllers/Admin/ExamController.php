@@ -3,19 +3,19 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Exam;
-use App\Models\Course;
+use App\Models\Stream;
 use App\Rules\HashIdExists;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ExamResource;
 use Illuminate\Support\Facades\Artisan;
+use Vinkla\Hashids\Facades\Hashids;
 
 class ExamController extends Controller
 {
-    public function index(Course $course)
+    public function index(Stream $stream)
     {
-        $exams = $course->exams;
-
+        $exams = $stream->exams;
         return ExamResource::collection($exams);
     }
 
@@ -27,15 +27,13 @@ class ExamController extends Controller
             'topics.questions.domains',
             'files'
         ]);
-
         return new ExamResource($exam);
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
-            'course_id' => 'required|exists:courses,id',
-            'level' => 'required|string|in:havo,vwo',
+            'stream_id' => ['required', new HashIdExists('streams')],
             'year' => 'required|integer|min:2010',
             'term' => 'required|integer|in:1,2',
             'standardization_value' => 'nullable|numeric',
@@ -45,7 +43,7 @@ class ExamController extends Controller
         ]);
 
         $exam = Exam::create([
-            'course_id' => $data['course_id'],
+            'stream_id' => Hashids::decode($data['stream_id'])[0],
             'status' => 'prepared',
             'level' => $data['level'],
             'year' => $data['year'],
@@ -70,9 +68,8 @@ class ExamController extends Controller
     public function update(Request $request, Exam $exam)
     {
         $data = $request->validate([
-            'course_id' => ['required', new HashIdExists('courses')],
+            'stream_id' => ['required', new HashIdExists('streams')],
             'status' => 'nullable|in:concept,published',
-            'level' => 'required|in:havo,vwo',
             'year' => 'required|integer|min:2010',
             'term' => 'required|integer|in:1,2',
             'standardization_value' => 'nullable|numeric',
@@ -80,6 +77,7 @@ class ExamController extends Controller
             'introduction' => 'nullable|string'
         ]);
 
+        $data['stream_id'] = Hashids::decode($data['stream_id'])[0];
         $exam->update($data);
         $exam->load('topics.questions.answers.sections', 'files');
 

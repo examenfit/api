@@ -21,7 +21,9 @@ class TopicCacheResource extends JsonResource
     public function toArray($request)
     {
         return [
-            'level' => $this->resource['level'],
+            //'stream' => $this->resource['stream'],
+            'course' => $this->resource['course'],//remove?
+            'level' => $this->resource['level'],//remove?
             'year' => $this->resource['year'],
             'term' => $this->resource['term'],
             'totalPoints' => $this->resource['totalPoints'],
