@@ -246,8 +246,7 @@ class CollectionController extends Controller
             'count' => 'integer|min:0'
         ]);
         $count = $request->query('count', 100);
-        //$user_id = auth()->user()->id;
-        $user_id = 31;
+        $user_id = auth()->user()->id;
 
         return array_map(function($collection) {
           return [
