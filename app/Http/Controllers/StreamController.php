@@ -57,7 +57,7 @@ class StreamController extends Controller
             $query->withCount(['topics']);
         }]);
 
-        return TagResource::collection($stream->tags);
+        return TagResource::collection($stream->tags->sortBy('name'));
     }
 
     public function tag(Stream $stream, Tag $tag)
