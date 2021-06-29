@@ -27,7 +27,7 @@ class MetaDataImport extends Command
      *
      * @var string
      */
-    protected $signature = 'ef:import:metadata {file}';
+    protected $signature = 'ef:import:metadata {file} {--chapters}';
 
     /**
      * The console command description.
@@ -160,8 +160,10 @@ class MetaDataImport extends Command
 
         $this->getStream();
 
-        $this->selectGRChapter();
-        $this->selectMWChapter();
+        if ($this->option('chapters')) {
+          $this->selectGRChapter();
+          $this->selectMWChapter();
+        }
 
         $this->processFile($file);
     }
@@ -191,9 +193,15 @@ class MetaDataImport extends Command
         return $topics;
     }
 
+    private function verbose_info($message)
+    {
+        if ($this->option('verbose')) {
+            $this->info($message);
+        }
+    }
+
     private function processTopicField($opgave)
     {
-
         if (is_null($opgave)) {
             return;
         }
@@ -203,13 +211,13 @@ class MetaDataImport extends Command
 
         if ($count < 1) {
             $this->topic = null;
-            $this->warning("\"$opgave\" niet gevonden");
+            $this->warning("Opgave \"$opgave\" niet gevonden");
             return;
         }
 
         if ($count > 1) {
             $this->topic = null;
-            $this->warning("\"$opgave\" ambigu ($count voorkomens)");
+            $this->warning("Opgave \"$opgave\" ambigu ($count voorkomens)");
             return;
         }
 
@@ -222,12 +230,12 @@ class MetaDataImport extends Command
         $level = $this->stream->level->name;
 
         if ($status === 'published') {
-            $this->info("\"$opgave\" ($course $level, $exam)");
+            $this->info("Opgave \"$opgave\" ($course $level, $exam)");
         } else {
-            $this->warning("\"$opgave\" ($course $level, $exam) STATUS = $status");
+            $this->warning("Opgave \"$opgave\" ($course $level, $exam) STATUS = $status");
         }
 
-        $this->info('');
+        $this->verbose_info('');
     }
 
     private function getQuestions($vraag_nr)
@@ -245,7 +253,7 @@ class MetaDataImport extends Command
         }
 
         if (is_null($this->topic)) {
-            $this->warning("Vraag $vraag_nr wordt niet verwerkt");
+            //$this->warning("Vraag $vraag_nr wordt niet verwerkt");
             return;
         }
 
@@ -271,9 +279,9 @@ class MetaDataImport extends Command
             foreach ($questions as $question) {
                 $this->question = $question;
             }
-            $this->info("Vraag $vraag_nr");
+            $this->verbose_info("Vraag $vraag_nr");
         } else {
-            $this->info("overgeslagen: Vraag $vraag_nr");
+            //$this->info("overgeslagen: Vraag $vraag_nr");
         }
     }
 
@@ -286,9 +294,11 @@ class MetaDataImport extends Command
             $this->processDomains($row['domeinen']);
             $this->processQuestionType($row['vraagtypen']);
             $this->processHighlights($row['highlights']);
-            $this->processChapters($row);
             $this->processTags($row['trefwoorden']);
-            $this->info('');
+            if ($this->option('chapters')) {
+              $this->processChapters($row);
+            }
+            $this->verbose_info('');
         }
     }
 
@@ -304,9 +314,9 @@ class MetaDataImport extends Command
             $name = $chapter->name;
             $title = $chapter->title;
             if (is_null($title)) {
-                $this->info("Hoofdstuk#$id $name");
+                $this->verbose_info("Hoofdstuk#$id $name");
             } else {
-                $this->info("Hoofdstuk#$id $name \"$title\"");
+                $this->verbose_info("Hoofdstuk#$id $name \"$title\"");
             }
             $sync[] = $chapter->id;
         }
@@ -358,6 +368,7 @@ class MetaDataImport extends Command
         foreach($values as $value) {
 
             $code = explode(': ', $value)[0];
+            $name = explode(': ', $value)[1];
             $domains = Domain::query()
                 ->where('stream_id', $this->stream->id)
                 ->where('name', 'LIKE', "%($code)")
@@ -365,13 +376,14 @@ class MetaDataImport extends Command
 
             $count = count($domains);
             if ($count !== 1) {
-                $this->warning("Afwijkend aantal voorkomens voor Domein \"$code\" ($count/1)");
+                $this->warning("Afwijkend aantal voorkomens gevonden voor Domein \"($code)\" ($count/1)");
+                return;
             }
 
             foreach ($domains as $domain) {
                $id = $domain->id;
                $name = $domain->name;
-               $this->info("Domein#$id $name");
+               $this->verbose_info("Domein#$id $name");
                $sync[] = $domain->id;
             }
         }
@@ -393,7 +405,7 @@ class MetaDataImport extends Command
             }
             $id = $tag->id;
             $tags[] = $tag->id;
-            $this->info("Trefwoord#$id \"$name\"");
+            $this->verbose_info("Trefwoord#$id \"$name\"");
         }
 
         $this->question->tags()->sync($tags);
@@ -414,13 +426,14 @@ class MetaDataImport extends Command
         if (!$type) {
             $type = QuestionType::create([
                 'stream_id' => $this->stream->id,
+                'course_id' => $this->course_id,
                 'name' => $value,
             ]);
         }
 
         $this->question->update([ 'type_id' => $type->id, ]);
         $id = $type->id;
-        $this->info("Vraagtype#$id \"$value\"");
+        $this->verbose_info("Vraagtype#$id \"$value\"");
     }
 
     public function processHighlights($value)
@@ -434,6 +447,6 @@ class MetaDataImport extends Command
         $highlight = $this->question->highlights()->create([ 'text' => $value, ]);
 
         $id = $highlight->id;
-        $this->info("Highlight#$id \"$value\"");
+        $this->verbose_info("Highlight#$id \"$value\"");
     }
 }
