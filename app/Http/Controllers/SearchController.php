@@ -26,9 +26,18 @@ use App\Models\Exam;
 
 class SearchController extends Controller
 {
-
     public function search(Request $request, Stream $stream)
     {
+        $role = auth()->user()->role;
+
+        if ($role === 'admin' || $role === 'author') {
+          $statuses = ['concept', 'published'];
+        } else {
+          $statuses = ['published'];
+        }
+
+        // actually this returns the filter options
+
         $stream->load([
             'domains' => function ($query) {
                 $query
@@ -42,26 +51,10 @@ class SearchController extends Controller
                 $query->withCount(['topics']);
             },
             'topics',
-/*
-            'methodologies' => function ($query) {
-                $query
-                    ->with(['chapters' => function ($query) {
-                        $query
-                            ->with(['children' => function ($query) {
-                                $query
-                                    ->withCount(['topics'])
-                                    ->orderBy('name');
-                            }])
-                            ->withCount(['topics'])
-                            ->orderBy('name');
-                    }])
-                    ->withCount(['topics']);
-            }
-*/
         ]);
 
         $years = $stream->topics
-            ->where('exam.status', 'published')
+            ->whereIn('exam.status', $statuses)
             ->countBy(fn ($topic) => $topic->cache['year'])
             ->transform(function ($item, $key) {
                 return [
@@ -73,7 +66,7 @@ class SearchController extends Controller
 
 
         $terms = $stream->topics
-            ->where('exam.status', 'published')
+            ->whereIn('exam.status', $statuses)
             ->countBy(fn ($topic) => $topic->cache['term'])
             ->transform(function ($item, $key) {
                 return [
@@ -84,7 +77,7 @@ class SearchController extends Controller
             })->sortBy('id')->values();
 
         $complexities = $stream->topics
-            ->where('exam.status', 'published')
+            ->whereIn('exam.status', $statuses)
             ->countBy(fn ($topic) => $topic->complexity)
             ->sortDesc()
             ->transform(function ($item, $key) {
@@ -100,12 +93,12 @@ class SearchController extends Controller
             ->values();
 
         $has_answers_count = $stream->topics
-            ->where('exam.status', 'published')
+            ->whereIn('exam.status', $statuses)
             ->where('has_answers', 1)
             ->count();
 
         $has_no_answers_count = $stream->topics
-            ->where('exam.status', 'published')
+            ->whereIn('exam.status', $statuses)
             ->where('has_answers', 0)
             ->count();
 
@@ -122,31 +115,32 @@ class SearchController extends Controller
             ]
         ];
 
-        $methodologies = Methodology::all()->load(
-            ['chapters' => fn($q) => $q
-                ->where('chapter_id', null)
+        $methodologies = Methodology::whereHas(
+            'chapters', fn($q) => $q
+            ->where('stream_id', $stream->id)
+        )
+        ->with('chapters',
+            fn($q) => $q
                 ->where('stream_id', $stream->id)
                 ->withCount('topics')
-                ->with(['children' => fn($q) => $q
-                    ->withCount('topics')
-                    ->orderBy('id')
+                ->with([
+                    'children' => fn($q) => $q
+                        ->withCount('topics')
+                        ->orderBy('id')
                 ])
                 ->orderBy('name')
-            ]
-        );
+        )
+        ->get();
 
         return [
+            'methodologies' => MethodologyResource::collection($methodologies),
             'methodologies' => MethodologyResource::collection($methodologies),
             'domains' => DomainResource::collection($stream->domains),
             'questionTypes' => QuestionTypeResource::collection($stream->questionTypes),
             'years' => $years,
             'terms' => $terms,
             'complexities' => $complexities,
-            //'methodologies' => MethodologyResource::collection($stream->methodologies),
             'has_answers' => $has_answers
-            //'has_answers' => [
-               //[ 'id' => 1, 'name' => 'Inclusief tips/nakijken voor leerlingen', 'topics_count' => 123 ],
-            //]
         ];
     }
 
