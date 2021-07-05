@@ -218,6 +218,13 @@ class MetaDataImport extends Command
         if ($count > 1) {
             $this->topic = null;
             $this->warning("Opgave \"$opgave\" ambigu ($count voorkomens)");
+            foreach($topics as $topic) {
+                $status = $topic->exam->status;
+                $course = $topic->exam->stream->course->name;
+                $level = $topic->exam->stream->level->name;
+                $exam = $topic->exam->year.'-'.$topic->exam->term;
+                $this->info("  In examen: ($course $level, $exam)");
+            }
             return;
         }
 
@@ -231,8 +238,8 @@ class MetaDataImport extends Command
 
         if ($status === 'published') {
             $this->info("Opgave \"$opgave\" ($course $level, $exam)");
-        } else {
-            $this->warning("Opgave \"$opgave\" ($course $level, $exam) STATUS = $status");
+        } else if ($status === 'concept') {
+            $this->info("Opgave \"$opgave\" ($course $level, $exam) STATUS = $status");
         }
 
         $this->verbose_info('');
@@ -281,7 +288,7 @@ class MetaDataImport extends Command
             }
             $this->verbose_info("Vraag $vraag_nr");
         } else {
-            //$this->info("overgeslagen: Vraag $vraag_nr");
+            //$this->info("Genegeerd: Vraag $vraag_nr");
         }
     }
 
@@ -290,7 +297,7 @@ class MetaDataImport extends Command
         $this->processTopicField($row['opgave']);
         $this->processQuestionField($row['vraag_nr']);
 
-        if (!is_null($this->question)) {
+        if ($this->question) {
             $this->processDomains($row['domeinen']);
             $this->processQuestionType($row['vraagtypen']);
             $this->processHighlights($row['highlights']);
@@ -326,10 +333,13 @@ class MetaDataImport extends Command
     {
         $titles = explode("\n", $text);
         foreach ($titles as $title) {
-            $chapters = $this->stream->chapters
+            $stream_id = $this->stream->id;
+            $this->info("stream=$stream_id, methodology=$methodology_id, title=$title");
+            //$chapters = $this->stream->chapters
+            $chapters = Chapter::where('stream_id', $this->stream->id)
                 ->where('title', $title)
                 ->where('methodology_id', $methodology_id)
-                ->where('chapter_id', '!=', $exam_chapter_id);
+                ->where('chapter_id', '!=', $exam_chapter_id)->get();
             $this->processChapter($sync, $chapters, $title);
         }
     }
@@ -361,30 +371,62 @@ class MetaDataImport extends Command
         $this->question->chapters()->sync($sync);
     }
 
+    private function getDomains($code, $index, $name)
+    {
+        $domains = Domain::query()
+            ->where('stream_id', $this->stream->id)
+            ->where('name', 'LIKE', "%($code$index)")
+            ->get();
+
+        $count = count($domains);
+        if ($count === 1) {
+            return $domains->first();
+        }
+        if ($count === 0) {
+            if ($index) {
+                $parent_id = $this->getDomains($code, '', $name)->id;
+            } else {
+                $parent_id = null;
+            }
+            $domain = Domain::create([
+                'stream_id' => $this->stream->id,
+                'name' => "$name ($code$index)",
+                'parent_id' => $parent_id
+            ]);
+            return $domain;
+        }
+
+        $this->warning("Afwijkend aantal voorkomens gevonden voor Domein \"($code)\" ($count/1)");
+        return [];
+    }
+
+    private function getDomain($value)
+    {
+        $matches = [];
+        if (preg_match('/^([A-Z])([0-9]*)\\W+(.*)$/', $value, $matches)) {
+            $code = $matches[1];
+            $index = $matches[2];
+            $name = $matches[3];
+        } else {
+            $this->warning("Ongeldig invoerpatroon voor Domein \"$value\"");
+            return;
+        }
+
+        $domain = $this->getDomains($code, $index, $name);
+
+        return $domain;
+    }
+
     public function processDomains($text)
     {
         $sync = [];
         $values = explode("\n", $text);
         foreach($values as $value) {
-
-            $code = explode(': ', $value)[0];
-            $name = explode(': ', $value)[1];
-            $domains = Domain::query()
-                ->where('stream_id', $this->stream->id)
-                ->where('name', 'LIKE', "%($code)")
-                ->get();
-
-            $count = count($domains);
-            if ($count !== 1) {
-                $this->warning("Afwijkend aantal voorkomens gevonden voor Domein \"($code)\" ($count/1)");
-                return;
-            }
-
-            foreach ($domains as $domain) {
+            if ($domain = $this->getDomain($value)) {
                $id = $domain->id;
                $name = $domain->name;
                $this->verbose_info("Domein#$id $name");
-               $sync[] = $domain->id;
+               $sync[] = $id;
             }
         }
         $this->question->domains()->sync($sync);

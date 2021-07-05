@@ -12,6 +12,11 @@ class Domain extends Model
     use HasFactory, HashID, HasJsonRelationships;
 
     public $with = ['children'];
+    public $fillable = [
+        'name',
+        'stream_id',
+        'parent_id'
+    ];
 
     public function parent()
     {
