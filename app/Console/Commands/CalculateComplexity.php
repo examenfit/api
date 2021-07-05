@@ -54,15 +54,10 @@ class CalculateComplexity extends Command
             return $query->where('term', 1);
         })->get()->each(function ($topic) {
 
-            // At this point, the exam hasn't a relationship with levels yet
-            $level = Level::query()
-                ->where('course_id', $topic->exam->course_id)
-                ->where('name', $topic->exam->level)
-                ->first();
+            $stream = $topic->exam->stream;
 
-
-            if ($level && $level->proportion_threshold_low && $level->proportion_threshold_high) {
-                $complexity = $this->complexity($level, $topic->cache['weightedProportionValue']);
+            if ($stream->proportion_threshold_low && $stream->proportion_threshold_high) {
+                $complexity = $this->complexity($stream, $topic->cache['weightedProportionValue']);
 
                 if ($complexity !== $topic->complexity) {
                     $this->info(
@@ -77,8 +72,8 @@ class CalculateComplexity extends Command
                 }
 
                 // Calculate for questions
-                $topic->questions->each(function ($question) use ($level, $topic) {
-                    $complexity = $this->complexity($level, $question->proportion_value);
+                $topic->questions->each(function ($question) use ($stream, $topic) {
+                    $complexity = $this->complexity($stream, $question->proportion_value);
 
                     if ($complexity !== $question->complexity) {
                         $this->info(
@@ -98,13 +93,13 @@ class CalculateComplexity extends Command
     }
 
     // https://trello.com/c/kLj6bySG/140-complexiteit-automatisch-berekenen
-    public function complexity($level, $proportionValue)
+    public function complexity($stream, $proportionValue)
     {
         if (!$proportionValue) {
             return null;
-        } elseif ($proportionValue <= $level->proportion_threshold_low) {
+        } elseif ($proportionValue <= $stream->proportion_threshold_low) {
             return 'high';
-        } elseif ($proportionValue > $level->proportion_threshold_high) {
+        } elseif ($proportionValue > $stream->proportion_threshold_high) {
             return 'low';
         } else {
             return 'average';
