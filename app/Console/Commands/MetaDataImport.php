@@ -27,7 +27,7 @@ class MetaDataImport extends Command
      *
      * @var string
      */
-    protected $signature = 'ef:import:metadata {file} {--chapters}';
+    protected $signature = 'ef:import:metadata {file} {--chapters} {--purge-tags}';
 
     /**
      * The console command description.
@@ -159,6 +159,9 @@ class MetaDataImport extends Command
         $this->selectLevel();
 
         $this->getStream();
+        if ($this->option("purge-tags")) {
+            Tag::where('stream_id', $this->stream->id)->delete();
+        }
 
         if ($this->option('chapters')) {
           $this->selectGRChapter();
@@ -438,7 +441,10 @@ class MetaDataImport extends Command
         $names = array_filter(explode("\n", $text));
 
         foreach ($names as $name) {
-            $tag = Tag::where('name', $name)->first();
+            $tag = Tag::query()
+              ->where('stream_id', $this->stream->id)
+              ->where('name', $name)
+              ->first();
             if (!$tag) {
                 $tag = Tag::forceCreate([
                     'stream_id' => $this->stream->id,
