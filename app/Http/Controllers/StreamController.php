@@ -111,9 +111,9 @@ class StreamController extends Controller
               and e.id = t.exam_id
               and t.id = q.topic_id
               and q.id = qt.question_id
-              and e.stream_id != t1.stream_id
               and t1.name = t2.name
-              and t1.stream_id != t2.stream_id
+              and e.stream_id != t1.stream_id
+              and e.stream_id = t2.stream_id
             order by name
         ");
     }
@@ -132,9 +132,9 @@ class StreamController extends Controller
               and e.id = t.exam_id
               and t.id = q.topic_id
               and q.id = qt.question_id
-              and e.stream_id != t1.stream_id
               and t1.name = t2.name
-              and t1.stream_id != t2.stream_id
+              and e.stream_id != t1.stream_id
+              and e.stream_id = t2.stream_id
         ");
     }
     public function null_stream_chapters()
