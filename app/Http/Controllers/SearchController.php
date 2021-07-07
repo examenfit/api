@@ -146,6 +146,14 @@ class SearchController extends Controller
 
     public function search_results(Request $request, Stream $stream)
     {
+        $role = auth()->user()->role;
+        if ($role === 'admin') {
+            $STATUS = [ 'published','concept' ];
+        } else if ($role === 'author') {
+            $STATUS = [ 'published','concept' ];
+        } else { 
+            $STATUS = [ 'published' ];
+        }
         $topics = QueryBuilder::for(Topic::class)
         ->allowedFilters([
             AllowedFilter::callback('domain', function (Builder $query, $value) {
@@ -271,7 +279,7 @@ class SearchController extends Controller
             }),
         ])
             ->where('cache->stream_id', $stream->id)
-            ->where('cache->examStatus', 'published');
+            ->whereIn('cache->examStatus', $STATUS);
 
         return TopicResource::collection($topics->get());
     }
