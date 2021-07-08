@@ -209,6 +209,8 @@ class MetaDataImport extends Command
             return;
         }
         
+        $this->opgave = $opgave;
+
         $topics = $this->getTopics($opgave);
         $count = count($topics);
 
@@ -258,6 +260,9 @@ class MetaDataImport extends Command
 
     private function processQuestionField($vraag_nr)
     {
+        $this->question = null;
+        $this->vraag_nr = $vraag_nr;
+
         if (is_null($vraag_nr)) {
             return;
         }
@@ -266,8 +271,6 @@ class MetaDataImport extends Command
             //$this->warning("Vraag $vraag_nr wordt niet verwerkt");
             return;
         }
-
-        $this->question = null;
 
         $questions = $this->getQuestions($vraag_nr);
         $count = count($questions);
@@ -295,10 +298,44 @@ class MetaDataImport extends Command
         }
     }
 
+    private function processTopicQuestion()
+    {
+        if ($this->question) {
+            return;
+        }
+
+        $vraag_nr = $this->vraag_nr;
+        $opgave = $this->opgave;
+        $questions = Question::where('number', $vraag_nr)
+            ->with('topic', fn($q) => $q->where('name', $opgave))
+            ->get();
+
+        $count = count($questions);
+        if ($count === 1) {
+            $question = $questions->first();
+            $topic = $question->topic;
+
+            $exam = $topic->exam->year.'-'.$this->topic->exam->term;
+            $status = $topic->exam->status;
+            $course = $this->stream->course->name;
+            $level = $this->stream->level->name;
+
+            if ($status === 'published') {
+                $this->info("Opgave \"$opgave\", vraag $vraag_nr ($course $level, $exam)");
+            } else if ($status === 'concept') {
+                $this->info("Opgave \"$opgave\", vraag $vraag_nr ($course $level, $exam) STATUS = $status");
+            }
+
+            $this->question = $question;
+            $this->topic = $topic;
+        }
+    }
+
     public function processRow($row)
     {
         $this->processTopicField($row['opgave']);
         $this->processQuestionField($row['vraag_nr']);
+        $this->processTopicQuestion();
 
         if ($this->question) {
             $this->processDomains($row['domeinen']);

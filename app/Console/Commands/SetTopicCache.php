@@ -157,7 +157,7 @@ class SetTopicCache extends Command
                 ->filter(fn ($item) => is_int($item))
                 ->values();
 
-            if ($cache['questionCount']) {
+            if ($cache['questionCount'] && $cache['totalPoints'] > 0) {
                 $cache['weightedProportionValue'] =
                     round($proportionSum / $cache['totalPoints']);
             }
