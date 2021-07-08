@@ -35,7 +35,7 @@ class ExamController extends Controller
         $data = $request->validate([
             'stream_id' => ['required', new HashIdExists('streams')],
             'year' => 'required|integer|min:2010',
-            'term' => 'required|integer|in:1,2',
+            'term' => 'required|integer|in:1,2,3',
             'standardization_value' => 'nullable|numeric',
             'files' => 'required|min:1',
             'files.*.name' => 'required|string',
@@ -71,7 +71,7 @@ class ExamController extends Controller
             'stream_id' => ['required', new HashIdExists('streams')],
             'status' => 'nullable|in:concept,published',
             'year' => 'required|integer|min:2010',
-            'term' => 'required|integer|in:1,2',
+            'term' => 'required|integer|in:1,2,3',
             'standardization_value' => 'nullable|numeric',
             'is_pilot' => 'nullable|boolean',
             'introduction' => 'nullable|string'

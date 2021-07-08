@@ -71,4 +71,9 @@ class AnswerController extends Controller
 
         return response(null, 200);
     }
+
+    public function fix()
+    {
+        Artisan::call('ef:splitMultipleMethods');
+    }
 }
