@@ -69,7 +69,7 @@ class ExamController extends Controller
     {
         $data = $request->validate([
             'stream_id' => ['required', new HashIdExists('streams')],
-            'status' => 'nullable|in:concept,published',
+            'status' => 'nullable|in:concept,published,frozen',
             'year' => 'required|integer|min:2010',
             'term' => 'required|integer|in:1,2,3',
             'standardization_value' => 'nullable|numeric',
