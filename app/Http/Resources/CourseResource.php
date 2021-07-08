@@ -18,12 +18,13 @@ class CourseResource extends JsonResource
         return [
             'id' => $this->hash_id,
             'name' => $this->name,
-            'exams' => ExamResource::collection($this->whenLoaded('exams')),
-            'domains' => DomainResource::collection($this->whenLoaded('domains')),
-            'tags' => TagResource::collection($this->whenLoaded('tags')),
-            'questionTypes' => QuestionTypeResource::collection($this->whenLoaded('questionTypes')),
-            'methodologies' => MethodologyResource::collection($this->whenLoaded('methodologies')),
-            'levels' => LevelResource::collection($this->whenLoaded('levels')),
+            'streams' => StreamResource::collection($this->whenLoaded('streams')),
+            //'exams' => ExamResource::collection($this->whenLoaded('exams')),
+            //'domains' => DomainResource::collection($this->whenLoaded('domains')),
+            //'tags' => TagResource::collection($this->whenLoaded('tags')),
+            //'questionTypes' => QuestionTypeResource::collection($this->whenLoaded('questionTypes')),
+            //'methodologies' => MethodologyResource::collection($this->whenLoaded('methodologies')),
+            //'levels' => LevelResource::collection($this->whenLoaded('levels')),
         ];
     }
 }

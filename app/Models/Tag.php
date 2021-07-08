@@ -20,9 +20,9 @@ class Tag extends Model
             ->orderBy('name', 'ASC');
     }
 
-    public function course()
+    public function stream()
     {
-        return $this->belongsTo(Course::class);
+        return $this->belongsTo(Stream::class);
     }
 
     public function question()
@@ -33,19 +33,5 @@ class Tag extends Model
     public function topics()
     {
         return $this->hasManyJson(Topic::class, 'cache->tagsId');
-    }
-
-    public function level()
-    {
-        return $this->belongsTo(Level::class);
-    }
-
-    public function setLevelIdAttribute($value)
-    {
-        $decodedValue = $this->hashToId($value);
-
-        $this->attributes['level_id'] = $decodedValue
-            ? $this->attributes['level_id'] = $decodedValue
-            : $this->attributes['level_id'] = $value;
     }
 }

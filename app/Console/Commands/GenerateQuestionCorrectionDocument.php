@@ -72,7 +72,8 @@ class GenerateQuestionCorrectionDocument extends Command
     public function getExam($id)
     {
         $this->exam = Exam::with([
-            'course',
+            'stream.course',
+            'stream.level',
             'topics.questions.attachments',
             'topics.questions.answers',
             'topics.questions.domains.parent',
@@ -157,9 +158,11 @@ class GenerateQuestionCorrectionDocument extends Command
     public function addCover()
     {
         // Title
-        $level = strtoupper($this->exam->level);
+        $level = strtoupper($this->exam->stream->level->name);
+        $course = $this->exam->stream->course->name;
+        $year = $this->exam->year;
         $term = $this->exam->term === 1 ? 'Ⅰ' : 'Ⅱ';
-        $title = "{$this->exam->course->name} {$level} – {$this->exam->year}-{$term}";
+        $title = "{$course} {$level} – {$year}-{$term}";
         $this->currentSection()->addText($title, ['bold' => true, 'size' => 24]);
 
         // Subtitle

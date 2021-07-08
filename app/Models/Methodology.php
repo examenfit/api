@@ -12,6 +12,11 @@ class Methodology extends Model implements Auditable
 {
     use HasFactory, HashID, \OwenIt\Auditing\Auditable, HasJsonRelationships;
 
+    public $fillable = [
+        'stream_id',
+        'name',
+    ];
+
     public function chapters()
     {
         return $this->hasMany(Chapter::class)->whereNull('chapter_id');

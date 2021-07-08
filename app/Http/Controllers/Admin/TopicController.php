@@ -82,4 +82,10 @@ class TopicController extends Controller
 
         return response(null, 200);
     }
+
+    public function cache()
+    {
+        Artisan::call('ef:cache:topics');
+        return response(null, 200);
+    }
 }

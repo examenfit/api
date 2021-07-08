@@ -12,9 +12,8 @@ class Exam extends Model implements Auditable
     use HasFactory, HashID, \OwenIt\Auditing\Auditable;
 
     public $fillable = [
-        'course_id',
+        'stream_id',
         'status',
-        'level',
         'year',
         'term',
         'standardization_value',
@@ -28,9 +27,9 @@ class Exam extends Model implements Auditable
         'assignment_contents' => 'array'
     ];
 
-    public function course()
+    public function stream()
     {
-        return $this->belongsTo(Course::class);
+        return $this->belongsTo(Stream::class);
     }
 
     public function topics()
@@ -53,6 +52,7 @@ class Exam extends Model implements Auditable
         return $this->hasManyThrough(Attachment::class, Question::class);
     }
 
+/*
     public function setCourseIdAttribute($value)
     {
         $decodedValue = $this->hashToId($value);
@@ -61,4 +61,5 @@ class Exam extends Model implements Auditable
             ? $this->attributes['course_id'] = $decodedValue
             : $this->attributes['course_id'] = $value;
     }
+*/
 }

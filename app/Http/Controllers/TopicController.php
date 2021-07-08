@@ -11,7 +11,8 @@ class TopicController extends Controller
     public function show(Topic $topic)
     {
         $topic->load([
-            'exam.course',
+            'exam.stream.course',
+            'exam.stream.level',
             'questions.attachments',
             'questions.domains.parent',
             'questions.questionType',
