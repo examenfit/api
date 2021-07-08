@@ -336,10 +336,10 @@ class CollectionQuestionsDocument
         $course = $topic->exam->stream->course->name;
         $level = $topic->exam->stream->level->name;
         $year = $topic->exam->year;
-        $term = $topic->exam->term;
+        $term = substr("III", 0, $topic->exam->term);
 
         //$this->currentSection()->addTitle($title);
-        $exam = $term === 1 ? "{$year}-I" : "{$year}-II";
+        $exam = "{$year}-{$term}";
         $section = $this->currentSection();
         $table = $section->addTable([
             'unit' => \PhpOffice\PhpWord\Style\Table::WIDTH_PERCENT,
