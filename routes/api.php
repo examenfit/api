@@ -61,6 +61,9 @@ Route::get('/fix_tags/', [StreamController::class, 'fix_tags']);
 Route::get('/null_stream_chapters/', [StreamController::class, 'null_stream_chapters']);
 Route::get('/fix_null_stream_chapters/', [StreamController::class, 'fix_null_stream_chapters']);
 
+Route::get('/0step_answer_sections/', [StreamController::class, 'Ostep_answer_sections']);
+Route::get('/fix_answer_sections/', [StreamController::class, 'fix_answer_sections']);
+
 Route::get('/collections/{collection}/{topic?}', [CollectionController::class, 'show']);
 Route::post('/collections/{collection}/{question}/elaborations', [CollectionController::class, 'storeElaboration']);
 
@@ -69,14 +72,14 @@ Route::post('/log', [ActivityLogController::class, 'store']);
 
 Route::get('/streams/', [StreamController::class, 'index']);
 
-Route::group(['middleware' => 'auth:sanctum'], function () {
-
     Route::get('/activation-status', [RegistrationController::class, 'activationStatus']);
     Route::post('/activate-account', [RegistrationController::class, 'activateAccount']);
     Route::post('/activate-license', [RegistrationController::class, 'activateLicense']);
 
     Route::post('/forgot-password', [PasswordResetLinkController::class, 'store']); // csrf?
     Route::post('/reset-password', [NewPasswordController::class, 'save'])->name('password.reset');
+
+Route::group(['middleware' => 'auth:sanctum'], function () {
 
     Route::get('/latest', [CollectionController::class, 'latest']);
 
@@ -147,6 +150,9 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::post('attachments', [AttachmentController::class, 'store']);
 
         Route::get('/teacher-document/{exam}', [TeacherDocumentController::class, 'index']);
+
+        Route::post('/misc/topics/cache', [TopicController::class, 'cache']);
+        Route::post('/misc/answers/fix', [AnswerController::class, 'fix']);
     });
 
     Route::group(['prefix' => 'admin', 'middleware' => 'role:admin'], function () {
