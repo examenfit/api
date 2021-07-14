@@ -14,6 +14,7 @@ class Exam extends Model implements Auditable
     public $fillable = [
         'stream_id',
         'status',
+        'notes',
         'year',
         'term',
         'standardization_value',

@@ -20,6 +20,7 @@ class ExamResource extends JsonResource
             'id' => $this->hash_id,
             'stream_id' => Hashids::encode($this->stream_id),
             'status' => $this->status,
+            'notes' => $this->notes,
             'year' => $this->year,
             'term' => $this->term,
             'standardization_value' => $this->standardization_value,
