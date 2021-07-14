@@ -74,7 +74,8 @@ class ExamController extends Controller
             'term' => 'required|integer|in:1,2,3',
             'standardization_value' => 'nullable|numeric',
             'is_pilot' => 'nullable|boolean',
-            'introduction' => 'nullable|string'
+            'introduction' => 'nullable|string',
+            'notes' => 'nullable|string'
         ]);
 
         $data['stream_id'] = Hashids::decode($data['stream_id'])[0];
