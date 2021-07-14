@@ -12,6 +12,7 @@ use App\Models\Chapter;
 use App\Models\Question;
 use App\Models\QuestionType;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\MetaDataImport as ImportsMetaDataImport;
 
@@ -203,6 +204,51 @@ class MetaDataImport extends Command
         }
     }
 
+    private function similarity($a, $b)
+    {
+    }
+
+    private function similar($opgave)
+    {
+        $MATCH = 10;
+        if (strlen($opgave) < $MATCH) {
+            return;
+        }
+
+        $begin = substr($opgave, 0, $MATCH);
+        $end = substr($opgave, -$MATCH, $MATCH);
+        $topics = DB::select("
+          select
+            courses.name as vak,
+            levels.name as niveau,
+            exams.year as jaar,
+            exams.term as tijdvak,
+            topics.name as name,
+            topics.id as id
+          from topics, exams, streams, courses, levels
+          where (topics.name like ? or topics.name like ?)
+            and topics.exam_id = exams.id
+            and exams.stream_id = streams.id
+            and streams.course_id = courses.id
+            and streams.level_id = levels.id
+          order by abs(length(topics.name) - ?)
+        ", [
+          "$begin%",
+          "%$end",
+          strlen($opgave)
+        ]);
+        foreach($topics as $topic) {
+          $vak = $topic->vak;
+          $niveau = $topic->niveau;
+          $jaar = $topic->jaar;
+          $tijdvak = $topic->tijdvak;
+          $id = $topic->id;
+          $similar = $topic->name;
+          $dist = levenshtein($opgave, $similar);
+          $this->info("  Mogelijke match: \"$similar\" ±$dist ($vak $niveau, $jaar-$tijdvak)");
+        }
+    }
+
     private function processTopicField($opgave)
     {
         if (is_null($opgave)) {
@@ -217,6 +263,7 @@ class MetaDataImport extends Command
         if ($count < 1) {
             $this->topic = null;
             $this->warning("Opgave \"$opgave\" niet gevonden");
+            $this->similar($opgave);
             return;
         }
 
