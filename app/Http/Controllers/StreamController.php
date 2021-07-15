@@ -219,5 +219,49 @@ class StreamController extends Controller
             d.stream_id is null
         ");
     }
-    
+
+    public function Ostep_answer_sections()
+    {
+        return DB::select("
+            select
+              questions.id as question_id,
+              courses.name as vak,
+              levels.name as niveau,
+              year,
+              term,
+              topics.name,
+              questions.number
+            from
+              questions,
+              topics,
+              exams,
+              streams,
+              courses,
+              levels
+            where
+              courses.id = streams.course_id and
+              levels.id = streams.level_id and
+              streams.id = exams.stream_id and
+              exams.id = topics.exam_id and
+              topics.id = questions.topic_id and
+              questions.id in (
+                select
+                  question_id
+                from
+                  answers
+                where
+                  id not in (select answer_id from answer_sections)
+              )
+              order by 1,2,3,4,6;
+        ");
+    }
+
+    function fix_answer_sections() {
+        return DB::delete("
+            delete from
+              answers
+            where
+              id not in (select answer_id from answer_sections)
+        ");
+    }
 }
