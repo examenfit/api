@@ -14,8 +14,7 @@ class TeacherDocumentController extends Controller
     {
         try {
             set_time_limit(120);
-            Artisa::call('ef:questioncorrection', ['exam' => $exam->id]);
-
+            Artisan::call('ef:questioncorrection', ['exam' => $exam->id]);
             Log::info(Artisan::output());
 
             $path = storage_path("app/public/question-correction/{$exam->hash_id}.docx");
