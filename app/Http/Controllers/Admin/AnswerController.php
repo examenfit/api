@@ -6,6 +6,7 @@ use App\Models\Answer;
 use App\Models\Question;
 use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AnswerResource;
 use App\Models\AnswerSection;
@@ -39,14 +40,17 @@ class AnswerController extends Controller
             'secionts.*.points' => 'required|integer'
         ]);
 
+        Log::info('remark = '.$data['remark']);
+
         if (isset($data['sections']) && count($data['sections'])) {
             $answer->sections()->delete();
             $answer->sections()->createMany($data['sections']);
         }
 
-        if (isset($data['remark'])) {
+        //if (isset($data['remark'])) {
+            Log::info('updating');
             $answer->update(['remark' => $data['remark']]);
-        }
+        //}
 
         return $this->show($answer);
     }
