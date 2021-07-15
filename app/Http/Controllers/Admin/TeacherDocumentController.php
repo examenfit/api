@@ -13,9 +13,9 @@ class TeacherDocumentController extends Controller
     public function index(Exam $exam)
     {
         try {
-            set_time_limit(120);
-            Artisan::call('ef:questioncorrection', ['exam' => $exam->id]);
-            Log::info(Artisan::output());
+            //set_time_limit(120);
+            //Artisan::call('ef:questioncorrection', ['exam' => $exam->id]);
+            //Log::info(Artisan::output());
 
             $path = storage_path("app/public/question-correction/{$exam->hash_id}.docx");
 
