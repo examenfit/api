@@ -45,7 +45,6 @@ class ExamController extends Controller
         $exam = Exam::create([
             'stream_id' => Hashids::decode($data['stream_id'])[0],
             'status' => 'prepared',
-            'level' => $data['level'],
             'year' => $data['year'],
             'term' => $data['term'],
         ]);

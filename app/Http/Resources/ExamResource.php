@@ -29,7 +29,7 @@ class ExamResource extends JsonResource
             'topics' => TopicResource::collection($this->whenLoaded('topics')),
             'files' => ExamSourceFileResource::collection($this->whenLoaded('files')),
             'stream' => new StreamResource($this->whenLoaded('stream')),
-            'level' => new LevelResource($this->whenLoaded('level')),
+            //'level' => new LevelResource($this->whenLoaded('level')),
             'assignment_contents' => $this->when(Auth::user()->isAdmin(), $this->assignment_contents),
         ];
     }
