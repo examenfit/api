@@ -161,7 +161,7 @@ class GenerateQuestionCorrectionDocument extends Command
         $level = strtoupper($this->exam->stream->level->name);
         $course = $this->exam->stream->course->name;
         $year = $this->exam->year;
-        $term = $this->exam->term === 1 ? 'Ⅰ' : 'Ⅱ';
+        $term = substr('III', -$this->exam->term);
         $title = "{$course} {$level} – {$year}-{$term}";
         $this->currentSection()->addText($title, ['bold' => true, 'size' => 24]);
 
