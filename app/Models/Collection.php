@@ -14,6 +14,9 @@ class Collection extends Model
     public $fillable = [
         'user_id',
         'name',
+        'download_type',
+        'partial_topics',
+        'complete_topics'
     ];
 
     public static function booted()

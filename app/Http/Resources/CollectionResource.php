@@ -17,6 +17,9 @@ class CollectionResource extends JsonResource
         return [
             'id' => $this->hash_id,
             'name' => $this->name,
+            'download_type' => $this->download_type,
+            'partial_topics' => $this->partial_topics,
+            'complete_topics' => $this->complete_topics,
             'topics' => TopicResource::collection($this->whenLoaded('topics')),
             'questions' => QuestionResource::collection($this->whenLoaded('questions')),
             'author' => $this->when($this->relationLoaded('author'), function () {
