@@ -16,7 +16,8 @@ class Collection extends Model
         'name',
         'download_type',
         'partial_topics',
-        'complete_topics'
+        'complete_topics',
+        'course_id'
     ];
 
     public static function booted()
