@@ -55,6 +55,22 @@ class CollectionController extends Controller
         ", [ $id, $course->id ]);
     }
 
+    public function activity_summary(Collection $collection)
+    {
+        $r = DB::select("
+          select
+            count(distinct device_key) as devices,
+            count(distinct session_key) as sessions,
+            date(max(created_at)) as last,
+            count(*) as activities
+          from
+            activity_logs
+          where
+            collection_id = ?
+        ", [ $collection->id ]);
+        return response()->json($r[0]);
+    }
+
     public function unknown_usage()
     {
         return DB::select("
