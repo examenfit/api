@@ -58,6 +58,9 @@ Route::get('/invalid_tags/', [StreamController::class, 'invalid_tags']);
 Route::get('/fixable_tags/', [StreamController::class, 'fixable_tags']);
 Route::get('/fix_tags/', [StreamController::class, 'fix_tags']);
 
+Route::get('/unknown_usage', [CollectionController::class, 'unknown_usage']);
+Route::get('/fix_usage', [CollectionController::class, 'fix_usage']);
+
 Route::get('/null_stream_chapters/', [StreamController::class, 'null_stream_chapters']);
 Route::get('/fix_null_stream_chapters/', [StreamController::class, 'fix_null_stream_chapters']);
 
@@ -79,9 +82,12 @@ Route::get('/streams/', [StreamController::class, 'index']);
     Route::post('/forgot-password', [PasswordResetLinkController::class, 'store']); // csrf?
     Route::post('/reset-password', [NewPasswordController::class, 'save'])->name('password.reset');
 
+    Route::get('/activity_summary/{collection}', [CollectionController::class, 'activity_summary']);
+
 Route::group(['middleware' => 'auth:sanctum'], function () {
 
     Route::get('/latest', [CollectionController::class, 'latest']);
+    Route::get('/constraints/{course}', [CollectionController::class, 'constraints']);
 
     Route::get('/courses/', [CourseController::class, 'index']);
     Route::get('/levels/', [LevelController::class, 'index']);

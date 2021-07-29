@@ -77,6 +77,7 @@ class SearchController extends Controller
             })->sortBy('id')->values();
 
         $complexities = $stream->topics
+            ->whereNotNull('complexity')
             ->whereIn('exam.status', $statuses)
             ->countBy(fn ($topic) => $topic->complexity)
             ->sortDesc()

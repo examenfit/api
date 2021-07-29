@@ -1,0 +1,34 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class AddDownloadinfoColumnsToCollectionsTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::table('collections', function (Blueprint $table) {
+            $table->string('download_type')->nullable();
+            $table->integer('partial_topics')->nullable();
+            $table->integer('complete_topics')->nullable();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::table('collections', function (Blueprint $table) {
+            //
+        });
+    }
+}

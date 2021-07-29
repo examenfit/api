@@ -46,8 +46,8 @@ class StreamController extends Controller
               s.course_id = c.id AND
               s.level_id = l.id
             ORDER BY
-              level,
-              course
+              course,
+              level
         "));
     }
 

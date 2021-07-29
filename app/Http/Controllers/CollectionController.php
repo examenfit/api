@@ -8,6 +8,7 @@ use DateTimeZone;
 use Exception;
 
 use App\Models\Topic;
+use App\Models\Course;
 use App\Models\Question;
 use App\Models\Collection;
 use App\Models\Elaboration;
@@ -23,6 +24,116 @@ use App\Support\DocumentMarkup;
 
 class CollectionController extends Controller
 {
+    public function constraints(Course $course)
+    {
+        $id = auth()->user()->id;
+
+        return DB::select("
+          select
+          /*
+            stream_id,
+          */
+            cast(sum(complete_topics) as unsigned) as complete_topics,
+            cast(sum(complete_topics + partial_topics) as unsigned) as topics,
+            cast(sum(if (download_type = 'word', complete_topics + partial_topics, 0)) as unsigned) as word_topics
+          from
+          /*
+            exams,
+            topics,
+            questions,
+          */
+            collections
+          where
+          /*
+            exam_id = exams.id and
+            topic_id = topics.id and
+            question_id = questions.id and
+          */
+            user_id = ? and
+            course_id =? and
+            created_at > date_add(now(), interval -7 day)
+        ", [ $id, $course->id ]);
+    }
+
+    public function activity_summary(Collection $collection)
+    {
+        $r = DB::select("
+          select
+            count(distinct device_key) as devices,
+            count(distinct session_key) as sessions,
+            date(max(created_at)) as last,
+            count(*) as activities
+          from
+            activity_logs
+          where
+            collection_id = ?
+        ", [ $collection->id ]);
+        return response()->json($r[0]);
+    }
+
+    public function unknown_usage()
+    {
+        return DB::select("
+            select *
+            from collections
+            where complete_topics is null
+        ");
+    }
+
+    public function fix_usage()
+    {
+        $collections = [];
+        $usage = DB::select("
+            select
+              collection_id,
+              topic_id,
+              count(distinct q.id) as questions_used,
+              (select count(*) from questions m where m.topic_id = q.topic_id) as questions_available
+            from
+              questions q,
+              collection_question r
+            where
+              q.id = question_id
+            group by
+              collection_id,
+              topic_id
+            order by
+              collection_id,
+              topic_id
+        ");
+        foreach($usage as $info) {
+            $id = $info->collection_id;
+            if (!array_key_exists("x$id", $collections)) {
+                $collections["x$id"] = [
+                  'id' => $id,
+                  'partial' => 0,
+                  'complete' => 0,
+                ];
+            }
+            if ($info->questions_used === $info->questions_available) {
+                $collections["x$id"]['partial'] += 0;
+                $collections["x$id"]['complete'] += 1;
+            } else {
+                $collections["x$id"]['partial'] += 1;
+                $collections["x$id"]['complete'] += 0;
+            }
+        }
+
+        foreach($collections as $usage) {
+            $id = $usage['id'];
+            $partial = $usage['partial'];
+            $complete = $usage['complete'];
+            DB::update("
+              update collections
+              set partial_topics = ?,
+                  complete_topics = ?
+              where id = ?
+            ", [ $partial, $complete, $id ]);
+        }
+        
+        return response()->json([ 'status' => 'ok' ]);
+    }
+
     public function show(Collection $collection, Topic $topic)
     {
         $collection->load([
@@ -204,12 +315,16 @@ class CollectionController extends Controller
     {
         $data = $request->validate([
             'name' => 'required|string|max:255',
+            'download_type' => 'required|string',
+            'course_id' => ['required', new HashIdExists('courses')],
             'questions' => 'required|array',
             'questions.*' => new HashIdExists('questions'),
         ]);
 
         $collection = Collection::create([
             'name' => $data['name'],
+            'course_id' => Hashids::decode($data['course_id'])[0],
+            'download_type' => $data['download_type']
         ]);
 
         $collection->questions()->sync(
@@ -218,7 +333,36 @@ class CollectionController extends Controller
             )
         );
 
+
+        $info = DB::select("
+            select
+              topic_id,
+              count(distinct q.id) as questions_used,
+              (select count(*) from questions m where m.topic_id = q.topic_id) as questions_available
+            from
+              questions q,
+              collection_question r
+            where
+              q.id = question_id and
+              collection_id = ?
+            group by
+              topic_id
+        ", [ $collection->id ]);
+
+        $partial_topics = 0;
+        $complete_topics = 0;
+        foreach ($info as $row) {
+          if ($row->questions_used < $row->questions_available) {
+            ++$partial_topics;
+          } else {
+            ++$complete_topics;
+          }
+        }
+
         $collection->load('topics');
+        $collection->partial_topics = $partial_topics;
+        $collection->complete_topics = $complete_topics;
+        $collection->save();
 
         return new CollectionResource($collection);
     }
