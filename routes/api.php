@@ -82,11 +82,12 @@ Route::get('/streams/', [StreamController::class, 'index']);
     Route::post('/forgot-password', [PasswordResetLinkController::class, 'store']); // csrf?
     Route::post('/reset-password', [NewPasswordController::class, 'save'])->name('password.reset');
 
+    Route::get('/activity_summary/{collection}', [CollectionController::class, 'activity_summary']);
+
 Route::group(['middleware' => 'auth:sanctum'], function () {
 
     Route::get('/latest', [CollectionController::class, 'latest']);
     Route::get('/constraints/{course}', [CollectionController::class, 'constraints']);
-    Route::get('/activity_summary/{collection}', [CollectionController::class, 'activity_summary']);
 
     Route::get('/courses/', [CourseController::class, 'index']);
     Route::get('/levels/', [LevelController::class, 'index']);
