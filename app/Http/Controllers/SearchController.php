@@ -210,7 +210,14 @@ class SearchController extends Controller
                 $ids = collect($value)->map(
                     fn ($item) => Hashids::decode($item)[0]
                 )->toArray();
-                $query->whereJsonContains('cache->chapterId', $ids);
+                $n = 0;
+                foreach ($ids as $id) {
+                  if ($n++) {
+                    $query->orWhereJsonContains('cache->chapterId', $id);
+                  } else {
+                    $query->whereJsonContains('cache->chapterId', $id);
+                  }
+                }
             }),
         ])->allowedSorts([
             'name',
