@@ -380,8 +380,16 @@ class MetaDataImport extends Command
 
     public function processRow($row)
     {
-        $this->processTopicField($row['opgave']);
-        $this->processQuestionField($row['vraag_nr']);
+        try {
+            $opgave = $row['opgave'];
+            $vraag_nr = $row['vraag_nr'];
+        } catch(\Exception $err) {
+            $this->verbose_info($err);
+            return;
+        }
+
+        $this->processTopicField($opgave);
+        $this->processQuestionField($vraag_nr);
         $this->processTopicQuestion();
 
         if ($this->question) {
