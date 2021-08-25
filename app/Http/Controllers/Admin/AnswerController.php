@@ -19,6 +19,26 @@ class AnswerController extends Controller
         return new AnswerResource($answer);
     }
 
+    public function delete(Answer $answer)
+    {
+        $id = $answer->id;
+        $answer->delete();
+        return response()->json([ 'message' => 'deleted Answer#'.$id, 'status' => 'ok' ]);
+    }
+
+    public function addStep(Answer $answer)
+    {
+        $answer->sections()->create([
+          'correction' => '',
+          'text' => '',
+          'elaboration' => '',
+          'explanation' => '',
+          'points' => 0,
+        ]);
+        $answer->load('sections.tips', 'question.tips');
+        return new AnswerResource($answer);
+    }
+
     public function store(Request $request, Question $question)
     {
         $data = $request->validate([
@@ -74,6 +94,14 @@ class AnswerController extends Controller
         ]);
 
         return response(null, 200);
+    }
+
+    public function deleteStep(Answer $answer, AnswerSection $answerSection)
+    {
+        $id = $answerSection->id;
+        $answerSection->delete();
+        $answer->load('sections.tips', 'question.tips');
+        return new AnswerResource($answer);
     }
 
     public function fix()
