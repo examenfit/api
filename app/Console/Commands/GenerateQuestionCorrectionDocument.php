@@ -358,6 +358,11 @@ class GenerateQuestionCorrectionDocument extends Command
 
         $this->addAnswerTitle("Vraag {$nr}, tips:");
 
+        $textRun->addText(
+            "Algemene tip:",
+            ['bold' => true, 'color' => '0070C0']
+        );
+
         $textRun = $this->currentSection()->addTextRun();
         $textRun->addText("Gegeven:", ['bold' => true]);
         $textRun->addTextBreak(1);
@@ -365,11 +370,6 @@ class GenerateQuestionCorrectionDocument extends Command
         $textRun->addTextBreak(1);
         $textRun->addText("Aanpak:", ['bold' => true]);
         $textRun->addTextBreak(1);
-
-        $textRun->addText(
-            "Algemene tip:",
-            ['bold' => true, 'color' => '0070C0']
-        );
 
         $textRun->addTextBreak(1);
 
