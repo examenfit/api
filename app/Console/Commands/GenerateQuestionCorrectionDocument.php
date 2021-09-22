@@ -9,6 +9,10 @@ use PhpOffice\PhpWord\Element\TextRun;
 use PhpOffice\PhpWord\SimpleType\Jc;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
+define('__SHOW_TOPIC_TEXT__', false);
+define('__SHOW_QUESTION_TEXT__', false);
+define('__SHOW_MEDIA__', false);
+
 class GenerateQuestionCorrectionDocument extends Command
 {
     protected $signature = 'ef:questioncorrection {exam}';
@@ -67,6 +71,7 @@ class GenerateQuestionCorrectionDocument extends Command
 
         $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($this->processor, 'Word2007');
         $objWriter->save(storage_path("app/public/question-correction/{$this->exam->hash_id}.docx"));
+        $this->info(storage_path("app/public/question-correction/{$this->exam->hash_id}.docx"));
     }
 
     public function getExam($id)
@@ -140,8 +145,6 @@ class GenerateQuestionCorrectionDocument extends Command
             foreach ($topic->questions as $question) {
                 $this->addQuestion($question);
 
-                $this->currentSection()->addPageBreak();
-
                 $this->addAnswer($question->answers);
 
                 // Temporary hide
@@ -182,17 +185,29 @@ class GenerateQuestionCorrectionDocument extends Command
         $this->currentSection()->addPageBreak();
     }
 
+    function addTopicTitle($topic)
+    {
+        $this->currentSection()->addTitle($topic->name);
+    }
+
+    function addTopicIntro($topic)
+    {
+        if (__SHOW_TOPIC_TEXT__) {
+            // Introduction
+            $textRun = $this->currentSection()->addTextRun();
+            $this->formatText($topic->introduction, $textRun);
+        }
+    }
+
     public function addTopic($topic)
     {
         // Title
-        $this->currentSection()->addTitle($topic->name);
+        $this->addTopicTitle($topic);
 
         // Attachments
         $this->addAttachments($topic->attachments, null, 'small');
 
-        // Introduction
-        $textRun = $this->currentSection()->addTextRun();
-        $this->formatText($topic->introduction, $textRun);
+        $this->addTopicIntro($topic);
 
         // Attachments
         $this->addAttachments($topic->attachments, null, 'large', 1.3);
@@ -203,6 +218,10 @@ class GenerateQuestionCorrectionDocument extends Command
 
     public function addAttachments($attachments, $parent = null, $type = null)
     {
+        if (!__SHOW_MEDIA__) {
+            return;
+        }
+
         $textBoxStyleOptions = [];
         $titleHeight = 20;
 
@@ -257,31 +276,40 @@ class GenerateQuestionCorrectionDocument extends Command
     public function addQuestion($question)
     {
         // Title
-        $this->currentSection()->addTitle('Vraag ' . $this->questionNumber);
+        // $this->currentSection()->addTitle('Vraag ' . $this->questionNumber);
 
         $this->addAttachments($question->attachments);
 
-        // Create TextRun
-        $textRun = $this->currentSection()->addTextRun(['alignment' => 'left']);
+        if (__SHOW_QUESTION_TEXT__) {
+            // Create TextRun
+            $textRun = $this->currentSection()->addTextRun(['alignment' => 'left']);
 
-        // Introduction
-        $this->formatText($question->introduction, $textRun);
+            // Introduction
+            $this->formatText($question->introduction, $textRun);
 
-        $textRun->addTextBreak(2);
+            $textRun->addTextBreak(2);
 
-        // Question number
-        $textRun->addText('Vraag ' . $this->questionNumber . ': ', ['bold' => true]);
+            // Question number
+            $textRun->addText('Vraag ' . $this->questionNumber . ': ', ['bold' => true]);
 
-        // Question text
-        $this->formatText($question->text, $textRun);
+            // Question text
+            $this->formatText($question->text, $textRun);
 
-        // Add break
-        $this->currentSection()->addTextBreak(1);
+            // Add break
+            $this->currentSection()->addTextBreak(1);
+            $this->currentSection()->addPageBreak();
+        }
+    }
+
+    function addAnswerTitle($text)
+    {
+        $this->currentSection()->addTitle($text);
     }
 
     public function addAnswer($answers)
     {
-        $this->currentSection()->addTitle("CV – Vraag {$this->questionNumber}:");
+        $nr = $this->questionNumber;
+        $this->addAnswerTitle("Vraag {$nr}, correctievoorschrift:");
 
         foreach ($answers as $index => $answer) {
 
@@ -311,8 +339,7 @@ class GenerateQuestionCorrectionDocument extends Command
         $answer = $answers[0];
 
         $this->currentSection()->addTextBreak(1);
-        $this->currentSection()
-            ->addTitle("Tussenantwoorden – Vraag {$this->questionNumber}:");
+        $this->addAnswerTitle("Vraag {$nr}, tussenantwoorden:");
 
         foreach ($answer->sections as $index => $section) {
             $textRun = $this->currentSection()->addTextRun();
@@ -329,10 +356,16 @@ class GenerateQuestionCorrectionDocument extends Command
 
         $this->currentSection()->addPageBreak();
 
-        $this->currentSection()
-            ->addTitle("Tips – Vraag {$this->questionNumber}:");
+        $this->addAnswerTitle("Vraag {$nr}, tips:");
 
         $textRun = $this->currentSection()->addTextRun();
+        $textRun->addText("Gegeven:", ['bold' => true]);
+        $textRun->addTextBreak(1);
+        $textRun->addText("Gevraagd:", ['bold' => true]);
+        $textRun->addTextBreak(1);
+        $textRun->addText("Aanpak:", ['bold' => true]);
+        $textRun->addTextBreak(1);
+
         $textRun->addText(
             "Algemene tip:",
             ['bold' => true, 'color' => '0070C0']
@@ -351,6 +384,7 @@ class GenerateQuestionCorrectionDocument extends Command
             $textRun->addTextBreak(1);
         }
 
+/*
         $this->currentSection()->addTextBreak(2);
         $this->currentSection()->addTitle("Modeluitwerking – Vraag {$this->questionNumber}:");
 
@@ -372,6 +406,7 @@ class GenerateQuestionCorrectionDocument extends Command
                 $textRun->addTextBreak(1);
             }
         }
+*/
     }
 
     public function addMetaData($question)
@@ -410,7 +445,7 @@ class GenerateQuestionCorrectionDocument extends Command
         $this->currentSection()->addTextBreak(1);
 
         $textRun = $this->currentSection()->addTextRun();
-        $textRun->addText("Highlight - Vraag {$question->number}: ", ['bold' => true, 'color' => '0070C0']);
+        $textRun->addText("Highlight vraag {$question->number}: ", ['bold' => true, 'color' => '0070C0']);
     }
 
     public function formatText($text, &$textRun = null, $textStyle = null)
