@@ -141,11 +141,14 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('/questions/{question}', [QuestionController::class, 'show']);
         Route::put('/questions/{question}', [QuestionController::class, 'update']);
         Route::delete('/questions/{question}', [QuestionController::class, 'destroy']);
+        Route::post('/questions/{question}/answers', [AnswerController::class, 'store']);
 
         Route::get('/answers/{answer}', [AnswerController::class, 'show']);
-        Route::post('/questions/{question}/answers', [AnswerController::class, 'store']);
         Route::put('/answers/{answer}', [AnswerController::class, 'update']);
+        Route::delete('/answers/{answer}', [AnswerController::class, 'delete']);
+        Route::post('/answers/{answer}', [AnswerController::class, 'addStep']);
         Route::put('/answers/{answer}/sections/{answerSection}', [AnswerController::class, 'updateSection']);
+        Route::delete('/answers/{answer}/sections/{answerSection}', [AnswerController::class, 'deleteStep']);
 
         Route::put("/tags/{tag}", [AdminTagController::class, 'update']);
         Route::delete("/tags/{tag}", [AdminTagController::class, 'destroy']);

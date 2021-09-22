@@ -185,6 +185,13 @@ class MetaDataImport extends Command
     private function warning($message)
     {
         $this->info("LET OP: $message");
+        if ($this->topic && $this->question) {
+          $topic = $this->topic->name;
+          $year = $this->topic->exam->year;
+          $term = $this->topic->exam->term;
+          $number = $this->question->number;
+          $this->info("        $topic, Vraag $number ($year-$term)");
+        }
     }
 
     private function getTopics($opgave)
