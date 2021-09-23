@@ -135,7 +135,7 @@ class MetaDataImport extends Command
 
         $choices = $this->getChoices($chapters);
 
-        $this->mw_exam_chapter_id = $this->askChoice("Getal & Ruimte examenhoofdstuk?", $choices);
+        $this->mw_exam_chapter_id = $this->askChoice("Moderne Wiskunde examenhoofdstuk?", $choices);
     }
 
     private function getStream()
@@ -411,12 +411,11 @@ class MetaDataImport extends Command
         }
     }
 
-
-    private function processChapter(&$sync, $chapters, $title)
+    private function processChapter(&$sync, $chapters, $name_or_title)
     {
         $count = count($chapters);
         if ($count !== 1) {
-            $this->warning("Afwijkend aantal voorkomens gevonden voor Hoofdstuk \"$title\" ($count/1)");
+            $this->warning("Afwijkend aantal voorkomens gevonden voor Hoofdstuk \"$name_or_title\" ($count/1)");
         }
         foreach($chapters as $chapter) {
             $id = $chapter->id;
@@ -431,31 +430,73 @@ class MetaDataImport extends Command
         }
     }
 
-    private function processMainChapter(&$sync, $text, $methodology_id, $exam_chapter_id)
+    private function processMainChapter(&$sync, $str, $title, $methodology_id, $exam_chapter_id)
     {
-        $titles = explode("\n", $text);
-        foreach ($titles as $title) {
-            $stream_id = $this->stream->id;
-            $this->info("stream=$stream_id, methodology=$methodology_id, title=$title");
-            //$chapters = $this->stream->chapters
-            $chapters = Chapter::where('stream_id', $this->stream->id)
-                ->where('title', $title)
-                ->where('methodology_id', $methodology_id)
-                ->where('chapter_id', '!=', $exam_chapter_id)->get();
-            $this->processChapter($sync, $chapters, $title);
+        $methode = 'onbekende methode';
+        if ($methodology_id === 1) $methode = 'Getal & Ruimte';
+        if ($methodology_id === 2) $methode = 'Moderne Wiskunde';
+
+        if ($title === 0) {
+          $this->info("Fout in sheet, veld voor hoofdstuk titel ($methode) niet gevonden.");
+          return;
         }
+        if ($str === 0) {
+          $this->info("Fout in sheet, veld voor hoofdstuk ($methode) niet gevonden.");
+          return;
+        }
+
+        $stream_id = $this->stream->id;
+        $names = explode(' ', $str);
+        $name = array_pop($names);
+        $part = join(' ', $names);
+        //$this->info("$part - $name $title");
+
+        //$this->info("stream=$stream_id, methodology=$methodology_id, title=$title");
+        //$chapters = $this->stream->chapters
+        $chapters = Chapter::where('stream_id', $this->stream->id)
+            ->where('name', $name)
+            ->where('title', $title)
+            ->where('methodology_id', $methodology_id)
+            ->where('chapter_id', '!=', $exam_chapter_id)
+            ->get();
+        if (count($chapters) === 0) {
+          $chapters = Chapter::where('stream_id', $this->stream->id)
+            ->where('title', $title)
+            ->where('methodology_id', $methodology_id)
+            ->where('chapter_id', '!=', $exam_chapter_id)
+            ->get();
+          if (count($chapters)) {
+            $this->warning("Hoofdstuk gevonden op alleen titel '$title' ($methode)");
+          }
+        }
+        $this->processChapter($sync, $chapters, "$str $title ($methode)");
     }
 
-    private function processExamChapter(&$sync, $text, $methodology_id, $exam_chapter_id)
+    private function processExamChapter(&$sync, $name, $methodology_id, $exam_chapter_id)
     {
-        $titles = explode("\n", $text);
-        foreach ($titles as $title) {
-            $chapters = $this->stream->chapters
-                ->where('name', $title)
-                ->where('methodology_id', $methodology_id)
-                ->where('chapter_id', $exam_chapter_id);
-            $this->processChapter($sync, $chapters, $title);
+        $methode = 'onbekende methode';
+        if ($methodology_id === 1) $methode = 'Getal & Ruimte';
+        if ($methodology_id === 2) $methode = 'Moderne Wiskunde';
+
+        if ($name === 0) {
+          $this->info("Fout in sheet, veld voor hoofdstuk titel niet gevonden.");
+          return;
         }
+        //$this->info("exam_chapter_id=$exam_chapter_id, methodology=$methodology_id, name=$name");
+        $chapters = $this->stream->chapters
+            ->where('name', $name)
+            ->where('methodology_id', $methodology_id)
+            ->where('chapter_id', $exam_chapter_id);
+        if (count($chapters) === 0) {
+          $chapters = $this->stream->chapters
+            ->where('title', $name)
+            ->where('methodology_id', $methodology_id)
+            ->where('chapter_id', $exam_chapter_id);
+          if (count($chapters)) {
+            $this->warning("Hoofdstuk gevonden op titel ipv. naam '$name' ($methode)");
+          }
+        }
+        $this->processChapter($sync, $chapters, $name);
     }
 
     public function processChapters($row)
@@ -463,11 +504,11 @@ class MetaDataImport extends Command
         $sync = [];
 
         // Getal & Ruimte
-        $this->processMainChapter($sync, $row['hoofdstuktitel_gr'], 1, $this->gr_exam_chapter_id);
+        $this->processMainChapter($sync, $row['hoofdstuk_gr'], $row['hoofdstuktitel_gr'], 1, $this->gr_exam_chapter_id);
         $this->processExamChapter($sync, $row['examentraining_gr'], 1, $this->gr_exam_chapter_id);
 
         // Moderne Wiskunde
-        $this->processMainChapter($sync, $row['hoofdstuktitel_mw'], 2, $this->mw_exam_chapter_id);
+        $this->processMainChapter($sync, $row['hoofdstuk_mw'], $row['hoofdstuktitel_mw'], 2, $this->mw_exam_chapter_id);
         $this->processExamChapter($sync, $row['examentraining_mw'], 2, $this->mw_exam_chapter_id);
 
         $this->question->chapters()->sync($sync);
