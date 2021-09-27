@@ -9,6 +9,8 @@ use App\Http\Controllers\CourseController;
 use App\Http\Controllers\LevelController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\PrivilegeController;
+use App\Http\Controllers\LicenseController;
 use App\Http\Controllers\Admin\TipController;
 use App\Http\Controllers\Admin\ExamController;
 use App\Http\Controllers\ActivityLogController;
@@ -27,6 +29,7 @@ use App\Http\Controllers\Admin\IndexController as AdminIndexController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\AuditController as AdminAuditController;
 use App\Http\Controllers\Admin\TagController as AdminTagController;
+//use App\Http\Controllers\Admin\ChapterController as AdminChapterController;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,6 +46,25 @@ use App\Http\Controllers\Admin\TagController as AdminTagController;
 
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])
     ->middleware('guest');
+
+// fixme: restrict access
+Route::get('/licenses', [LicenseController::class, 'index']);
+Route::post('/licenses', [LicenseController::class, 'index']);
+Route::get('/licenses/{license}', [LicenseController::class, 'get']);
+Route::put('/licenses/{license}', [LicenseController::class, 'put']);
+Route::delete('/licenses/{license}', [LicenseController::class, 'delete']);
+Route::post('/licenses/{license}', [LicenseController::class, 'createSeat']);
+Route::get('/licenses/{license}/{seat}', [LicenseController::class, 'getSeat']);
+Route::put('/licenses/{license}/{seat}', [LicenseController::class, 'putSeat']);
+Route::delete('/licenses/{license}/{seat}', [LicenseController::class, 'deleteSeat']);
+Route::post('/licenses/{license}/{seat}', [LicenseController::class, 'createPrivilege']);
+Route::get('/licenses/{license}/{seat}/{privilege}', [LicenseController::class, 'getPrivilege']);
+Route::put('/licenses/{license}/{seat}/{privilege}', [LicenseController::class, 'putPrivilege']);
+Route::delete('/licenses/{license}/{seat}/{privilege}', [LicenseController::class, 'deletePrivilege']);
+
+Route::post('/privilege', [PrivilegeController::class, 'privilege']);
+Route::post('/privileges', [PrivilegeController::class, 'privileges']);
+Route::post('/objects', [PrivilegeController::class, 'objects']);
 
 Route::get('/download-collection/{collection}', [CollectionController::class, 'showCollectionQuestionsDocument']);
 Route::get('/download-collection-html/{collection}', [CollectionController::class, 'showCollectionQuestionsHtml']);
@@ -122,6 +144,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('/courses', [AdminCourseController::class, 'index']);
         Route::get('/courses/{stream}', [AdminCourseController::class, 'show']);
         Route::get('/courses/{stream}/tags', [AdminTagController::class, 'index']);
+        //Route::get('/courses/{stream}/chapters', [AdminChapterController::class, 'index']);
         Route::post('/courses/{stream}/tags', [AdminTagController::class, 'store']);
         Route::get('courses/{stream}/meta', [AdminCourseController::class, 'showMeta']);
 

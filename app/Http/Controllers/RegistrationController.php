@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 
 use App\Mail\RegistrationMail;
 use App\Models\Registration;
+use App\Models\License;
 use App\Models\User;
 use App\Http\Requests\RegistrationRequest;
 use App\Http\Resources\RegistrationResource;
@@ -130,6 +131,18 @@ class RegistrationController extends Controller
         }
     }
 
+    private function activateTrialLicense($user, $registration)
+    {
+        $user->role = 'docent';
+        $user->newsletter = $registration->newsletter;
+        $user->save();
+
+        License::createTrialLicense($user);
+
+        $registration->activated = new DateTime();
+        $registration->save();
+    }
+
     public function activateLicense(Request $request)
     {
         try {
@@ -142,11 +155,7 @@ class RegistrationController extends Controller
                 return response()->json(['message' => 'user does not exist'], 406);
             }
             if ($registration->license === 'trial') {
-                $user->role = 'participant';
-                $user->newsletter = $registration->newsletter;
-                $user->save();
-                $registration->activated = new DateTime();
-                $registration->save();
+                $this->activateTrialLicense($user, $registration);
             }
             return $registration;
         } catch (Exception $err) {
