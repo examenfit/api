@@ -29,7 +29,7 @@ use App\Http\Controllers\Admin\IndexController as AdminIndexController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\AuditController as AdminAuditController;
 use App\Http\Controllers\Admin\TagController as AdminTagController;
-//use App\Http\Controllers\Admin\ChapterController as AdminChapterController;
+use App\Http\Controllers\Admin\ChapterController as AdminChapterController;
 
 /*
 |--------------------------------------------------------------------------
@@ -144,7 +144,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('/courses', [AdminCourseController::class, 'index']);
         Route::get('/courses/{stream}', [AdminCourseController::class, 'show']);
         Route::get('/courses/{stream}/tags', [AdminTagController::class, 'index']);
-        //Route::get('/courses/{stream}/chapters', [AdminChapterController::class, 'index']);
+        Route::get('/courses/{stream}/chapters', [AdminChapterController::class, 'index']);
         Route::post('/courses/{stream}/tags', [AdminTagController::class, 'store']);
         Route::get('courses/{stream}/meta', [AdminCourseController::class, 'showMeta']);
 
