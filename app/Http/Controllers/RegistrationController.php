@@ -57,6 +57,21 @@ class RegistrationController extends Controller
         }
     }
 
+    public function register(RegistrationRequest $request)
+    {
+        $data = $request->validated();
+        try
+        {
+            $registration = $this->createRegistration($data);
+            $this->sendRegistrationMail($registration);
+            return response()->json([ 'status' => 'success' ]);
+        }
+        catch (Exception $error)
+        {
+            return response()->json([ 'status' => 'failed', 'message' => $error->getMessage() ]);
+        }
+    }
+
     private function getRegistration(Request $request)
     {
         $activation_code = $request->activation_code;
