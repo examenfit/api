@@ -75,6 +75,7 @@ Route::post('/log', [ActivityLogController::class, 'store']);
 
 Route::get('/streams/', [StreamController::class, 'index']);
 
+    Route::post('/register', [RegistrationController::class, 'register']);
     Route::get('/activation-status', [RegistrationController::class, 'activationStatus']);
     Route::post('/activate-account', [RegistrationController::class, 'activateAccount']);
     Route::post('/activate-license', [RegistrationController::class, 'activateLicense']);
