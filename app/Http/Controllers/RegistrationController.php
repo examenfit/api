@@ -158,7 +158,7 @@ class RegistrationController extends Controller
                 $this->activateTrialLicense($user, $registration);
                 return $registration;
             }
-            return response()->json(['message' => 'licence invalid'], 406);
+            return response()->json(['message' => 'license invalid'], 406);
         } catch (Exception $err) {
             return response()->json(['message' => $err->getMessage()], 500);
         }
