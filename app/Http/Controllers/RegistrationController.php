@@ -133,7 +133,7 @@ class RegistrationController extends Controller
 
     private function activateTrialLicense($user, $registration)
     {
-        $user->role = 'docent';
+        $user->role = 'participant';
         $user->newsletter = $registration->newsletter;
         $user->save();
 
@@ -156,8 +156,9 @@ class RegistrationController extends Controller
             }
             if ($registration->license === 'trial') {
                 $this->activateTrialLicense($user, $registration);
+                return $registration;
             }
-            return $registration;
+            return response()->json(['message' => 'licence invalid'], 406);
         } catch (Exception $err) {
             return response()->json(['message' => $err->getMessage()], 500);
         }
