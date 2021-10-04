@@ -30,8 +30,7 @@ class License extends Model
         return $this->hasMany(Seat::class);
     }
 
-
-    public static function createTrialLicense($user)
+    public static function createTrialLicense($user, $streams = [ 1, 2 ])
     {
         $begin = new DateTime;
         $end = new DateTime;
@@ -54,14 +53,16 @@ class License extends Model
 
         echo "license #{$seat->id}\n";
 
-        Privilege::create([
-            'actor_seat_id' => $seat->id,
-            'action' => 'beperkt collecties samenstellen',
-            'object_type' => 'stream',
-            'object_id' => null,
-            'begin' => $begin,
-            'end' => $end
-        ]);
+        foreach ($streams as $stream_id) {
+            Privilege::create([
+                'actor_seat_id' => $seat->id,
+                'action' => 'beperkt collecties samenstellen',
+                'object_type' => 'stream',
+                'object_id' => $stream_id,
+                'begin' => $begin,
+                'end' => $end
+            ]);
+        }
 
         return $license;
     }
