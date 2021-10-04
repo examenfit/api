@@ -524,7 +524,7 @@ class MetaDataImport extends Command
         if ($count === 1) {
             return $domains->first();
         }
-/*
+
         $domains = Domain::query()
             ->where('stream_id', $this->stream->id)
             ->where('name', 'LIKE', "%($code$index)")
@@ -534,7 +534,8 @@ class MetaDataImport extends Command
             $this->warning("Domein code gevonden, naam mismatch \"$name ($code$index)\"");
             return $domains->first();
         }
-*/
+
+/*
         if ($count === 0) {
             if ($index) {
                 $parent_id = $this->getDomains($code, '', $name)->id;
@@ -548,7 +549,7 @@ class MetaDataImport extends Command
             ]);
             return $domain;
         }
-
+*/
         $this->warning("Afwijkend aantal voorkomens gevonden voor Domein code \"$name ($code$index)\" ($count/1)");
         return [];
     }
