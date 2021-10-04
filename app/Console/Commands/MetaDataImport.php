@@ -466,7 +466,7 @@ class MetaDataImport extends Command
             ->where('chapter_id', '!=', $exam_chapter_id)
             ->get();
           if (count($chapters)) {
-            $this->warning("Hoofdstuk gevonden op alleen titel '$title' ($methode)");
+            $this->warning("Hoofdstuk '$name $title' gevonden op alleen titel '$title' ($methode)");
           }
         }
         $this->processChapter($sync, $chapters, "$str $title ($methode)");
@@ -493,7 +493,7 @@ class MetaDataImport extends Command
             ->where('methodology_id', $methodology_id)
             ->where('chapter_id', $exam_chapter_id);
           if (count($chapters)) {
-            $this->warning("Hoofdstuk gevonden op titel ipv. naam '$name' ($methode)");
+            //$this->warning("Hoofdstuk gevonden op titel ipv. naam '$name' ($methode)");
           }
         }
         $this->processChapter($sync, $chapters, $name);
@@ -518,13 +518,23 @@ class MetaDataImport extends Command
     {
         $domains = Domain::query()
             ->where('stream_id', $this->stream->id)
-            ->where('name', 'LIKE', "%($code$index)")
+            ->where('name', "$name ($code$index)")
             ->get();
-
         $count = count($domains);
         if ($count === 1) {
             return $domains->first();
         }
+/*
+        $domains = Domain::query()
+            ->where('stream_id', $this->stream->id)
+            ->where('name', 'LIKE', "%($code$index)")
+            ->get();
+        $count = count($domains);
+        if ($count === 1) {
+            $this->warning("Domein code gevonden, naam mismatch \"$name ($code$index)\"");
+            return $domains->first();
+        }
+*/
         if ($count === 0) {
             if ($index) {
                 $parent_id = $this->getDomains($code, '', $name)->id;
@@ -539,7 +549,7 @@ class MetaDataImport extends Command
             return $domain;
         }
 
-        $this->warning("Afwijkend aantal voorkomens gevonden voor Domein \"($code)\" ($count/1)");
+        $this->warning("Afwijkend aantal voorkomens gevonden voor Domein code \"$name ($code$index)\" ($count/1)");
         return [];
     }
 
