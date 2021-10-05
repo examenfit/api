@@ -21,7 +21,7 @@ class UserController extends Controller
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'role' => 'required|in:admin,author,participant',
+            'role' => 'required|in:admin,author,participant,docent,leerling',
             'password' => 'required|min:8',
         ]);
 
