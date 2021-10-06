@@ -33,14 +33,11 @@ class CourseController extends Controller
     {
         $stream->load([
             'tags',
-            'domains',
+            'domains' => fn($q) => $q->where('parent_id', null),
             'questionTypes',
-            'chapters' => function ($query) {
-                $query
-                ->where('chapter_id', null)
+            'chapters' => fn ($q) => $q->where('chapter_id', null)
                 ->orderBy('name')
-                ->orderBy('methodology_id');
-            }
+                ->orderBy('methodology_id'),
         ]);
 
         return new StreamResource($stream);
