@@ -38,6 +38,9 @@ class RegistrationController extends Controller
     private function createRegistration($data)
     {
         $data['activation_code'] = Str::random(32);
+        if (!array_key_exists('newsletter', $data)) {
+          $data['newsletter'] = 0;
+        }
         $registration = Registration::create($data);
         $registration->save();
         return $registration;
