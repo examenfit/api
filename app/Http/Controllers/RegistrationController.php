@@ -134,7 +134,7 @@ class RegistrationController extends Controller
     private function activateTrialLicense($user, $registration)
     {
         $user->role = 'participant';
-        $user->newsletter = $registration->newsletter;
+        $user->newsletter = $registration->newsletter ?: 0;
         $user->save();
 
         License::createTrialLicense($user);
