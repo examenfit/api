@@ -56,7 +56,7 @@ class License extends Model
         foreach ($streams as $stream_id) {
             Privilege::create([
                 'actor_seat_id' => $seat->id,
-                'action' => 'beperkt collecties samenstellen',
+                'action' => 'beperkt oefensets samenstellen',
                 'object_type' => 'stream',
                 'object_id' => $stream_id,
                 'begin' => $begin,
