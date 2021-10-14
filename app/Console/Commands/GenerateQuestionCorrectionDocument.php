@@ -384,9 +384,8 @@ class GenerateQuestionCorrectionDocument extends Command
             $textRun->addTextBreak(1);
         }
 
-/*
         $this->currentSection()->addTextBreak(2);
-        $this->currentSection()->addTitle("Modeluitwerking – Vraag {$this->questionNumber}:");
+        $this->addAnswerTitle("Vraag {$nr}, modeluitwerking:");
 
         foreach ($answer->sections as $index => $section) {
             $textRun = $this->currentSection()->addTextRun();
@@ -397,6 +396,7 @@ class GenerateQuestionCorrectionDocument extends Command
                 ['bold' => true, 'color' => '0070C0']
             );
             $textRun->addTextBreak(1);
+/*
             if ($index === 0) {
                 $textRun->addText("Gegeven:", ['bold' => true]);
                 $textRun->addTextBreak(1);
@@ -405,8 +405,8 @@ class GenerateQuestionCorrectionDocument extends Command
                 $textRun->addText("Aanpak:", ['bold' => true]);
                 $textRun->addTextBreak(1);
             }
-        }
 */
+        }
     }
 
     public function addMetaData($question)
