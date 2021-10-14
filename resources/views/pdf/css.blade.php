@@ -92,6 +92,21 @@ i {
   text-align: right;
   padding-top: 3pt;
 }
+.formuleblad-title {
+  font-size: var(--title-size);
+  font-weight: bold;
+}
+.formuleblad-header {
+  padding-bottom: 7pt;
+  border-bottom: solid 1pt black;
+  margin-bottom: 21pt;
+}
+.formuleblad-content {
+  clear: both;
+  font-size: var(--text-size);
+  line-height: 15pt;
+  margin-bottom: 28pt;
+}
 .topic-header {
   padding-bottom: 7pt;
   border-bottom: solid 1pt black;

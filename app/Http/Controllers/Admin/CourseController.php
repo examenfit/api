@@ -29,6 +29,14 @@ class CourseController extends Controller
         return new StreamResource($stream);
     }
 
+    public function update(Stream $stream, Request $request)
+    {
+        $stream->formuleblad = $request->formuleblad;
+        $stream->save();
+
+        return response()->json([ 'status' => 'ok' ]);
+    }
+
     public function showMeta(Stream $stream)
     {
         $stream->load([

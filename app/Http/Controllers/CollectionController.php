@@ -296,6 +296,9 @@ class CollectionController extends Controller
             }
         }
 
+        $formuleblad = $topics[0]->exam->stream->formuleblad;
+
+        $collection['formuleblad'] = $markup->fix($formuleblad);
         $collection['topics'] = $topics;
         $collection['questions'] = $questions;
         $collection['points'] = $points;
@@ -307,6 +310,8 @@ class CollectionController extends Controller
         $timestamp = date('Y-m-d H:i');
 
         $collection['timestamp'] = $timestamp;
+
+        //return response()->json($collection);
 
         return view('pdf', $collection);
     }
