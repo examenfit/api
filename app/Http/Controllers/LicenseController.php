@@ -25,11 +25,29 @@ class LicenseController extends Controller
         return response()->noContent(401);
       }
       if ($user->role === 'admin') {
-        $licenses = License::all();
+        $licenses = License::all(); // fixme
         $licenses->load(['owner']);
         return LicenseResource::collection($licenses);
       }
-      return response()->noContent(403);
+      return array_map(fn ($license) => [
+        'id' => Hashids::encode($license->id),
+        'type' => $license->type,
+        'end' => $license->end
+      ], DB::select("
+        select
+          l.id,
+          l.type,
+          l.end
+        from
+          licenses l,
+          seats s
+        where
+          s.license_id = l.id
+         and
+          s.user_id = ?
+      ", [ $user->id ]));
+
+      //return response()->noContent(403);
     }
 
     public function post(Request $request)
