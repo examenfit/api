@@ -18,6 +18,7 @@ use Vinkla\Hashids\Facades\Hashids;
 
 class LicenseController extends Controller
 {
+    // /api/licenses
     public function index()
     {
       $user = auth()->user();
@@ -26,7 +27,6 @@ class LicenseController extends Controller
       }
       if ($user->role === 'admin') {
         $licenses = License::all(); // fixme
-        $licenses->load(['owner']);
         return LicenseResource::collection($licenses);
       }
       return array_map(fn ($license) => [
@@ -37,7 +37,9 @@ class LicenseController extends Controller
         select
           l.id,
           l.type,
-          l.end
+          l.begin,
+          l.end,
+          l.is_active
         from
           licenses l,
           seats s
@@ -97,8 +99,42 @@ class LicenseController extends Controller
       return new SeatResource($seat);
     }
 
-    public function putSeat(License $license, Seat $seat)
+    public function putSeat(License $license, Seat $seat, Request $request)
     {
+      if ($seat->license_id !== $license->id) {
+        return response()->noContent(400);
+      }
+
+      $data = $request->validate([
+        'email' => 'required|email',
+        'first_name' => 'required|string',
+        'last_name' => 'required|string',
+        'is_active' => 'boolean'
+      ]);
+      $seat->email = $data['email'];
+      $seat->first_name = $data['first_name'];
+      $seat->last_name = $data['last_name'];
+      $seat->is_active = $data['is_active'];
+      $seat->save();
+
+      return new SeatResource($seat);
+
+      // $seat->license_id === $license->id
+      // $seat->email
+      // $seat->first_name
+      // $seat->last_name
+      // $seat->is_active
+      // $seat->begin
+      // $seat->end
+      return response()->noContent(501);
+    }
+
+    public function invite(License $license, Seat $seat)
+    {
+      // $seat->license_id === $license->id
+      // $seat->email
+      // $seat->first_name
+      // $seat->last_name
       return response()->noContent(501);
     }
 
