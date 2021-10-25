@@ -32,6 +32,7 @@ class ChapterController extends Controller
                 ])
                 ->orderBy('name')
         )
+        ->orderBy('name')
         ->get();
 
         return MethodologyResource::collection($methodologies);
