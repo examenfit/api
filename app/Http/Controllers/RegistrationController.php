@@ -134,13 +134,13 @@ class RegistrationController extends Controller
         }
     }
 
-    private function activateTrialLicense($user, $registration)
+    private function activateProeflicentie($user, $registration)
     {
-        $user->role = 'participant';
+        $user->role = 'docent';
         $user->newsletter = $registration->newsletter ?: 0;
         $user->save();
 
-        License::createTrialLicense($user);
+        License::createProeflicentie($user);
 
         $registration->activated = new DateTime();
         $registration->save();
@@ -158,7 +158,12 @@ class RegistrationController extends Controller
                 return response()->json(['message' => 'user does not exist'], 406);
             }
             if ($registration->license === 'trial') {
-                $this->activateTrialLicense($user, $registration);
+                // "trial" is deprecated
+                $this->activateProeflicentie($user, $registration);
+                return $registration;
+            }
+            if ($registration->license === 'proeflicentie') {
+                $this->activateProeflicentie($user, $registration);
                 return $registration;
             }
             return response()->json(['message' => 'license invalid'], 406);
