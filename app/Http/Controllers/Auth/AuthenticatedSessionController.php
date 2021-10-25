@@ -31,7 +31,19 @@ class AuthenticatedSessionController extends Controller
           return new UserResource($user);
         }
 
-        Auth::guard('web')->logout();
+        if ($user) {
+          $email = $user->email;
+          $role = $user->role;
+          Auth::guard('web')->logout();
+          return response()->json([
+            'status' => 'unauthorized',
+            'message' => 'invalid role',
+            'user' => [
+              'email' => $email,
+              'role' => $role
+            ]
+          ], 401);
+        }
 
         return response()->noContent(401);
     }
