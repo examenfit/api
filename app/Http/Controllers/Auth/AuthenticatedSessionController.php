@@ -12,7 +12,7 @@ class AuthenticatedSessionController extends Controller
 {
     private function isAuthorized($user)
     {
-      return true;
+      //return true;
 
       $hasValidRole =
         $user->role === "leerling" ||
