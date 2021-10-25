@@ -58,9 +58,18 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
-        $request->session()->regenerate();
+        $user = Auth::User();
 
-        return new UserResource(Auth::user());
+        if ($this->isAuthorized($user)) {
+          $request->session()->regenerate();
+          return new UserResource($user);
+        }
+
+        return response()->json([
+          'status' => 'unauthorized',
+          'message' => 'The given data was invalid.',
+          'errors' => ['email' => ['These credentials are not authorized.']]
+        ], 422);
     }
 
     /**
