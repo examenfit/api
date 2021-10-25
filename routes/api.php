@@ -81,6 +81,7 @@ Route::get('/log', [ActivityLogController::class, 'index']);
 Route::post('/log', [ActivityLogController::class, 'store']);
 
 Route::get('/streams/', [StreamController::class, 'index']);
+Route::get('/streams/{stream}/formuleblad', [StreamController::class, 'formuleblad']);
 
     Route::get('/score', [ScoreController::class, 'loadAll']);
     Route::put('/score', [ScoreController::class, 'saveAll']);
@@ -126,7 +127,6 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('/streams/{stream}/search/', [SearchController::class, 'search']);
     Route::get('/streams/{stream}/tags/', [StreamController::class, 'tags']);
     Route::get('/streams/{stream}/tags/{tag}', [StreamController::class, 'tag']);
-    Route::get('/streams/{stream}/formuleblad', [StreamController::class, 'formuleblad']);
 
 
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy']);
