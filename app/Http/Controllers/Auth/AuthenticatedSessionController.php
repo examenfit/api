@@ -10,9 +10,30 @@ use App\Http\Requests\Auth\LoginRequest;
 
 class AuthenticatedSessionController extends Controller
 {
+    private function isAuthorized($user)
+    {
+      return true;
+
+      $hasValidRole =
+        $user->role === "leerling" ||
+        $user->role === "docent" ||
+        $user->role === "author" ||
+        $user->role === "admin";
+
+      return $hasValidRole;
+    }
+
     public function show()
     {
-        return new UserResource(Auth::User());
+        $user = Auth::User();
+
+        if ($user && $this->isAuthorized($user)) {
+          return new UserResource($user);
+        }
+
+        Auth::guard('web')->logout();
+
+        return response()->noContent(401);
     }
 
     /**
