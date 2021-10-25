@@ -14,6 +14,7 @@ use App\Http\Resources\SeatResource;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Vinkla\Hashids\Facades\Hashids;
 
 class LicenseController extends Controller
@@ -52,6 +53,14 @@ class LicenseController extends Controller
       //return response()->noContent(403);
     }
 
+    function createProeflicentie($request)
+    {
+      //$user_id = $request->user_id;
+      //$stream_ids = explode(',', $request->stream_ids)
+
+      return response()->noContent(501);
+    }
+
     public function post(Request $request)
     {
       $data = $request->validate([
@@ -60,7 +69,7 @@ class LicenseController extends Controller
 
       switch ($data['type']) {
         case 'proeflicentie':
-          return createProeflicentie($request);
+          return $this->createProeflicentie($request);
         default:
           die('unknown type');
       }
@@ -109,6 +118,7 @@ class LicenseController extends Controller
         'email' => 'required|email',
         'first_name' => 'required|string',
         'last_name' => 'required|string',
+        'token' => $token = Str::random(32),
         'is_active' => 'boolean'
       ]);
       $seat->email = $data['email'];
