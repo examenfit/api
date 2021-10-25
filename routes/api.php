@@ -125,6 +125,9 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('/streams/{stream}/search/results', [SearchController::class, 'search_results']);
     Route::get('/streams/{stream}/search/', [SearchController::class, 'search']);
     Route::get('/streams/{stream}/tags/', [StreamController::class, 'tags']);
+    Route::get('/streams/{stream}/tags/{tag}', [StreamController::class, 'tag']);
+    Route::get('/streams/{stream}/formuleblad', [StreamController::class, 'formuleblad']);
+
 
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy']);
     Route::get('/user', [AuthenticatedSessionController::class, 'show']);
@@ -135,7 +138,6 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 
     Route::get('/topics/{topic}', [TopicController::class, 'show']);
 
-    Route::get('/streams/{stream}/tags/{tag}', [StreamController::class, 'tag']);
 
 
     Route::get('/cart', [CartController::class, 'index']);
