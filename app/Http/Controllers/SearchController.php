@@ -131,6 +131,7 @@ class SearchController extends Controller
                 ])
                 ->orderBy('name')
         )
+        ->orderBy('name')
         ->get();
 
         return [
