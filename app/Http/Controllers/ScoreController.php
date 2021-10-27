@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use DateTime;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Resources\ScoreResource;
@@ -56,8 +58,21 @@ class ScoreController extends Controller
         $r = [];
         $ignored = [];
         $warnings = false;
-        foreach($scores as $question_id => $score) {
+        $user_id = $user->id;
+        $ts = new DateTime();
+        foreach($scores as $question_id_hash => $score) {
+          $question_id = Hashids::decode($question_id_hash)[0];
           if (array_key_exists('updatedAt', $score)) {
+            DB::update("
+              update
+                scores
+              set
+                updated_at = ?
+              where
+                user_id = ?
+               and 
+                question_id = ?
+            ", [ $ts, $user_id, $question_id ]);
             DB::insert("
               replace
               into
@@ -69,15 +84,19 @@ class ScoreController extends Controller
                 totalPoints = ?,
                 scoredPoints = ?,
                 hasCompletedScoreFlow = ?,
-                sections = ?
+                sections = ?,
+                created_at = ?,
+                updated_at = ?
             ", [
-              $user->id,
-              Hashids::decode($question_id)[0],
+              $user_id,
+              $question_id,
               $score['updatedAt'],
               $score['totalPoints'],
               $score['scoredPoints'],
               $score['hasCompletedScoreFlow'],
               json_encode($score['sections']),
+              $ts,
+              $ts
             ]);
           } else {
             $warnings = true;
