@@ -8,6 +8,7 @@ use App\Models\Topic;
 use App\Models\Stream;
 use App\Models\Course;
 use App\Models\Domain;
+use App\Models\Methodology;
 use App\Models\Chapter;
 use App\Models\Question;
 use App\Models\QuestionType;
@@ -16,36 +17,16 @@ use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\MetaDataImport as ImportsMetaDataImport;
 
-class MetaDataImport extends Command
+
+class ImportGR12 extends Command
 {
     private $question;
     private $topic;
     private $exam;
     private $stream;
 
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'ef:import:metadata {file} {--chapters} {--purge-tags}';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
+    protected $signature = 'ef:import:gr12 {file}';
     protected $description = 'Clears and imports meta data based on an Excel sheet';
-
-    /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
 
     private function askChoice($question, $options)
     {
@@ -53,7 +34,7 @@ class MetaDataImport extends Command
 
         if ($count < 1) {
             $this->info($question);
-            die('FOUT: Geen opties');
+            die("FOUT: Geen opties\n");
         }
 
         $n = 0;
@@ -72,17 +53,17 @@ class MetaDataImport extends Command
         return $option;
     }
 
-   private function selectCourse()
-   {
+    private function selectCourse()
+    {
         $courses = Course::all()->mapWithKeys(
             fn ($row) => [$row->id => $row->name]
         )->toArray();
 
         $this->course_id = $this->askChoice("Vak?", $courses);
-   }
+    }
 
-   private function selectLevel()
-   {
+    private function selectLevel()
+    {
         $levels = Level::all()->mapWithKeys(
             fn ($row) => [$row->id => $row->name]
         )->toArray();
@@ -110,32 +91,26 @@ class MetaDataImport extends Command
         return $options;
     }
 
-    private function selectGRChapter()
+    private function selectGR12Chapter()
     {
-        $chapters = $this->getChapters(1);
-        $count = count($chapters);
+        $m = "Getal & Ruimte 12 ed.";
+        $this->methode = Methodology::firstWhere('name', $m);
 
-        if ($count < 1) {
-            die('Geen hoofdstukken voor "Getal & Ruimte" gevonden');
+        if (!$this->methode) {
+          $create = $this->askChoice("Geen methode \"$m\" gevonden. Aanmaken?", [1 => 'Ja', 0 => 'Nee' ]);
+          if ($create) {
+            $this->createGR12();
+          } else {
+            die("Script afgebroken.\n");
+          }
         }
 
-        $choices = $this->getChoices($chapters);
+        // $chapters = $this->getChapters(3);
+        // $count = count($chapters);
 
-        $this->gr_exam_chapter_id = $this->askChoice("Getal & Ruimte examenhoofdstuk?", $choices);
-    }
+        // $choices = $this->getChoices($chapters);
 
-    private function selectMWChapter()
-    {
-        $chapters = $this->getChapters(2);
-        $count = count($chapters);
-
-        if ($count < 1) {
-            die('Geen hoofdstukken voor "Moderne Wiskunde" gevonden');
-        }
-
-        $choices = $this->getChoices($chapters);
-
-        $this->mw_exam_chapter_id = $this->askChoice("Moderne Wiskunde examenhoofdstuk?", $choices);
+        //$this->gr12_exam_chapter_id = $this->askChoice("Getal & Ruimte examenhoofdstuk?", $choices);
     }
 
     private function getStream()
@@ -153,21 +128,13 @@ class MetaDataImport extends Command
      */
     public function handle()
     {
-        //$file = $this->ask("What is the path to the file?");
         $file = $this->argument('file');
 
         $this->selectCourse();
         $this->selectLevel();
 
         $this->getStream();
-        if ($this->option("purge-tags")) {
-            Tag::where('stream_id', $this->stream->id)->delete();
-        }
-
-        if ($this->option('chapters')) {
-          $this->selectGRChapter();
-          $this->selectMWChapter();
-        }
+        $this->selectGR12Chapter();
 
         $this->processFile($file);
     }
@@ -209,10 +176,6 @@ class MetaDataImport extends Command
         if ($this->option('verbose')) {
             $this->info($message);
         }
-    }
-
-    private function similarity($a, $b)
-    {
     }
 
     private function similar($opgave)
@@ -346,9 +309,10 @@ class MetaDataImport extends Command
             foreach ($questions as $question) {
                 $this->question = $question;
             }
+            $this->info("Vraag $vraag_nr");
             $this->verbose_info("Vraag $vraag_nr");
         } else {
-            //$this->info("Genegeerd: Vraag $vraag_nr");
+            $this->info("Genegeerd: Vraag $vraag_nr ($status)");
         }
     }
 
@@ -400,14 +364,7 @@ class MetaDataImport extends Command
         $this->processTopicQuestion();
 
         if ($this->question) {
-            $this->processDomains($row['domeinen']);
-            $this->processQuestionType($row['vraagtypen']);
-            $this->processHighlights($row['highlights']);
-            $this->processTags($row['trefwoorden']);
-            if ($this->option('chapters')) {
-              $this->processChapters($row);
-            }
-            $this->verbose_info('');
+            $this->processChapters($row);
         }
     }
 
@@ -430,73 +387,43 @@ class MetaDataImport extends Command
         }
     }
 
-    private function processMainChapter(&$sync, $str, $title, $methodology_id, $exam_chapter_id)
+    private function processMainChapter(&$sync, $str)
     {
-        $methode = 'onbekende methode';
-        if ($methodology_id === 1) $methode = 'Getal & Ruimte';
-        if ($methodology_id === 2) $methode = 'Moderne Wiskunde';
-
-        if ($title === 0) {
-          $this->info("Fout in sheet, veld voor hoofdstuk titel ($methode) niet gevonden.");
-          return;
-        }
-        if ($str === 0) {
-          $this->info("Fout in sheet, veld voor hoofdstuk ($methode) niet gevonden.");
-          return;
-        }
-
+      foreach(explode("\n", trim($str)) as $line) {
         $stream_id = $this->stream->id;
-        $names = explode(' ', $str);
-        $name = array_pop($names);
-        $part = join(' ', $names);
-        //$this->info("$part - $name $title");
+        $words = explode(' ', $line);
+        $name = array_pop($words);
+        $part = join(' ', $words);
 
-        //$this->info("stream=$stream_id, methodology=$methodology_id, title=$title");
-        //$chapters = $this->stream->chapters
-        $chapters = Chapter::where('stream_id', $this->stream->id)
-            ->where('name', $name)
-            ->where('title', $title)
-            ->where('methodology_id', $methodology_id)
-            ->where('chapter_id', '!=', $exam_chapter_id)
-            ->get();
+        $chapters = DB::select("
+          select
+            c.id,
+            c.name,
+            c.title
+          from
+            chapters p,
+            chapters c
+          where
+            p.chapter_id is null
+           and
+            c.chapter_id = p.id
+           and
+            c.stream_id = ?
+           and
+            p.methodology_id = ?
+           and
+            p.name = ?
+           and
+            c.name = ?
+        ", [ $this->stream->id, $this->methode->id, $part, $name ]);
+
         if (count($chapters) === 0) {
-          $chapters = Chapter::where('stream_id', $this->stream->id)
-            ->where('title', $title)
-            ->where('methodology_id', $methodology_id)
-            ->where('chapter_id', '!=', $exam_chapter_id)
-            ->get();
-          if (count($chapters)) {
-            $this->warning("Hoofdstuk '$name $title' gevonden op alleen titel '$title' ($methode)");
-          }
+          $this->warning("Hoofdstuk '$part $name' niet gevonden (c.ctream_id={$this->stream->id} p.methodology_id={$this->methode->id} p.name={$part} c.name={$name}).");
+        } else {
+          $this->info("$part $name ({$this->methode->name})");
         }
-        $this->processChapter($sync, $chapters, "$str $title ($methode)");
-    }
-
-    private function processExamChapter(&$sync, $name, $methodology_id, $exam_chapter_id)
-    {
-        $methode = 'onbekende methode';
-        if ($methodology_id === 1) $methode = 'Getal & Ruimte';
-        if ($methodology_id === 2) $methode = 'Moderne Wiskunde';
-
-        if ($name === 0) {
-          $this->info("Fout in sheet, veld voor hoofdstuk titel niet gevonden.");
-          return;
-        }
-        //$this->info("exam_chapter_id=$exam_chapter_id, methodology=$methodology_id, name=$name");
-        $chapters = $this->stream->chapters
-            ->where('name', $name)
-            ->where('methodology_id', $methodology_id)
-            ->where('chapter_id', $exam_chapter_id);
-        if (count($chapters) === 0) {
-          $chapters = $this->stream->chapters
-            ->where('title', $name)
-            ->where('methodology_id', $methodology_id)
-            ->where('chapter_id', $exam_chapter_id);
-          if (count($chapters)) {
-            //$this->warning("Hoofdstuk gevonden op titel ipv. naam '$name' ($methode)");
-          }
-        }
-        $this->processChapter($sync, $chapters, $name);
+        $this->processChapter($sync, $chapters, "$part $name ({$this->methode->name})");
+      }
     }
 
     public function processChapters($row)
@@ -504,148 +431,62 @@ class MetaDataImport extends Command
         $sync = [];
 
         // Getal & Ruimte
-        $this->processMainChapter($sync, $row['hoofdstuk_gr'], $row['hoofdstuktitel_gr'], 1, $this->gr_exam_chapter_id);
-        $this->processExamChapter($sync, $row['examentraining_gr'], 1, $this->gr_exam_chapter_id);
+        $this->processMainChapter($sync, $row['hoofdstuk_gr_ed_12']);
 
-        // Moderne Wiskunde
-        $this->processMainChapter($sync, $row['hoofdstuk_mw'], $row['hoofdstuktitel_mw'], 2, $this->mw_exam_chapter_id);
-        $this->processExamChapter($sync, $row['examentraining_mw'], 2, $this->mw_exam_chapter_id);
-
-        $this->question->chapters()->sync($sync);
+        //$this->question->chapters()->sync($sync);
     }
 
-    private function getDomains($code, $index, $name)
+    private function createMethode($stream_id, $name)
     {
-        $domains = Domain::query()
-            ->where('stream_id', $this->stream->id)
-            ->where('name', "$name ($code$index)")
-            ->get();
-        $count = count($domains);
-        if ($count === 1) {
-            return $domains->first();
-        }
-
-        $domains = Domain::query()
-            ->where('stream_id', $this->stream->id)
-            ->where('name', 'LIKE', "%($code$index)")
-            ->get();
-        $count = count($domains);
-        if ($count === 1) {
-            $this->warning("Domein code gevonden, naam mismatch \"$name ($code$index)\"");
-            return $domains->first();
-        }
-
-/*
-        if ($count === 0) {
-            if ($index) {
-                $parent_id = $this->getDomains($code, '', $name)->id;
-            } else {
-                $parent_id = null;
-            }
-            $domain = Domain::create([
-                'stream_id' => $this->stream->id,
-                'name' => "$name ($code$index)",
-                'parent_id' => $parent_id
-            ]);
-            return $domain;
-        }
-*/
-        $this->warning("Afwijkend aantal voorkomens gevonden voor Domein code \"$name ($code$index)\" ($count/1)");
-        return [];
+      $this->methode = Methodology::create([
+        'stream_id' => $stream_id,
+        'name' => $name
+      ]);
     }
 
-    private function getDomain($value)
+    private function createBook($stream_id, $name)
     {
-        $matches = [];
-        if (preg_match('/^([A-Z])([0-9]*)\\W+(.*)$/', $value, $matches)) {
-            $code = $matches[1];
-            $index = $matches[2];
-            $name = $matches[3];
-        } else {
-            $this->warning("Ongeldig invoerpatroon voor Domein \"$value\"");
-            return;
-        }
-
-        $domain = $this->getDomains($code, $index, $name);
-
-        return $domain;
+      $this->book = Chapter::create([
+        'stream_id' => $stream_id,
+        'methodology_id' => $this->methode->id,
+        'name' => $name
+      ]);
     }
 
-    public function processDomains($text)
+    private function createChapter($stream_id, $name, $title)
     {
-        $sync = [];
-        $values = explode("\n", $text);
-        foreach($values as $value) {
-            if ($domain = $this->getDomain($value)) {
-               $id = $domain->id;
-               $name = $domain->name;
-               $this->verbose_info("Domein#$id $name");
-               $sync[] = $id;
-            }
-        }
-        $this->question->domains()->sync($sync);
+      $this->chapter = Chapter::create([
+        'stream_id' => $stream_id,
+        'methodology_id' => $this->methode->id,
+        'chapter_id' => $this->book->id,
+        'name' => $name,
+        'title' => $title
+      ]);
     }
 
-    public function processTags($text)
+    private function createGR12()
     {
-        $tags = [];
-        $names = array_filter(explode("\n", $text));
-
-        foreach ($names as $name) {
-            $tag = Tag::query()
-              ->where('stream_id', $this->stream->id)
-              ->where('name', $name)
-              ->first();
-            if (!$tag) {
-                $tag = Tag::forceCreate([
-                    'stream_id' => $this->stream->id,
-                    'name' => $name,
-                ]);
-            }
-            $id = $tag->id;
-            $tags[] = $tag->id;
-            $this->verbose_info("Trefwoord#$id \"$name\"");
-        }
-
-        $this->question->tags()->sync($tags);
-    }
-
-    public function processQuestionType($value)
-    {
-        if (is_null($value) || $value === "") {
-            $this->warning("Vraagtype is leeg");
-            return;
-        }
-
-        $type = QuestionType::query()
-            ->where('stream_id', $this->stream->id)
-            ->where('name', $value)
-            ->first();
-
-        if (!$type) {
-            $type = QuestionType::create([
-                'stream_id' => $this->stream->id,
-                'course_id' => $this->course_id,
-                'name' => $value,
-            ]);
-        }
-
-        $this->question->update([ 'type_id' => $type->id, ]);
-        $id = $type->id;
-        $this->verbose_info("Vraagtype#$id \"$value\"");
-    }
-
-    public function processHighlights($value)
-    {
-        if (is_null($value) || $value === "") {
-            $this->warning("Highlight is leeg");
-            return;
-        }
-
-        $this->question->highlights()->delete();
-        $highlight = $this->question->highlights()->create([ 'text' => $value, ]);
-
-        $id = $highlight->id;
-        $this->verbose_info("Highlight#$id \"$value\"");
+      $this->createMethode(1, 'Getal & Ruimte 12 ed.');
+      $this->createBook(1, 'Deel 1');
+      $this->createChapter(1, 'H1', 'Tabellen en grafieken');
+      $this->createChapter(1, 'H2', 'De statistische cyclus');
+      $this->createChapter(1, 'H3', 'Lineaire verbanden');
+      $this->createChapter(1, 'H4', 'Handig tellen');
+      $this->createBook(1, 'Deel 2');
+      $this->createChapter(1, 'H5', 'Veranderingen');
+      $this->createChapter(1, 'H6', 'Rekenregels en formules');
+      $this->createChapter(1, 'H7', 'Statistiek en beslissingen');
+      $this->createChapter(1, 'H8', 'Statistiek met de computer');
+      $this->createBook(1, 'Deel 3');
+      $this->createChapter(1, 'H9', 'Exponentiële verbanden');
+      $this->createChapter(1, 'H10', 'Statistiek gebruiken');
+      $this->createChapter(1, 'H11', 'Formules en variabelen');
+      $this->createBook(1, 'Deel 4');
+      $this->createChapter(1, '12.1', 'Algemene vaardigheden');
+      $this->createChapter(1, '12.2', 'Lineaire verbanden');
+      $this->createChapter(1, '12.3', 'Exponentiële verbanden');
+      $this->createChapter(1, '12.4', 'Werken met formules');
+      $this->createChapter(1, '12.5', 'Statistiek');
+      $this->createChapter(1, '12.6', 'Onderzoeksopgaven');
     }
 }

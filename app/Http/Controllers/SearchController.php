@@ -131,6 +131,7 @@ class SearchController extends Controller
                 ])
                 ->orderBy('name')
         )
+        ->orderBy('name')
         ->get();
 
         return [
@@ -210,14 +211,16 @@ class SearchController extends Controller
                 $ids = collect($value)->map(
                     fn ($item) => Hashids::decode($item)[0]
                 )->toArray();
-                $n = 0;
-                foreach ($ids as $id) {
-                  if ($n++) {
-                    $query->orWhereJsonContains('cache->chapterId', $id);
-                  } else {
-                    $query->whereJsonContains('cache->chapterId', $id);
+                $query->where(function ($q) use ($ids) {
+                  $n = 0;
+                  foreach ($ids as $id) {
+                    if ($n++) {
+                      $q->orWhereJsonContains('cache->chapterId', $id);
+                    } else {
+                      $q->whereJsonContains('cache->chapterId', $id);
+                    }
                   }
-                }
+                });
             }),
         ])->allowedSorts([
             'name',

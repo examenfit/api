@@ -51,6 +51,13 @@ class StreamController extends Controller
         "));
     }
 
+    public function formuleblad(Stream $stream)
+    {
+        return [
+          'formuleblad' => $stream->formuleblad
+        ];
+    }
+
     public function tags(Stream $stream)
     {
         $stream->load(['tags' => function ($query) {

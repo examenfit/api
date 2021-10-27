@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 
 use App\Mail\RegistrationMail;
 use App\Models\Registration;
+use App\Models\License;
 use App\Models\User;
 use App\Http\Requests\RegistrationRequest;
 use App\Http\Resources\RegistrationResource;
@@ -37,6 +38,9 @@ class RegistrationController extends Controller
     private function createRegistration($data)
     {
         $data['activation_code'] = Str::random(32);
+        if (!array_key_exists('newsletter', $data)) {
+          $data['newsletter'] = 0;
+        }
         $registration = Registration::create($data);
         $registration->save();
         return $registration;
@@ -54,6 +58,21 @@ class RegistrationController extends Controller
         catch (Exception $error)
         {
             return view('registration.failure', [ 'message' => $error->getMessage() ]);
+        }
+    }
+
+    public function register(RegistrationRequest $request)
+    {
+        $data = $request->validated();
+        try
+        {
+            $registration = $this->createRegistration($data);
+            $this->sendRegistrationMail($registration);
+            return response()->json([ 'status' => 'success' ]);
+        }
+        catch (Exception $error)
+        {
+            return response()->json([ 'status' => 'failed', 'message' => $error->getMessage() ]);
         }
     }
 
@@ -115,6 +134,18 @@ class RegistrationController extends Controller
         }
     }
 
+    private function activateProeflicentie($user, $registration)
+    {
+        $user->role = 'docent';
+        $user->newsletter = $registration->newsletter ?: 0;
+        $user->save();
+
+        License::createProeflicentie($user);
+
+        $registration->activated = new DateTime();
+        $registration->save();
+    }
+
     public function activateLicense(Request $request)
     {
         try {
@@ -127,13 +158,15 @@ class RegistrationController extends Controller
                 return response()->json(['message' => 'user does not exist'], 406);
             }
             if ($registration->license === 'trial') {
-                $user->role = 'participant';
-                $user->newsletter = $registration->newsletter;
-                $user->save();
-                $registration->activated = new DateTime();
-                $registration->save();
+                // "trial" is deprecated
+                $this->activateProeflicentie($user, $registration);
+                return $registration;
             }
-            return $registration;
+            if ($registration->license === 'proeflicentie') {
+                $this->activateProeflicentie($user, $registration);
+                return $registration;
+            }
+            return response()->json(['message' => 'license invalid'], 406);
         } catch (Exception $err) {
             return response()->json(['message' => $err->getMessage()], 500);
         }

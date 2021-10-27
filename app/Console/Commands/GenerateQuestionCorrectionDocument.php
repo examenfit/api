@@ -3,8 +3,12 @@
 namespace App\Console\Commands;
 
 use App\Models\Collection;
+use App\Models\Course;
+use App\Models\Level;
+use App\Models\Stream;
 use App\Models\Exam;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpWord\Element\TextRun;
 use PhpOffice\PhpWord\SimpleType\Jc;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
@@ -15,7 +19,7 @@ define('__SHOW_MEDIA__', false);
 
 class GenerateQuestionCorrectionDocument extends Command
 {
-    protected $signature = 'ef:questioncorrection {exam}';
+    protected $signature = 'ef:questioncorrection {exam?}';
     protected $description = 'Create a Question Correction document for authors';
     public $exam = null;
     public $processor = null;
@@ -56,6 +60,142 @@ class GenerateQuestionCorrectionDocument extends Command
         $this->XSLTProcessor->importStyleSheet($this->mathStyleSheet);
     }
 
+    private function askChoice($question, $options)
+    {
+        $count = count($options);
+
+        if ($count < 1) {
+            $this->info($question);
+            die('FOUT: Geen opties');
+        }
+
+        $n = 0;
+        foreach($options as $option) {
+            $choices[++$n] = $option;
+        }
+
+        if ($count === 1) {
+            $this->info("$question -> $option");
+            return $choices[1];
+        }
+
+        $choice = $this->choice($question, $choices);
+        $option = array_search($choice, $options);
+
+        return $option;
+    }
+
+    private function selectLevel()
+    {
+        $levels = collect(DB::select("
+          select distinct
+            levels.id as level_id,
+            levels.name as level_name
+          from
+            exams,
+            streams,
+            levels
+          where
+            stream_id = streams.id
+           and
+            level_id = levels.id
+          order by 2
+        "))
+        ->mapWithKeys(
+            fn ($row) => [$row->level_id => $row->level_name]
+        )
+        ->toArray();
+
+        $this->level_id = $this->askChoice("Niveau?", $levels);
+    }
+
+    private function selectCourse()
+    {
+        $courses = collect(DB::select("
+          select distinct
+            courses.id as course_id,
+            courses.name as course_name
+          from
+            exams,
+            streams,
+            courses
+          where
+            stream_id = streams.id
+           and
+            course_id = courses.id
+           and
+            level_id = ?
+          order by 2
+        ", [ $this->level_id ]))
+        ->mapWithKeys(
+            fn ($row) => [$row->course_id => $row->course_name]
+        )
+        ->toArray();
+
+        $this->course_id = $this->askChoice("Vak?", $courses);
+    }
+
+    private function selectYear()
+    {
+        $years = collect(DB::select("
+          select distinct
+            exams.year
+          from
+            exams,
+            streams
+          where
+            stream_id = streams.id
+           and
+            course_id = ?
+           and
+            level_id = ?
+          order by 1
+        ", [ $this->course_id, $this->level_id ]))
+        ->mapWithKeys(
+            fn ($row) => [$row->year => $row->year]
+        )
+        ->toArray();
+
+        $this->year = $this->askChoice("Jaar?", $years);
+    }
+
+    private function selectTerm()
+    {
+        $terms = collect(DB::select("
+          select distinct
+            exams.id,
+            exams.term
+          from
+            exams,
+            streams
+          where
+            stream_id = streams.id
+           and
+            course_id = ?
+           and
+            level_id = ?
+           and
+            year = ?
+          order by 2
+        ", [ $this->course_id, $this->level_id, $this->year ]))
+        ->mapWithKeys(
+            fn ($row) => [$row->id => $row->term]
+        )
+        ->toArray();
+
+        $this->exam_id = $this->askChoice("Tijdvak?", $terms);
+    }
+
+    private function askExam()
+    {
+      $this->selectLevel();
+      $this->selectCourse();
+      $this->selectYear();
+      $this->selectTerm();
+      $this->info("exam_id = " . $this->exam_id);
+      return $this->exam_id;
+    }
+
     /**
      * Execute the console command.
      *
@@ -63,7 +203,11 @@ class GenerateQuestionCorrectionDocument extends Command
      */
     public function handle()
     {
-        $this->getExam($this->argument('exam'));
+        if ($this->argument('exam')) {
+          $this->getExam($this->argument('exam'));
+        } else {
+          $this->getExam($this->askExam());
+        }
         $this->setDocumentInfo();
         $this->setHeader();
         $this->setFooter();
@@ -384,9 +528,8 @@ class GenerateQuestionCorrectionDocument extends Command
             $textRun->addTextBreak(1);
         }
 
-/*
         $this->currentSection()->addTextBreak(2);
-        $this->currentSection()->addTitle("Modeluitwerking – Vraag {$this->questionNumber}:");
+        $this->addAnswerTitle("Vraag {$nr}, modeluitwerking:");
 
         foreach ($answer->sections as $index => $section) {
             $textRun = $this->currentSection()->addTextRun();
@@ -397,6 +540,7 @@ class GenerateQuestionCorrectionDocument extends Command
                 ['bold' => true, 'color' => '0070C0']
             );
             $textRun->addTextBreak(1);
+/*
             if ($index === 0) {
                 $textRun->addText("Gegeven:", ['bold' => true]);
                 $textRun->addTextBreak(1);
@@ -405,8 +549,8 @@ class GenerateQuestionCorrectionDocument extends Command
                 $textRun->addText("Aanpak:", ['bold' => true]);
                 $textRun->addTextBreak(1);
             }
-        }
 */
+        }
     }
 
     public function addMetaData($question)
