@@ -185,7 +185,7 @@ class LicenseController extends Controller
     function assignUser($seat)
     {
         $user = User::firstWhere('email', $seat->email);
-        $seat->user_id = $user;
+        $seat->user_id = $user->id;
         $seat->save();
     }
 
