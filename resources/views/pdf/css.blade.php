@@ -147,6 +147,20 @@ i {
   width: 6in;
   margin: 21pt 0;
 }
+.attachment {
+  clear: both;
+  margin: 21pt 0;
+}
+.attachment span {
+  max-width: 6in;
+  max-height: 5in;
+  display: block;
+}
+.attachment img {
+  max-width: 100%;
+  max-height: 100%;
+  display: block;
+}
 .question {
   margin-bottom: 28pt;
 }
