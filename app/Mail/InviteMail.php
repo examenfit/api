@@ -23,8 +23,8 @@ class InviteMail extends Mailable
     public function __construct($seat, $user)
     {
         $this->seat = $seat;
-        $this->link = $this->activationLink();
         $this->user = $user;
+        $this->link = $this->activationLink();
     }
 
     private function activationLink()
@@ -32,7 +32,7 @@ class InviteMail extends Mailable
         $app_url = config('app.dashboard_url');
         $path = 'uitnodiging-accepteren';
         $token = $this->seat->token;
-        $this->link = "{$app_url}/{$path}/{$token}"; // vak/niveau?
+        return "{$app_url}/{$path}/{$token}"; // vak/niveau?
     }
 
     /**
