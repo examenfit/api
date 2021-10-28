@@ -5,5 +5,4 @@
 <p>
   Klik op onderstaande link om je account te activeren.
 <p>
-  <!-- fixme -->
   <a href="{{ $link }}">{{ $link }}</a>
