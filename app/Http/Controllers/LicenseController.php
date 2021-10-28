@@ -4,13 +4,16 @@ namespace App\Http\Controllers;
 
 use DateTime;
 use DateTimeZone;
+use Mail;
 
+use App\Models\User;
 use App\Models\License;
 use App\Models\Seat;
 use App\Models\Privilege;
 
 use App\Http\Resources\LicenseResource;
 use App\Http\Resources\SeatResource;
+use App\Mail\InviteMail;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -48,7 +51,7 @@ class LicenseController extends Controller
           s.license_id = l.id
          and
           s.user_id = ?
-      ", [ $user->id ]));
+     ", [ $user->id ]));
 
       //return response()->noContent(403);
     }
@@ -108,6 +111,106 @@ class LicenseController extends Controller
       return new SeatResource($seat);
     }
 
+    function validateInvite($token)
+    {
+        $seat = Seat::firstWhere('token', $token);
+        if (!$seat) {
+          return 'unknown-seat';
+        }
+
+        if ($seat->user_id) { 
+          return 'invalid-seat';
+        }
+
+        $user = User::firstWhere('email', $seat->email);
+        if ($user) {
+          return 'valid-email';
+        }
+
+        else {
+          return 'unknown-email';
+        }
+    }
+
+    public function getInviteStatus(Request $request)
+    {
+        $request->validate([
+          'token' => 'string:required'
+        ]);
+
+        $token = $request->token;
+        $status = $this->validateInvite($request->token);
+
+        return response()->json([ 'status' => $status ]);
+    }
+
+
+    function createSeatUser($seat, $password)
+    {
+        $now = new DateTime();
+        $user = User::create([
+            'first_name' => $seat->first_name,
+            'last_name' => $seat->last_name,
+            'email' => $seat->email,
+            'password' => bcrypt($password),
+            'email_verified_at' => $now, // fixme
+            'role' => $seat->role
+        ]);
+        $seat->user_id = $user->id;
+        $seat->save();
+    }
+
+    public function postInviteAccount(Request $request)
+    {
+        $token = $request->token;
+
+        $status = $this->validateInvite($token);
+        if ($status !== 'unknown-email') {
+            return response()->json(['message' => 'invalid state'], 400);
+        }
+
+        $password = $request->password;
+        if (!$password) {
+            return response()->json(['message' => 'password required'], 400);
+        }
+
+        $seat = Seat::firstWhere('token', $token);
+        $this->createSeatUser($seat, $password);
+
+        return response()->json([
+          'status' => 'ok'
+        ]);
+    }
+
+    function assignUser($seat)
+    {
+        $user = User::firstWhere('email', $seat->email);
+    }
+
+    public function postInviteOk(Request $request)
+    {
+        $token = $request->token;
+
+        $status = $this->validateInvite($token);
+        if ($status !== 'valid-email') {
+            return response()->json(['message' => 'invalid state'], 400);
+        }
+
+        $seat = Seat::firstWhere('token', $token);
+        $this->assignUser($seat);
+
+        return response()->json([
+          'status' => 'ok'
+        ]);
+    }
+
+    private function sendInviteMail($seat)
+    {
+        $user = auth()->user();
+        $mail = new InviteMail($seat, $user);
+        Mail::to($seat->email)->send($mail);
+    }
+
     public function putSeat(License $license, Seat $seat, Request $request)
     {
       if ($seat->license_id !== $license->id) {
@@ -118,14 +221,16 @@ class LicenseController extends Controller
         'email' => 'required|email',
         'first_name' => 'required|string',
         'last_name' => 'required|string',
-        'token' => $token = Str::random(32),
         'is_active' => 'boolean'
       ]);
       $seat->email = $data['email'];
       $seat->first_name = $data['first_name'];
       $seat->last_name = $data['last_name'];
       $seat->is_active = $data['is_active'];
+      $seat->token = Str::random(32);
       $seat->save();
+
+      $this->sendInviteMail($seat);
 
       return new SeatResource($seat);
 
