@@ -21,6 +21,11 @@ class Seat extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    public function groups()
+    {
+        return $this->belongsToMany(Group::class, 'seat_group');
+    }
+
     public function privileges()
     {
         return $this->hasMany(Privilege::class, 'actor_seat_id');

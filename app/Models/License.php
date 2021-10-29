@@ -57,16 +57,22 @@ class License extends Model
             'end' => $end
         ]);
 
-        // $group = Group::create("leerlingen");
+        $stream = Stream::firstWhere('id', $streams[0]);
+        $course = $stream->course->name;
+        $group = Group::create([
+          'license_id' => $license->id,
+          'name' => $course,
+          'is_active' => 1
+        ]);
 
-        //Privilege::create([
-        //    'actor_seat_id' => $seat->id,
-        //    'action' => 'groepen beheren',
-        //    'object_type' => 'group',
-        //    'object_id' => $group->id,
-        //    'begin' => $begin,
-        //    'end' => $end
-        //]);
+        Privilege::create([
+            'actor_seat_id' => $seat->id,
+            'action' => 'groepen beheren',
+            'object_type' => 'group',
+            'object_id' => $group->id,
+            'begin' => $begin,
+            'end' => $end
+        ]);
 
         foreach ($streams as $stream_id) {
             Privilege::create([
@@ -85,10 +91,7 @@ class License extends Model
                 'license_id' => $license->id,
                 'role' => 'leerling'
             ]);
-            //SeatGroup::create([
-            //    'seat_id' => $seat->id,
-            //    'group_id' => $group->id,
-            //]);
+            $seat->groups()->sync([ $group->id ]);
             foreach ($streams as $stream_id) {
                 Privilege::create([
                     'actor_seat_id' => $seat->id,
