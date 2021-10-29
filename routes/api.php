@@ -120,6 +120,10 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('/groups/{group}', [LicenseController::class, 'getGroup']);
     Route::put('/groups/{group}', [LicenseController::class, 'putGroup']);
 
+
+    Route::post('/collections/{collection}/share', [CollectionController::class, 'shareCollection']);
+
+
     Route::post('/privilege', [PrivilegeController::class, 'privilege']);
     Route::post('/privileges', [PrivilegeController::class, 'privileges']);
     Route::post('/objects', [PrivilegeController::class, 'objects']);
