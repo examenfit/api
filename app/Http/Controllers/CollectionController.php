@@ -447,6 +447,7 @@ class CollectionController extends Controller
           return [
             'id' => Hashids::encode($collection->id),
             'name' => $collection->name,
+            'download_type' => $collection->download_type,
             'date' => (new DateTime($collection->created_at))->format('c'),
             'topics' => array_map(function($topic) {
                 return [
@@ -505,7 +506,7 @@ class CollectionController extends Controller
           ];
         }, DB::select("
           select
-            id, name, created_at
+            id, name, created_at, download_type
           from
             collections
           where
