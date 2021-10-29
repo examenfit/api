@@ -306,6 +306,41 @@ class LicenseController extends Controller
         return response()->noContent(403);
     }
 
+    private function grantToSeat($seat, $action, $object_type, $object_id)
+    {
+        Privilege::create([
+            'actor_seat_id' => $seat->id,
+            'action' => $action,
+            'object_type' => $object_type,
+            'object_id' => $object_id,
+            'begin' => $seat->license->begin,
+            'end' => $seat->license->end,
+            'is_active' => 1
+        ]);
+    }
+
+    private function grantToGroupSeats($group, $action, $object_type, $object_id)
+    {
+        $seats = $group->seats();
+        foreach ($seats as $seat) {
+            $this->grantToSeat($seat, $action, $object_type, $object_id);
+        }
+    }
+
+    public function postPrivilegeToGroup(Group $group)
+    {
+        $user = auth()->user();
+        if (!Privilege::granted('groep beheren', $group)) {
+          return response()->noContent(403);
+        }
+        $this->grantToGroupSeats(
+            $group,
+            $request->action,
+            $request->object_type,
+            $request->object_id
+        );
+    }
+
     public function putGroup()
     {
         return reponse()->noContent(501);
