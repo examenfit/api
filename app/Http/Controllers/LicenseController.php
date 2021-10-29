@@ -10,7 +10,9 @@ use App\Models\User;
 use App\Models\License;
 use App\Models\Seat;
 use App\Models\Privilege;
+use App\Models\Group;
 
+use App\Http\Resources\GroupResource;
 use App\Http\Resources\LicenseResource;
 use App\Http\Resources\SeatResource;
 use App\Mail\InviteMail;
@@ -36,7 +38,9 @@ class LicenseController extends Controller
       return array_map(fn ($license) => [
         'id' => Hashids::encode($license->id),
         'type' => $license->type,
-        'end' => $license->end
+        'begin' => $license->begin,
+        'end' => $license->end,
+        'is_active' => $license->is_active
       ], DB::select("
         select
           l.id,
@@ -280,5 +284,38 @@ class LicenseController extends Controller
     public function deletePrivilege(License $license, Seat $seat, Privilege $privilege)
     {
       return response()->noContent(501);
+    }
+
+    public function getGroups()
+    {
+        $user_id = auth()->user()->id;
+        $groups = DB::select("
+          select g.*
+          from
+            `groups` g,
+            `seat_group` r,
+            `seats` s
+          where 
+             g.id = r.group_id and
+             s.id = r.seat_id and
+             s.user_id = ?
+        ", [ $user_id ]);
+        return GroupResource::collection($groups);
+    }
+
+    public function getGroup(Group $group)
+    {
+        $user = auth()->user();
+        $seat = $user ?: Seat::firstWhere('user_id', $user->id);
+        //$priv = $seat ?: 
+        if ($user->role !== 'leerling') {
+          $group->load('seats');
+        }
+        return new GroupResource($group);
+    }
+
+    public function putGroup()
+    {
+        return reponse()->noContent(501);
     }
 }
