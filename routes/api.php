@@ -116,6 +116,9 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::put('/licenses/{license}/{seat}/{privilege}', [LicenseController::class, 'putPrivilege']);
     Route::delete('/licenses/{license}/{seat}/{privilege}', [LicenseController::class, 'deletePrivilege']);
 
+    Route::get('/groups', [LicenseController::class, 'getGroups']);
+    Route::get('/groups/{group}', [LicenseController::class, 'getGroup']);
+    Route::put('/groups/{group}', [LicenseController::class, 'putGroup']);
 
     Route::post('/privilege', [PrivilegeController::class, 'privilege']);
     Route::post('/privileges', [PrivilegeController::class, 'privileges']);

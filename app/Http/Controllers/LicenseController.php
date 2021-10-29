@@ -288,30 +288,22 @@ class LicenseController extends Controller
 
     public function getGroups()
     {
-        $user_id = auth()->user()->id;
-        $groups = DB::select("
-          select g.*
-          from
-            `groups` g,
-            `seat_group` r,
-            `seats` s
-          where 
-             g.id = r.group_id and
-             s.id = r.seat_id and
-             s.user_id = ?
-        ", [ $user_id ]);
-        return GroupResource::collection($groups);
+        $user = auth()->user();
+        $user_id = $user->id;
+        $groups = Group::whereHas(
+          'seats', fn($q) => $q->where('user_id', $user_id)
+        );
+        return GroupResource::collection($groups->get());
     }
 
     public function getGroup(Group $group)
     {
         $user = auth()->user();
-        $seat = $user ?: Seat::firstWhere('user_id', $user->id);
-        //$priv = $seat ?: 
-        if ($user->role !== 'leerling') {
-          $group->load('seats');
+        if (Privilege::granted('groep beheren', $group)) {
+          $group->load('seats.user');
+          return new GroupResource($group);
         }
-        return new GroupResource($group);
+        return response()->noContent(403);
     }
 
     public function putGroup()
