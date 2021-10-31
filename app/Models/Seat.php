@@ -16,9 +16,19 @@ class Seat extends Model
         'role'
     ];
 
+    public function license()
+    {
+        return $this->belongsTo(License::class, 'license_id');
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function groups()
+    {
+        return $this->belongsToMany(Group::class, 'seat_group');
     }
 
     public function privileges()

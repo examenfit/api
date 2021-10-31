@@ -96,6 +96,10 @@ Route::get('/streams/{stream}/formuleblad', [StreamController::class, 'formulebl
 
     Route::get('/activity_summary/{collection}', [CollectionController::class, 'activity_summary']);
 
+    Route::get('/invite-status', [LicenseController::class, 'getInviteStatus']);
+    Route::post('/invite-account', [LicenseController::class, 'postInviteAccount']);
+    Route::post('/invite-ok', [LicenseController::class, 'postInviteOk']);
+
 Route::group(['middleware' => 'auth:sanctum'], function () {
 
     Route::get('/licenses', [LicenseController::class, 'index']);
@@ -111,6 +115,14 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('/licenses/{license}/{seat}/{privilege}', [LicenseController::class, 'getPrivilege']);
     Route::put('/licenses/{license}/{seat}/{privilege}', [LicenseController::class, 'putPrivilege']);
     Route::delete('/licenses/{license}/{seat}/{privilege}', [LicenseController::class, 'deletePrivilege']);
+
+    Route::get('/groups', [LicenseController::class, 'getGroups']);
+    Route::get('/groups/{group}', [LicenseController::class, 'getGroup']);
+    Route::put('/groups/{group}', [LicenseController::class, 'putGroup']);
+
+
+    Route::post('/collections/{collection}/share', [CollectionController::class, 'shareCollection']);
+
 
     Route::post('/privilege', [PrivilegeController::class, 'privilege']);
     Route::post('/privileges', [PrivilegeController::class, 'privileges']);

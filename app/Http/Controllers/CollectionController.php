@@ -12,6 +12,11 @@ use App\Models\Course;
 use App\Models\Question;
 use App\Models\Collection;
 use App\Models\Elaboration;
+
+use App\Models\License;
+use App\Models\Seat;
+use App\Models\Privilege;
+
 use App\Rules\HashIdExists;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -338,7 +343,6 @@ class CollectionController extends Controller
             )
         );
 
-
         $info = DB::select("
             select
               topic_id,
@@ -372,6 +376,48 @@ class CollectionController extends Controller
         return new CollectionResource($collection);
     }
 
+    public function shareCollection(Collection $collection)
+    {
+        $user_id = $collection->user_id;
+        $seats = Seat::query()
+          ->where('role', 'docent')
+          ->where('user_id', $user_id);
+
+        $n = 0;
+        foreach($seats->get() as $docent) {
+          $docent->load('license.seats');
+          $leerlingen = Seat::query()
+            ->where('role', 'leerling')
+            ->where('license_id', $docent->license_id);
+          foreach($leerlingen->get() as $leerling) {
+            $leerling->load('privileges');
+            $has_priv = false;
+            foreach($leerling->privileges as $priv) {
+              if ($priv->object_type === 'collection' &&
+                  $priv->object_id === $collection->id &&
+                  $priv->action === 'opgavenset uitvoeren') {
+                $has_priv = true;
+              }
+            }
+            if (!$has_priv) {
+              Privilege::create([
+                  'actor_seat_id' => $leerling->id,
+                  'action' => 'opgavenset uitvoeren',
+                  'object_type' => 'collection',
+                  'object_id' => $collection->id,
+                  'begin' => $docent->license->begin,
+                  'end' => $docent->license->end
+              ]);
+              $n++;
+            }
+          }
+        }
+        return response()->json([
+          'status' => 'ok',
+          'shared' => $n
+        ]);
+    }
+
     public function storeElaboration(Request $request, Collection $collection, Question $question)
     {
         $data = $request->validate([
@@ -401,6 +447,7 @@ class CollectionController extends Controller
           return [
             'id' => Hashids::encode($collection->id),
             'name' => $collection->name,
+            'download_type' => $collection->download_type,
             'date' => (new DateTime($collection->created_at))->format('c'),
             'topics' => array_map(function($topic) {
                 return [
@@ -459,7 +506,7 @@ class CollectionController extends Controller
           ];
         }, DB::select("
           select
-            id, name, created_at
+            id, name, created_at, download_type
           from
             collections
           where

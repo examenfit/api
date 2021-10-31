@@ -7,23 +7,32 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class LeerlingInviteMail extends Mailable
+class InviteMail extends Mailable
 {
     use Queueable, SerializesModels;
 
     public $seat;
     public $link;
+    public $user;
 
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct($seat)
+    public function __construct($seat, $user)
+    {
+        $this->seat = $seat;
+        $this->user = $user;
+        $this->link = $this->activationLink();
+    }
+
+    private function activationLink()
     {
         $app_url = config('app.dashboard_url');
-        $token = $seat->token;
-        $this->link = "{$app_url}/leerlinguitnodiging-bevestigen/{$token}"; // vak/niveau?
+        $path = 'uitnodiging-accepteren';
+        $token = $this->seat->token;
+        return "{$app_url}/{$path}/{$token}"; // vak/niveau?
     }
 
     /**
@@ -35,6 +44,6 @@ class LeerlingInviteMail extends Mailable
     {
         return $this->from('info@examenfit.nl')
                     ->subject('Aanmelding ExamenFit')
-                    ->view('mail.leerling-invite');
+                    ->view('mail.invite');
     }
 }
