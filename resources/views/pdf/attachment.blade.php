@@ -1,6 +1,6 @@
 <div class=attachment>
   <b>{{ $name }}</b>
-  <span>
-    <img src="{{ Storage::url($path) }}">
-  </span>
+  <div>
+    <img style="object-fit: contain" src="{{ Storage::url($path) }}">
+  </div>
 </div>
