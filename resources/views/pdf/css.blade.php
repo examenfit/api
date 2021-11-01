@@ -148,18 +148,19 @@ i {
   margin: 21pt 0;
 }
 .attachment {
-  clear: both;
+  page-break-inside: avoid;
   margin: 21pt 0;
 }
-.attachment span {
-  max-width: 6in;
-  max-height: 5in;
+.attachment b {
+  display: block;
+}
+.attachment div {
   display: block;
 }
 .attachment img {
-  max-width: 100%;
-  max-height: 100%;
-  display: block;
+  max-width: 6in;
+  max-height: 4in;
+  object-fit: contain;
 }
 .question {
   margin-bottom: 28pt;
