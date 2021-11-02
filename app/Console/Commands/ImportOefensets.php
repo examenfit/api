@@ -375,7 +375,7 @@ class ImportOefensets extends Command {
       return; // quit
     }
     for ($row = 2; $row < 99; $row += 2) {
-      $onderwerp = mb_strtolower($this->getValue(2,$row));
+      $onderwerp = $this->getValue(2,$row);
       if ($onderwerp) {
         $this->initOnderwerp($onderwerp);
         $this->importOnderwerp($row);
@@ -386,10 +386,10 @@ class ImportOefensets extends Command {
   function importOnderwerp($row)
   {
     for ($col = 3; $col < 99; $col += 1) {
-      $set = join(', ', explode("\n", trim(mb_strtolower($this->getValue($col, $row)))));
+      $set = join(', ', explode("\n", trim($this->getValue($col, $row))));
       if ($set) {
-        $type = mb_strtolower($this->getValue($col, 1));
-        $vragen = explode("\n", trim(mb_strtolower($this->getValue($col, $row+1))));
+        $type = $this->getValue($col, 1);
+        $vragen = explode("\n", trim($this->getValue($col, $row+1)));
         if (substr($type, 0, 5) === 'basis') {
           $this->initBasisvaardigheid($set);
           $this->deleteBasisvaardigheidAnnotations();
@@ -406,7 +406,7 @@ class ImportOefensets extends Command {
   function importBasisvaardigheid($vragen)
   {
     foreach($vragen as $vraag) {
-      preg_match('/(\\d+)-(i+) (\\d+)/', $vraag, $matches);
+      preg_match('/(\\d+)-([iI]+) (\\d+)/', $vraag, $matches);
       if ($matches) {
         $year = +$matches[1];
         $term = strlen($matches[2]);
@@ -422,7 +422,7 @@ class ImportOefensets extends Command {
   function importGecombineerdeOpgave($vragen)
   {
     foreach($vragen as $vraag) {
-      preg_match('/(\\d+)-(i+) (\\d+)/', $vraag, $matches);
+      preg_match('/(\\d+)-([iI]+) (\\d+)/', $vraag, $matches);
       if ($matches) {
         $year = +$matches[1];
         $term = strlen($matches[2]);
