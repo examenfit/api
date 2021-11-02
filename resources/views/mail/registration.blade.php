@@ -4,7 +4,7 @@
 </p>
 
 <p>
-    Welkom bij ExamenFit, dé examentool die maatwerk biedt!
+    Leuk dat je benieuwd bent naar ExamenFit. Hopelijk ga je de meerwaarde van onze examentool voor maatwerk waarderen!
 </p>
 
 <p>Je hebt je aangemeld voor een proeflicentie. Hiermee kun je:</p>
