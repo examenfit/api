@@ -433,6 +433,17 @@ class ImportGR12 extends Command
         // Getal & Ruimte
         $this->processMainChapter($sync, $row['hoofdstuk_gr_ed_12']);
 
+        $question_id = $this->question->id;
+        foreach($sync as $chapter_id) {
+      try {
+          DB::insert("
+            insert into question_chapter (question_id, chapter_id) values(?, ?)
+          ", [ $question_id, $chapter_id ]);
+      } catch (\ErrorException $err) {
+$this->info('Ooops');
+      }
+        }
+
         //$this->question->chapters()->sync($sync);
     }
 

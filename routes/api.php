@@ -11,6 +11,7 @@ use App\Http\Controllers\LevelController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\PrivilegeController;
+use App\Http\Controllers\AnnotationController;
 use App\Http\Controllers\LicenseController;
 use App\Http\Controllers\Admin\TipController;
 use App\Http\Controllers\Admin\ExamController;
@@ -48,6 +49,9 @@ use App\Http\Controllers\Admin\ChapterController as AdminChapterController;
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])
     ->middleware('guest');
 
+Route::get('/annotations/{stream}', [AnnotationController::class, 'index']);
+Route::get('/annotations/{stream}/oefensets', [AnnotationController::class, 'oefensets']);
+Route::get('/annotations/{stream}/{annotation}', [AnnotationController::class, 'get']);
 
 Route::get('/download-collection/{collection}', [CollectionController::class, 'showCollectionQuestionsDocument']);
 Route::get('/download-collection-html/{collection}', [CollectionController::class, 'showCollectionQuestionsHtml']);
