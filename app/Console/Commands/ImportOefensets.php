@@ -388,7 +388,7 @@ class ImportOefensets extends Command {
     for ($col = 3; $col < 99; $col += 1) {
       $set = join(', ', explode("\n", trim($this->getValue($col, $row))));
       if ($set) {
-        $type = $this->getValue($col, 1);
+        $type = mb_strtolower($this->getValue($col, 1));
         $vragen = explode("\n", trim($this->getValue($col, $row+1)));
         if (substr($type, 0, 5) === 'basis') {
           $this->initBasisvaardigheid($set);
