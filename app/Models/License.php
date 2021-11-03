@@ -9,6 +9,8 @@ use App\Support\HashID;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+use Illuminate\Support\Str;
+
 class License extends Model
 {
     use HasFactory, HashID;
@@ -105,5 +107,53 @@ class License extends Model
         }
 
         return $license;
+    }
+
+    public static function createDemoLeerling($license)
+    {
+        $seat = Seat::query()
+          ->where('license_id', $license->id)
+          ->where('role', 'leerling')
+          ->first();
+
+        $code = base_convert(time() % pow(36,6), 10, 36);
+        $email = "leerling-$code@examenfit.nl";
+
+        $demo = Seat::create([
+            'license_id' => $license->id,
+            'role' => 'leerling',
+        ]);
+
+        $groups = Group::query()
+          ->where('license_id', $license->id)
+          ->get();
+
+        foreach($groups as $group)
+        {
+            $sync[] = $group->id;
+        }
+
+        foreach($seat->privileges() as $priv)
+        {
+            $demo->groups()->sync($sync);
+            Privilege::create([
+                'actor_seat_id' => $demo->id,
+                'action' => $priv->action,
+                'object_type' => $priv->object_type,
+                'object_id' => $priv->object_id,
+                'begin' => $license->begin,
+                'end' => $license->end
+            ]);
+        }
+
+        $user = auth()->user();
+        $demo->first_name = $user->first_name;
+        $demo->last_name = $user->last_name;
+        $demo->email = $email;
+        $demo->is_active = 1;
+        $demo->token = Str::random(32);
+        $demo->save();
+
+        return $demo;
     }
 }
