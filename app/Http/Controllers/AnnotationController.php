@@ -75,7 +75,7 @@ class AnnotationController extends Controller
 
       $annotations->load([
         'children.questions.topic.exam',
-        'children.questions.chapters'
+        'children.questions.chapters.parent'
       ]);
 
       return AnnotationResource::collection($annotations);
