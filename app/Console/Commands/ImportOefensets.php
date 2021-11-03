@@ -114,6 +114,20 @@ class ImportOefensets extends Command {
     $this->error("Werkblad 'oefenreeksen' niet gevonden.");
   }
 
+  const DELETE_ANNOTATIONS = "
+    DELETE FROM
+      annotations
+    WHERE
+      stream_id = ?
+  ";
+  
+  function deleteAnnotations() {
+    DB::delete(ImportOefensets::DELETE_ANNOTATIONS, [ $this->stream->id ]);
+    $vak = $this->vak;
+    $niveau = $this->niveau;
+    $this->warn("Metadata voor $vak $niveau gewist");
+  }
+
   const QUERY_ONDERWERP = "
     SELECT
       *
@@ -151,7 +165,7 @@ class ImportOefensets extends Command {
 
   function createOnderwerp($onderwerp)
   {
-    $this->warn("createOnderwerp: $onderwerp");
+    $this->info("createOnderwerp: $onderwerp");
     DB::insert(ImportOefensets::INSERT_ONDERWERP, [
       $this->stream->id,
       $onderwerp
@@ -210,7 +224,7 @@ class ImportOefensets extends Command {
 
   function createBasisvaardigheid($basisvaardigheid)
   {
-    $this->warn("createBasisvaardigheid: $basisvaardigheid");
+    $this->info("createBasisvaardigheid: $basisvaardigheid");
     return DB::insert(ImportOefensets::INSERT_BASISVAARDIGHEID, [
       $this->stream->id,
       $this->onderwerp->id,
@@ -237,7 +251,7 @@ class ImportOefensets extends Command {
       stream_id = ? AND
       parent_id = ? AND
       name = ? AND
-      type = 'gecombineerde-opgave'
+      type = 'gecombineerde-vaardigheden'
   ";
 
   function queryGecombineerdeOpgave($opgave)
@@ -262,12 +276,12 @@ class ImportOefensets extends Command {
       stream_id = ?,
       parent_id = ?,
       name = ?,
-      type = 'gecombineerde-opgave'
+      type = 'gecombineerde-vaardigheden'
   ";
 
   function createGecombineerdeOpgave($opgave)
   {
-    $this->warn("createGecombineerdeOpgave: $opgave");
+    $this->info("createGecombineerdeOpgave: $opgave");
     return DB::insert(ImportOefensets::INSERT_GECOMBINEERDE_OPGAVE, [
       $this->stream->id,
       $this->onderwerp->id,
@@ -374,6 +388,7 @@ class ImportOefensets extends Command {
     if (!$this->validateSheet()) {
       return; // quit
     }
+    $this->deleteAnnotations();
     for ($row = 2; $row < 99; $row += 2) {
       $onderwerp = $this->getValue(2,$row);
       if ($onderwerp) {
@@ -392,11 +407,12 @@ class ImportOefensets extends Command {
         $vragen = explode("\n", trim($this->getValue($col, $row+1)));
         if (substr($type, 0, 5) === 'basis') {
           $this->initBasisvaardigheid($set);
-          $this->deleteBasisvaardigheidAnnotations();
+          //$this->deleteBasisvaardigheidAnnotations();
           $this->importBasisvaardigheid($vragen);
         } else {
-          $this->initGecombineerdeOpgave($set);
-          $this->deleteGecombineerdeOpgave();
+          //$this->initGecombineerdeOpgave($set);
+          $this->initGecombineerdeOpgave('Gecombineerde opgaven');
+          //$this->deleteGecombineerdeOpgave();
           $this->importGecombineerdeOpgave($vragen);
         }
       }
