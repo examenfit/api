@@ -49,7 +49,10 @@ use App\Http\Controllers\Admin\ChapterController as AdminChapterController;
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])
     ->middleware('guest');
 
+
 Route::get('/annotations/{stream}', [AnnotationController::class, 'index']);
+Route::get('/annotations/{stream}/types', [AnnotationController::class, 'types']);
+Route::get('/annotations/{stream}/types/{type}', [AnnotationController::class, 'type']);
 Route::get('/annotations/{stream}/oefensets', [AnnotationController::class, 'oefensets']);
 Route::get('/annotations/{stream}/{annotation}', [AnnotationController::class, 'get']);
 
@@ -110,6 +113,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('/licenses', [LicenseController::class, 'index']);
     Route::get('/licenses/{license}', [LicenseController::class, 'get']);
     Route::put('/licenses/{license}', [LicenseController::class, 'put']);
+    Route::post('/licenses/{license}/demo-leerling', [LicenseController::class, 'createDemoLeerling']);
     Route::delete('/licenses/{license}', [LicenseController::class, 'delete']);
     Route::post('/licenses/{license}', [LicenseController::class, 'createSeat']);
     Route::get('/licenses/{license}/{seat}', [LicenseController::class, 'getSeat']);

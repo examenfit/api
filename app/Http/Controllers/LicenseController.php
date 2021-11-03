@@ -68,6 +68,21 @@ class LicenseController extends Controller
       return response()->noContent(501);
     }
 
+    function createDemoLeerling(License $license)
+    {
+      $user = auth()->user();
+      if (!$user) {
+        return response()->noContent(401);
+      }
+
+      $demo = License::createDemoLeerling($license);
+
+      $mail = new InviteMail($demo, $user);
+      Mail::to($user->email)->send($mail);
+
+      return new SeatResource($demo);
+    }
+
     public function post(Request $request)
     {
       $data = $request->validate([

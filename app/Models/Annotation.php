@@ -18,6 +18,7 @@ class Annotation extends Model
     {
         return $this->hasMany(Self::class, 'parent_id')
             ->orderBy('position', 'ASC')
+            ->orderBy('type', 'ASC')
             ->orderBy('name', 'ASC');
     }
 

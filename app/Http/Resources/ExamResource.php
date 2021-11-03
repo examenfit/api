@@ -16,6 +16,9 @@ class ExamResource extends JsonResource
      */
     public function toArray($request)
     {
+        $user = Auth::user();
+        $isAdmin = $user && $user->isAdmin();
+
         return [
             'id' => $this->hash_id,
             'stream_id' => Hashids::encode($this->stream_id),
@@ -30,7 +33,7 @@ class ExamResource extends JsonResource
             'files' => ExamSourceFileResource::collection($this->whenLoaded('files')),
             'stream' => new StreamResource($this->whenLoaded('stream')),
             //'level' => new LevelResource($this->whenLoaded('level')),
-            'assignment_contents' => $this->when(Auth::user()->isAdmin(), $this->assignment_contents),
+            'assignment_contents' => $this->when($isAdmin, $this->assignment_contents),
         ];
     }
 }
