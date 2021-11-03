@@ -58,7 +58,7 @@ class AnnotationController extends Controller
         'stream.course',
         'stream.level',
         'children',
-        'questions'
+        'questions.topic.exam'
       ]);
       $annotation->questions();
       return new AnnotationResource($annotation);
@@ -74,7 +74,8 @@ class AnnotationController extends Controller
         ->get();
 
       $annotations->load([
-        'children.questions'
+        'children.questions.topic.exam',
+        'children.questions.chapters'
       ]);
 
       return AnnotationResource::collection($annotations);
