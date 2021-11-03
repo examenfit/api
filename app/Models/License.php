@@ -147,7 +147,7 @@ class License extends Model
         }
 
         $user = auth()->user();
-        $demo->first_name = $user->first_name;
+        $demo->first_name = 'Leerling';
         $demo->last_name = $user->last_name;
         $demo->email = $email;
         $demo->is_active = 1;
