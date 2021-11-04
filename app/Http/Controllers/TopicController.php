@@ -13,14 +13,15 @@ class TopicController extends Controller
         $topic->load([
             'exam.stream.course',
             'exam.stream.level',
-            'questions.attachments',
-            'questions.domains.parent',
-            'questions.questionType',
             'questions.answers.sections',
-            'questions.tags',
+            'questions.attachments',
             'questions.chapters',
             'questions.chapters.parent',
+            'questions.dependencies',
+            'questions.domains.parent',
             'questions.highlights',
+            'questions.questionType',
+            'questions.tags',
         ]);
 
         return new TopicResource($topic);
