@@ -45,8 +45,10 @@ class FixPrivileges extends Command
         ->where('role', 'leerling')
         ->get();
       foreach($seats as $seat) {
-        if (count($seat->privileges)) {
-          continue;
+        foreach($seat->privileges as $priv) {
+          if ($priv->action === 'oefensets uitvoeren') {
+            continue;
+          }
         }
         if ($seat->user_id) {
           $this->info('user.email: '.$seat->user->email);
