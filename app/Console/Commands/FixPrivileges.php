@@ -56,14 +56,15 @@ class FixPrivileges extends Command
           $this->info('seat: #'.$seat->id);
         }
         $license = $seat->license;
+        $this->info('license: #'.$license->id);
         foreach($license->seats as $docent) {
           if($docent->role === 'docent') {
             if ($docent->user_id) {
-              $this->info('user.email: '.$docent->user->email);
+              $this->info(' (docent) user.email: '.$docent->user->email);
             } else if ($docent->email) {
-              $this->info('seat.email: '.$docent->email);
+              $this->info(' (docent) seat.email: '.$docent->email);
             } else {
-              $this->info('seat: #'.$docent->id);
+              $this->info(' (docent) seat: #'.$docent->id);
             }
             foreach($docent->privileges as $priv) {
               if ($priv->object_type === 'stream') {
