@@ -87,9 +87,9 @@ class ImportOefensets extends Command {
           'email' => $email,
         ]);
         $n++;
-        die();
       }
     }
+    $this->info("$n registraties verzonden");
   }
 
 }
