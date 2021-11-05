@@ -376,12 +376,18 @@ class ImportOefensets extends Command {
 
   function createBasisvaardigheidAnnotation()
   {
-    DB::insert(ImportOefensets::INSERT_QUESTION_ANNOTATIONS, [ $this->basisvaardigheid->id, $this->question->id ]);
+    $question_id = $this->question->id;
+    $basisvaardigheid_id = $this->basisvaardigheid->id;
+
+    DB::insert(ImportOefensets::INSERT_QUESTION_ANNOTATIONS, [ $basisvaardigheid_id, $question_id ]);
   }
 
   function createGecombineerdeOpgaveAnnotation()
   {
-    DB::insert(ImportOefensets::INSERT_QUESTION_ANNOTATIONS, [ $this->opgave->id, $this->question->id ]);
+    $question_id = $this->question->id;
+    $opgave_id = $this->opgave->id;
+
+    DB::insert(ImportOefensets::INSERT_QUESTION_ANNOTATIONS, [ $opgave_id, $question_id ]);
   }
 
   function validateSheet()
