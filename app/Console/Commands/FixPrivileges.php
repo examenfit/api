@@ -41,14 +41,24 @@ class FixPrivileges extends Command
      */
     public function handle()
     {
+      $this->fix1();
+      $this->fix2();
+    }
+
+    public function fix1()
+    {
       $seats = Seat::query()
         ->where('role', 'leerling')
         ->get();
       foreach($seats as $seat) {
+        $count = 0;
         foreach($seat->privileges as $priv) {
           if ($priv->action === 'oefensets uitvoeren') {
-            continue;
+            $count++;
           }
+        }
+        if ($count) {
+          continue;
         }
         if ($seat->user_id) {
           $this->info('user.email: '.$seat->user->email);
@@ -81,6 +91,23 @@ class FixPrivileges extends Command
                 ]);
               }
             }
+          }
+        }
+      }
+    }
+
+    function fix2() {
+      foreach(Seat::all() as $seat) {
+        $this->info('#'.$seat->id);
+        $map = [];
+        foreach($seat->privileges as $priv) {
+          $k = join(';', [$priv->action, $priv->object_type, $priv->object_id]);
+          if (array_key_exists($k, $map)) {
+            $this->info("delete $k");
+            $priv->delete();
+          } else {
+            $this->info("keep $k");
+            $map[$k] = true;
           }
         }
       }

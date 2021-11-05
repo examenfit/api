@@ -251,7 +251,7 @@ class ImportOefensets extends Command {
       stream_id = ? AND
       parent_id = ? AND
       name = ? AND
-      type = 'gecombineerde-vaardigheden'
+      type = 'gecombineerde-opgaven'
   ";
 
   function queryGecombineerdeOpgave($opgave)
@@ -276,7 +276,7 @@ class ImportOefensets extends Command {
       stream_id = ?,
       parent_id = ?,
       name = ?,
-      type = 'gecombineerde-vaardigheden'
+      type = 'gecombineerde-opgaven'
   ";
 
   function createGecombineerdeOpgave($opgave)
