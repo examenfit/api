@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 
 use App\Http\Controllers\RegistrationController;
 
-class ImportOefensets extends Command {
+class BulkRegistrations extends Command {
 
   protected $signature = 'ef:bulk:registrations {--file=}';
   protected $description = 'Imports an Excel sheet';
