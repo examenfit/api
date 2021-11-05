@@ -46,13 +46,19 @@ class RegistrationController extends Controller
         return $registration;
     }
 
+    public function process($data)
+    {
+        $registration = $this->createRegistration($data);
+        $this->sendRegistrationMail($registration);
+        return $registration;
+    }
+
     public function store(RegistrationRequest $request)
     {
         $data = $request->validated();
         try
         {
-            $registration = $this->createRegistration($data);
-            $this->sendRegistrationMail($registration);
+            $registration = $this->process($data);
             return view('registration.success', $registration);
         }
         catch (Exception $error)
