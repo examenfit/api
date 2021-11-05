@@ -301,7 +301,9 @@ class ImportOefensets extends Command {
 
   const QUERY_QUESTION = "
     SELECT
-      questions.id
+      questions.id,
+      exams.status,
+      topics.has_answers
     FROM
       questions,
       topics,
@@ -337,7 +339,14 @@ class ImportOefensets extends Command {
     if (!$row) {
       die("failed to get: $year-$term #$number");
     }
-    $this->question = $row;
+    if ($row->status !== 'published') {
+      $this->warn("$year-$term #$number: Ongeldige status: ".$row->status);
+    } else if (!$row->has_answers) {
+      $this->warn("$year-$term #$number: Heeft geen antwoorden");
+    } else {
+      $this->question = $row;
+      return true;
+    }
   }
 
   const DELETE_QUESTION_ANNOTATIONS = "
@@ -427,8 +436,9 @@ class ImportOefensets extends Command {
         $year = +$matches[1];
         $term = strlen($matches[2]);
         $number = +$matches[3];
-        $this->initQuestion($year, $term, $number);
-        $this->createBasisvaardigheidAnnotation();
+        if ($this->initQuestion($year, $term, $number)) {
+          $this->createBasisvaardigheidAnnotation();
+        }
       } else {
         $this->error(" FAILED: \"$vraag\"");
       }
@@ -443,8 +453,9 @@ class ImportOefensets extends Command {
         $year = +$matches[1];
         $term = strlen($matches[2]);
         $number = +$matches[3];
-        $this->initQuestion($year, $term, $number);
-        $this->createGecombineerdeOpgaveAnnotation();
+        if ($this->initQuestion($year, $term, $number)) {
+          $this->createGecombineerdeOpgaveAnnotation();
+        }
       } else {
         $this->error(" FAILED: \"$vraag\"");
       }
