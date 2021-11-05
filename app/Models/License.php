@@ -128,14 +128,15 @@ class License extends Model
           ->where('license_id', $license->id)
           ->get();
 
+        $sync = [];
         foreach($groups as $group)
         {
             $sync[] = $group->id;
         }
 
-        foreach($seat->privileges() as $priv)
+        $demo->groups()->sync($sync);
+        foreach($seat->privileges as $priv)
         {
-            $demo->groups()->sync($sync);
             Privilege::create([
                 'actor_seat_id' => $demo->id,
                 'action' => $priv->action,
