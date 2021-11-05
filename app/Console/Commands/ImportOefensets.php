@@ -26,6 +26,7 @@ class ImportOefensets extends Command {
   public function handle() {
     $this->init();
     $this->process();
+    $this->fix();
   }
 
   function init() {
@@ -468,6 +469,17 @@ class ImportOefensets extends Command {
       return $value;
     } else {
       return $default;
+    }
+  }
+
+  function fix() {
+    $annotations = DB::select("SELECT * FROM annotations WHERE parent_id IS NOT NULL");
+    foreach($annotations as $annotation) {
+      $questions = DB::select("SELECT * FROM question_annotation WHERE annotation_id = ?", [ $annotation->id ]);
+      if (!count($questions)) {
+        $this->info('removing #'.$annotation->id.' ('.$annotation->type.' '.$annotation->name.')');
+        DB::delete("DELETE FROM annotations WHERE id = ?", [ $annotation->id ]);
+      }
     }
   }
 }
