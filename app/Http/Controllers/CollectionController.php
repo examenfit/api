@@ -62,6 +62,16 @@ class CollectionController extends Controller
 
     public function activity_summary(Collection $collection)
     {
+        $user = auth()->user();
+        if ($user === 'leerling') { 
+          return response()->json([
+            'devices' => 0,
+            'sessions' => 0,
+            'last' => '2000-01-01',
+            'activities' => 0
+          ]);
+        }
+
         $r = DB::select("
           select
             count(distinct device_key) as devices,
@@ -72,6 +82,8 @@ class CollectionController extends Controller
             activity_logs
           where
             collection_id = ?
+           and
+            email is null
         ", [ $collection->id ]);
         return response()->json($r[0]);
     }
