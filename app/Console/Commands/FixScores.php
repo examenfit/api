@@ -75,7 +75,7 @@ class FixScores extends Command
       ");
       foreach($last as $l) {
         $max_id = $l->max_id;
-        $this->info("stream $max_id");
+        $this->info("max $max_id");
         DB::update("
           UPDATE scores
           SET is_newest = 1
