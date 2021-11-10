@@ -179,7 +179,7 @@ class ScoreController extends Controller
           scores
         WHERE
           user_id = ? AND
-          (stream_id = ? OR TRUE) AND
+          stream_id = ? AND
           is_newest
       ", [ $user_id, $stream_id ]);
       $scores = ScoreController::mapScores($rows);
