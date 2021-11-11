@@ -36,7 +36,7 @@ class Question extends Model implements Auditable
 
     public function answers()
     {
-        return $this->hasMany(Answer::class);
+        return $this->hasMany(Answer::class)->orderBy('position', 'ASC');
     }
 
     public function attachments()
