@@ -11,8 +11,10 @@ class Answer extends Model
     use HasFactory, HashID;
 
     public $fillable = [
+        'name',
         'type',
         'remark',
+        'position',
     ];
 
     public function sections()

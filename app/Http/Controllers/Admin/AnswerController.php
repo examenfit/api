@@ -45,7 +45,13 @@ class AnswerController extends Controller
             'type' => 'required|in:correction,didactic',
         ]);
 
-        $answer = $question->answers()->create($data);
+        $n = count($question->answers) + 1;
+
+        $answer = $question->answers()->create([
+            'type' => $request->type,
+            'position' => $n,
+            'name' => "Oplossingsstrategie nr. $n"
+        ]);
 
         return new AnswerResource($answer);
     }
@@ -54,6 +60,8 @@ class AnswerController extends Controller
     {
         $data = $request->validate([
             'remark' => 'nullable|string',
+            'name' => 'nullable|string',
+            'position' => 'nullable|integer',
             'sections' => 'array',
             'sections.*.id' => 'nullable',
             'sections.*.text' => 'required|string',
@@ -69,7 +77,11 @@ class AnswerController extends Controller
 
         //if (isset($data['remark'])) {
             Log::info('updating');
-            $answer->update(['remark' => $data['remark']]);
+            $answer->update([
+              'name' => $data['name'],
+              'position' => $data['position'],
+              'remark' => $data['remark']
+            ]);
         //}
 
         return $this->show($answer);

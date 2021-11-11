@@ -49,6 +49,7 @@ use App\Http\Controllers\Admin\ChapterController as AdminChapterController;
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])
     ->middleware('guest');
 
+Route::get('/topics/{topic}', [TopicController::class, 'show']);
 
 Route::get('/annotations/{stream}', [AnnotationController::class, 'index']);
 Route::get('/annotations/{stream}/types', [AnnotationController::class, 'types']);
@@ -92,6 +93,12 @@ Route::get('/streams/{stream}/formuleblad', [StreamController::class, 'formulebl
 
     Route::get('/score', [ScoreController::class, 'loadAll']);
     Route::put('/score', [ScoreController::class, 'saveAll']);
+
+    Route::get('/streams/{stream}/scores', [ScoreController::class, 'getStreamScores']);
+    Route::post('/streams/{stream}/scores', [ScoreController::class, 'postStreamScore']);
+
+    Route::get('/streams/{stream}', [ScoreController::class, 'getStreamScores']);
+    Route::post('/streams/{stream}/{question}', [ScoreController::class, 'postStreamScore']);
 
     Route::post('/register', [RegistrationController::class, 'register']);
     Route::get('/activation-status', [RegistrationController::class, 'activationStatus']);
@@ -156,7 +163,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::post('/profile', [ProfileController::class, 'store']);
     Route::post('/userprofile', [ProfileController::class, 'store_userprofile']);
 
-    Route::get('/topics/{topic}', [TopicController::class, 'show']);
+    //Route::get('/topics/{topic}', [TopicController::class, 'show']);
 
 
 

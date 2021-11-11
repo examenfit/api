@@ -14,6 +14,7 @@ class ActivityLog extends Model
       'activity',
       'collection_id',
       'question_id',
-      'topic_id'
+      'topic_id',
+      'email'
     ];
 }

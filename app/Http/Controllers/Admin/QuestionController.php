@@ -55,6 +55,8 @@ class QuestionController extends Controller
         if (isset($data['answerSections'])) {
             $answer = $question->answers()->create([
                 'type' => 'correction',
+                'position' => 1,
+                'name' => 'Oplossingsstrategie',
                 'remark' => $data['answer_remark'] ?? null,
             ]);
 
