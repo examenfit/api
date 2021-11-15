@@ -16,7 +16,7 @@ class UserSwitchController extends Controller
       $user = Auth::user();
       $users = User::query()
         ->whereNotNull('link')
-        ->where('link', $user->link)
+        ->where('link', $user->link ?: '!@#$%^&*(')
         ->get();
 
       return UserResource::collection($users);
