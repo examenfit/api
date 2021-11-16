@@ -44,8 +44,7 @@ class License extends Model
             'end' => $end
         ]);
 
-        $seat = Seat::create([
-            'license_id' => $license->id,
+        $seat = $license->seats()->create([
             'user_id' => $user->id,
             'role' => 'docent'
         ]);
@@ -87,7 +86,7 @@ class License extends Model
             ]);
         }
 
-        $leerlingen = 3;
+        $leerlingen = 4;
         while ($leerlingen--) {
             $seat = Seat::create([
                 'license_id' => $license->id,
@@ -105,6 +104,25 @@ class License extends Model
                 ]);
             }
         }
+
+
+        $user->link = Str::random(32);
+        $user->save();
+
+        $demo = User::create([
+            'first_name' => 'Leonie',
+            'last_name' => 'Eerling',
+            'role' => 'leerling',
+            'email' => 'leerling-'.Str::random(6).'@examenfit.nl',
+            'password' => '',
+            'link' => $user->link
+        ]);
+
+        // seat = first leerling added
+        $seat = $license->seats[1];
+        $seat->first_name = 'Demo leerling';
+        $seat->user_id = $demo->id;
+        $seat->save();
 
         return $license;
     }
