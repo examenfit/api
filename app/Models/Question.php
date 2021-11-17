@@ -121,6 +121,14 @@ class Question extends Model implements Auditable
         return $this->tags()->sync($collection);
     }
 
+    public function syncTagIds($tags)
+    {
+        $collection = collect($tags)
+            ->pluck('id');
+
+        return $this->tags()->sync($collection);
+    }
+
     public function addDomains($domains)
     {
         $collection = collect($domains)
