@@ -22,6 +22,7 @@ class UserResource extends JsonResource
             'last_name' => $this->last_name,
             'role' => $this->role,
             'newsletter' => $this->newsletter,
+            'switchable' => isset($this->link),
             'data' => json_decode($this->data)
         ];
     }
