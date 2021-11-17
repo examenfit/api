@@ -19,7 +19,7 @@ use App\Http\Controllers\Admin\TipController;
 use App\Http\Controllers\Admin\ExamController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\CollectionController;
-//use App\Http\Controllers\CustomQueries;
+use App\Http\Controllers\CustomQueries;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\Admin\AnswerController;
 use App\Http\Controllers\Admin\QuestionController;
@@ -50,8 +50,8 @@ use App\Http\Controllers\Admin\ChapterController as AdminChapterController;
 |
 */
 
-//Route::get('/custom/questions/with_multiple_answers', [CustomQueries::class, 'questions_with_multiple_answers']);
-//Route::get('/custom/questions/complexity_is_null', [CustomQueries::class, 'questions_complexity_is_null']);
+Route::get('/custom/questions/with_multiple_answers', [CustomQueries::class, 'questions_with_multiple_answers']);
+Route::get('/custom/questions/complexity_is_null', [CustomQueries::class, 'questions_complexity_is_null']);
 
 
 // fixme these routes should probs not be public
