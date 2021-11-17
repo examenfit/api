@@ -77,8 +77,8 @@ class LicenseController extends Controller
 
       $demo = License::createDemoLeerling($license);
 
-      $mail = new InviteMail($demo, $user);
-      Mail::to($user->email)->send($mail);
+      //$mail = new InviteMail($demo, $user);
+      //Mail::to($user->email)->send($mail);
 
       return new SeatResource($demo);
     }
