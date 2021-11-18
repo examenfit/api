@@ -2,6 +2,8 @@
 
 
 use Illuminate\Support\Facades\Route;
+
+
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\TopicController;
 use App\Http\Controllers\ScoreController;
@@ -17,14 +19,18 @@ use App\Http\Controllers\Admin\TipController;
 use App\Http\Controllers\Admin\ExamController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\CollectionController;
+use App\Http\Controllers\CustomQueries;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\Admin\AnswerController;
 use App\Http\Controllers\Admin\QuestionController;
 use App\Http\Controllers\Admin\AttachmentController;
 use App\Http\Controllers\Admin\TeacherDocumentController;
+
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
+use App\Http\Controllers\Auth\UserSwitchController;
+
 use App\Http\Controllers\Admin\TopicController as AdminTopicController;
 use App\Http\Controllers\Admin\CourseController as AdminCourseController;
 use App\Http\Controllers\Admin\IndexController as AdminIndexController;
@@ -43,6 +49,10 @@ use App\Http\Controllers\Admin\ChapterController as AdminChapterController;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+
+Route::get('/custom/questions/with_multiple_answers', [CustomQueries::class, 'questions_with_multiple_answers']);
+Route::get('/custom/questions/complexity_is_null', [CustomQueries::class, 'questions_complexity_is_null']);
+
 
 // fixme these routes should probs not be public
 
@@ -114,6 +124,12 @@ Route::get('/streams/{stream}/formuleblad', [StreamController::class, 'formulebl
     Route::post('/invite-account', [LicenseController::class, 'postInviteAccount']);
     Route::post('/invite-ok', [LicenseController::class, 'postInviteOk']);
 
+//Route::get('/registrations/{registration}', [RegistrationController::class, 'get']);
+//Route::get('/registrations', [RegistrationController::class, 'all']);
+
+    Route::get('/user/switch', [UserSwitchController::class, 'getUsers']);
+    Route::post('/user/switch', [UserSwitchController::class, 'switchToUser']);
+
 Route::group(['middleware' => 'auth:sanctum'], function () {
 
     Route::get('/licenses', [LicenseController::class, 'index']);
@@ -181,6 +197,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('/courses/{stream}', [AdminCourseController::class, 'show']);
         Route::put('/courses/{stream}', [AdminCourseController::class, 'update']);
         Route::get('/courses/{stream}/tags', [AdminTagController::class, 'index']);
+        Route::get('/domains/{domain}/tags', [AdminTagController::class, 'perDomain']);
         Route::get('/courses/{stream}/chapters', [AdminChapterController::class, 'index']);
         Route::post('/courses/{stream}/tags', [AdminTagController::class, 'store']);
         Route::get('courses/{stream}/meta', [AdminCourseController::class, 'showMeta']);

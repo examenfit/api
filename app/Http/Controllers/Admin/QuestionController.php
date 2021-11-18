@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\Tag;
 use App\Models\Topic;
 use App\Models\Question;
 use App\Rules\HashIdExists;
@@ -92,6 +93,7 @@ class QuestionController extends Controller
             'answer_remark' => 'nullable|string',
             'type_id' => ['nullable', new HashIdExists('question_types')],
             'tags.*.id' => ['required', new HashIdExists('tags')],
+            'tagNames.*' => ['required'],
             'domains.*.id' => ['required', new HashIdExists('domains')],
             'chapters.*.id' => ['required', new HashIdExists('chapters')],
             'attachments' => 'array',
@@ -126,9 +128,22 @@ class QuestionController extends Controller
             $answer->sections()->createMany($data['answerSections']);
         }
 
-        if (isset($data['tags'])) {
-            $question->addTags($data['tags']);
+        if (isset($data['tagNames'])) {
+          $tags = [];
+          $stream = $question->topic->exam->stream;
+          foreach($data['tagNames'] as $tagName) {
+            $tags[] =
+              $stream->tags()->firstWhere('name', $tagName) ?:
+              $stream->tags()->create([
+                'name' => $tagName
+              ]);
+          }
+          $question->syncTagIds($tags);
         }
+
+        //if (isset($data['tags'])) {
+            //$question->addTags($data['tags']);
+        //}
 
         if (isset($data['domains'])) {
             $question->addDomains($data['domains']);

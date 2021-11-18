@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\Domain;
 use App\Models\Tag;
 use App\Models\Stream;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Http\Resources\TagResource;
 use App\Http\Controllers\Controller;
 use App\Rules\HashIdExists;
@@ -50,5 +52,26 @@ class TagController extends Controller
         $tag->delete();
 
         return $this->index($stream);
+    }
+
+    public function perDomain(Domain $domain)
+    {
+        return DB::select("
+          SELECT
+            name,
+            count(*) AS n
+          FROM
+            domain_question dq,
+            question_tag qt,
+            tags t
+          WHERE
+            tag_id = t.id AND
+            dq.question_id = qt.question_id AND
+            dq.domain_id = ?
+          GROUP BY
+            name
+          ORDER BY
+            n DESC
+        ", [ $domain->id ]);
     }
 }

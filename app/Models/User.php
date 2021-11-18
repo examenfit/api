@@ -27,7 +27,8 @@ class User extends Authenticatable
         'password',
         'role',
         'data',
-        'newsletter'
+        'newsletter',
+        'link'
     ];
 
     /**

@@ -44,8 +44,7 @@ class License extends Model
             'end' => $end
         ]);
 
-        $seat = Seat::create([
-            'license_id' => $license->id,
+        $seat = $license->seats()->create([
             'user_id' => $user->id,
             'role' => 'docent'
         ]);
@@ -87,7 +86,7 @@ class License extends Model
             ]);
         }
 
-        $leerlingen = 3;
+        $leerlingen = 4;
         while ($leerlingen--) {
             $seat = Seat::create([
                 'license_id' => $license->id,
@@ -106,22 +105,55 @@ class License extends Model
             }
         }
 
+
+        $user->link = Str::random(32);
+        $user->save();
+
+        $leonie = User::create([
+            'first_name' => 'Leonie',
+            'last_name' => 'Eerling',
+            'role' => 'leerling',
+            'email' => 'leerling-'.Str::random(6).'@examenfit.nl',
+            'password' => '',
+            'link' => $user->link
+        ]);
+
+        // seat = first leerling added
+        $seat = $license->seats[1];
+        $seat->first_name = 'Demo leerling';
+        $seat->user_id = $leonie->id;
+        $seat->save();
+
         return $license;
     }
 
     public static function createDemoLeerling($license)
     {
+        $docent = Seat::query()
+          ->where('license_id', $license->id)
+          ->where('role', 'docent')
+          ->first();
+
         $seat = Seat::query()
           ->where('license_id', $license->id)
           ->where('role', 'leerling')
           ->first();
 
-        $code = base_convert(time() % pow(36,6), 10, 36);
-        $email = "leerling-$code@examenfit.nl";
+        $user = auth()->user();
+        $leonie = User::create([
+            'first_name' => 'Leonie',
+            'last_name' => 'Eerling',
+            'role' => 'leerling',
+            'email' => 'leerling-'.Str::random(6).'@examenfit.nl',
+            'password' => '',
+            'link' => $user->link
+        ]);
 
         $demo = Seat::create([
             'license_id' => $license->id,
             'role' => 'leerling',
+            'first_name' => 'Demo leerling',
+            'user_id' => $leonie->id,
         ]);
 
         $groups = Group::query()
@@ -146,14 +178,6 @@ class License extends Model
                 'end' => $license->end
             ]);
         }
-
-        $user = auth()->user();
-        $demo->first_name = 'Leerling';
-        $demo->last_name = $user->last_name;
-        $demo->email = $email;
-        $demo->is_active = 1;
-        $demo->token = Str::random(32);
-        $demo->save();
 
         return $demo;
     }

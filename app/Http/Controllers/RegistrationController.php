@@ -198,4 +198,15 @@ class RegistrationController extends Controller
         return 'ok';
     }
 
+    // admin
+
+    public function all()
+    {
+        return RegistrationResource::collection(Registration::all());
+    }
+
+    public function get(Registration $registration)
+    {
+        return new RegistrationResource($registration);
+    }
 }
