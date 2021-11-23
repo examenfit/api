@@ -26,10 +26,12 @@ class AuthenticatedSessionController extends Controller
     public function show()
     {
         $user = Auth::User();
-        $user->load('seats.license');
-        $user->load('seats.privileges');
 
         if ($user && $this->isAuthorized($user)) {
+          $user->load([
+            'seats.license',
+            'seats.privileges',
+          ]);
           return new UserResource($user);
         }
 
