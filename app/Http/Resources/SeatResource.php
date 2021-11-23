@@ -25,6 +25,7 @@ class SeatResource extends JsonResource
             'last_name' => $this->last_name,
             'token' => $this->token,
             'user' => new UserResource($this->whenLoaded('user')),
+            'license' => new LicenseResource($this->whenLoaded('license')),
             'privileges' => PrivilegeResource::collection($this->whenLoaded('privileges')),
         ];
     }

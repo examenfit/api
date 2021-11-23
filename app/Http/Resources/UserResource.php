@@ -26,6 +26,7 @@ class UserResource extends JsonResource
             'role' => $this->role,
             'newsletter' => $this->newsletter,
             'switchable' => $switchable,
+            'seats' => SeatResource::collection($this->whenLoaded('seats')),
             'data' => json_decode($this->data)
         ];
     }
