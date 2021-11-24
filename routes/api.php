@@ -130,7 +130,10 @@ Route::get('/streams/{stream}/formuleblad', [StreamController::class, 'formulebl
     Route::get('/user/switch', [UserSwitchController::class, 'getUsers']);
     Route::post('/user/switch', [UserSwitchController::class, 'switchToUser']);
 
+
 Route::group(['middleware' => 'auth:sanctum'], function () {
+
+Route::get('/log/collection/{collection}', [ActivityLogController::class, 'collectionSummary']);
 
     Route::get('/licenses', [LicenseController::class, 'index']);
     Route::post('/licenses', [LicenseController::class, 'index']);

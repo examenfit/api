@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\ActivityLog;
+use App\Models\Collection;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Vinkla\Hashids\Facades\Hashids;
 
 class ActivityLogController extends Controller
@@ -29,5 +31,25 @@ class ActivityLogController extends Controller
         $data['email'] = $user ? $user->email : null;
         ActivityLog::create($data);
         return response()->noContent(201);
+    }
+
+    public function collectionSummary(Collection $collection)
+    {
+        return DB::select("
+          SELECT DISTINCT
+            origin,
+            activity,
+            COUNT(DISTINCT device_key) AS devices
+          FROM
+            activity_logs
+          WHERE
+            collection_id = ?
+          GROUP BY
+            origin, 
+            activity
+          ORDER BY
+            origin,
+            activity
+        ", [ $collection->id ]);
     }
 }
