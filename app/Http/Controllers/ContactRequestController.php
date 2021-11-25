@@ -15,6 +15,7 @@ class ContactRequestController extends Controller
     public function index()
     {
         $requests = ContactRequest::all();
+        $requests->load([ 'user' ]);
         return ContactRequestResource::collection($requests);
     }
 
