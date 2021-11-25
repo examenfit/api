@@ -6,6 +6,7 @@ use DateTime;
 
 use App\Http\Resources\ScoreResource;
 use App\Models\Stream;
+use App\Models\Privilege;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -60,6 +61,7 @@ class ScoreController extends Controller
         return ScoreController::mapScores($rows);
     }
 
+    // DEPRECATED
     public function loadAll(Request $request)
     {
         $user = auth()->user();
@@ -67,31 +69,7 @@ class ScoreController extends Controller
         return response()->json($data);
     }
 
-    static function granted($seat, $stream_id)
-    {
-        $user_id = auth()->user()->id;
-        foreach($seat->license->seats as $seat)
-        {
-          if ($seat->role === 'docent' && $seat->user_id === $user_id)
-          {
-            foreach($seat->privileges as $priv)
-            {
-              if ($priv->object_type !== 'stream') continue;
-              if ($priv->object_id !== $stream_id) continue;
-              
-              return TRUE;
-            }
-          }
-        }
-    }
-
-    public function loadForSeat(Seat $seat)
-    {
-        // fixme access control
-        $data = ScoreController::getScores($seat->user_id);
-        return response()->json($data);
-    }
-
+    // DEPRECATED
     public function saveAll(Request $request)
     {
         $user = auth()->user();
@@ -172,6 +150,36 @@ class ScoreController extends Controller
       }
       $user_id = $user->id;
       $stream_id = $stream->id;
+      $rows = DB::select("
+        SELECT
+          *
+        FROM
+          scores
+        WHERE
+          user_id = ? AND
+          stream_id = ? AND
+          is_newest
+      ", [ $user_id, $stream_id ]);
+      $scores = ScoreController::mapScores($rows);
+      return $scores;
+    }
+
+    public function getPrivilegeScores(Privilege $privilege)
+    {
+/*
+      $user = auth()->user();
+      if (!$user) {
+        return response()->noContent(401);
+      }
+      if ($user->role !== 'docent') {
+        return response()->noContent(403);
+      }
+*/
+      if ($privilege->action !== 'oefensets uitvoeren') {
+        return response()->noContent(403);
+      }
+      $user_id = $privilege->seat->user->id;
+      $stream_id = $privilege->object_id;
       $rows = DB::select("
         SELECT
           *

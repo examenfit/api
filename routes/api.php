@@ -109,6 +109,7 @@ Route::get('/streams/{stream}/formuleblad', [StreamController::class, 'formulebl
     Route::get('/score', [ScoreController::class, 'loadAll']);
     Route::put('/score', [ScoreController::class, 'saveAll']);
 
+
     Route::get('/streams/{stream}/scores', [ScoreController::class, 'getStreamScores']);
     Route::post('/streams/{stream}/scores', [ScoreController::class, 'postStreamScore']);
 
@@ -135,6 +136,7 @@ Route::get('/streams/{stream}/formuleblad', [StreamController::class, 'formulebl
     Route::get('/user/switch', [UserSwitchController::class, 'getUsers']);
     Route::post('/user/switch', [UserSwitchController::class, 'switchToUser']);
 
+    Route::get('/privileges/{privilege}/scores', [ScoreController::class, 'getPrivilegeScores']);
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
 
