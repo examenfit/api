@@ -30,8 +30,11 @@ class ContactRequestController extends Controller
     private function createContactRequest()
     {
         $user = auth()->user();
+        if (!$user) {
+          return response()->noContact(401);
+        }
         return ContactRequest::create([
-            'user_id' => 31 // $user->id
+            'user_id' => $user->id
         ]);
     }
 
