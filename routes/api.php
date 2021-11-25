@@ -4,6 +4,7 @@
 use Illuminate\Support\Facades\Route;
 
 
+use App\Http\Controllers\ContactRequestController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\TopicController;
 use App\Http\Controllers\ScoreController;
@@ -53,6 +54,10 @@ use App\Http\Controllers\Admin\ChapterController as AdminChapterController;
 Route::get('/custom/questions/with_multiple_answers', [CustomQueries::class, 'questions_with_multiple_answers']);
 Route::get('/custom/questions/complexity_is_null', [CustomQueries::class, 'questions_complexity_is_null']);
 
+Route::post('/contact-requests', [ContactRequestController::class, 'store']);
+Route::get('/contact-requests', [ContactRequestController::class, 'index']);
+Route::get('/contact-requests/{contactRequest}', [ContactRequestController::class, 'get']);
+Route::put('/contact-requests/{contactRequest}', [ContactRequestController::class, 'put']);
 
 // fixme these routes should probs not be public
 
