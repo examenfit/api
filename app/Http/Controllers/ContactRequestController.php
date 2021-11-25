@@ -22,7 +22,6 @@ class ContactRequestController extends Controller
     private function sendMail($contactRequest)
     {
         $addr = config('app.contact_request_to');
-        die("app.contact_request_to=$addr");
         $mail = new ContactRequestMail($contactRequest);
         Mail::to($addr)->send($mail);
     }
