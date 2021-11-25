@@ -20,9 +20,10 @@ class ContactRequestController extends Controller
 
     private function sendMail($contactRequest)
     {
-        $VERA = 'vera@examenfit.nl';
+        $addr = config('app.contact_request_to');
+        die("app.contact_request_to=$addr");
         $mail = new ContactRequestMail($contactRequest);
-        Mail::to($VERA)->send($mail);
+        Mail::to($addr)->send($mail);
     }
 
     private function createContactRequest()
