@@ -30,8 +30,12 @@ class ContactRequestMail extends Mailable
      */
     public function build()
     {
+        $id = $this->contactRequest->id;
+        $name = $this->contactRequest->user->full_name;
+        $email = $this->contactRequest->user->email;
+        $subject = "Contact verzoek #$id: $name <$email>"; 
         return $this->from('info@examenfit.nl')
-                    ->subject('Aanmelding ExamenFit')
+                    ->subject($subject)
                     ->view('mail.contact-request');
     }
 }
