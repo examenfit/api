@@ -56,12 +56,19 @@ class ActivityLogController extends Controller
 
     public function latestActivity(Privilege $privilege)
     {
+        if ($privilege->action === 'oefensets uitvoeren' && $privilege->object_type === 'stream') {
+            return $this->latestStreamActivity($privilege);
+        } 
+        if ($privilege->action === 'opgavenset uitvoeren' && $privilege->object_type === 'collection') {
+            return $this->latestCollectionActivity($privilege);
+        }
+        return response()->noContent(422);
+    }
+
+    function latestStreamActivity(Privilege $privilege)
+    {
         $stream_id = $privilege->object_id;
         $user_email = $privilege->seat->user->email;
-    //public function latestActivity()
-    //{
-        //$stream_id = 2;
-        //$user_email = 'leerling@examenfit.nl';
 
         return DB::select("
           SELECT
@@ -81,5 +88,26 @@ class ActivityLogController extends Controller
             created_at DESC
           LIMIT 1
         ", [ $stream_id, $user_email ]);
+    }
+
+    public function latestCollectionActivity(Privilege $privilege)
+    {
+        $user_email = $privilege->seat->user->email;
+        $collection_id = $privilege->object_id;
+
+        return DB::select("
+          SELECT
+            activity_logs.*
+          FROM
+            activity_logs
+          WHERE
+            activity IN ('Kijk antwoord na', 'Ontvang een tip') AND
+            question_id IS NOT NULL AND
+            collection_id = ? AND
+            email = ?
+          ORDER BY
+            created_at DESC
+          LIMIT 1
+        ", [ $collection_id, $user_email ]);
     }
 }
