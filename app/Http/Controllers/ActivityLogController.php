@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ActivityLog;
 use App\Models\Collection;
+use App\Models\Privilege;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -51,5 +52,34 @@ class ActivityLogController extends Controller
             origin,
             activity
         ", [ $collection->id ]);
+    }
+
+    public function latestActivity(Privilege $privilege)
+    {
+        $stream_id = $privilege->object_id;
+        $user_email = $privilege->seat->user->email;
+    //public function latestActivity()
+    //{
+        //$stream_id = 2;
+        //$user_email = 'leerling@examenfit.nl';
+
+        return DB::select("
+          SELECT
+            activity_logs.*
+          FROM
+            activity_logs,
+            topics,
+            exams
+          WHERE
+            activity IN ('Kijk antwoord na', 'Ontvang een tip') AND
+            topic_id = topics.id AND
+            exam_id = exams.id AND
+            stream_id = ? AND
+            question_id IS NOT NULL AND
+            email = ?
+          ORDER BY
+            created_at DESC
+          LIMIT 1
+        ", [ $stream_id, $user_email ]);
     }
 }

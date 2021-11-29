@@ -141,6 +141,7 @@ Route::get('/streams/{stream}/formuleblad', [StreamController::class, 'formulebl
 Route::group(['middleware' => 'auth:sanctum'], function () {
 
 Route::get('/log/collection/{collection}', [ActivityLogController::class, 'collectionSummary']);
+Route::get('/log/latest/{privilege}', [ActivityLogController::class, 'latestActivity']);
 
     Route::get('/licenses', [LicenseController::class, 'index']);
     Route::post('/licenses', [LicenseController::class, 'index']);
