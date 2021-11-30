@@ -36,11 +36,22 @@ class ActivityLogController extends Controller
 
     public function collectionSummary(Collection $collection)
     {
-        return DB::select("
+        $counts = DB::select("
+          SELECT
+            COUNT(DISTINCT device_key) AS devices,
+            COUNT(*) AS logs
+          FROM
+            activity_logs
+          WHERE
+            collection_id = ?
+        ", [ $collection->id ]);
+
+        $activities = DB::select("
           SELECT DISTINCT
             origin,
             activity,
-            COUNT(DISTINCT device_key) AS devices
+            COUNT(DISTINCT device_key) AS devices,
+            COUNT(*) AS logs
           FROM
             activity_logs
           WHERE
@@ -52,6 +63,11 @@ class ActivityLogController extends Controller
             origin,
             activity
         ", [ $collection->id ]);
+
+        return [
+          'collection' => $counts[0],
+          'activities' => $activities
+        ];
     }
 
     public function latestActivity(Privilege $privilege)
