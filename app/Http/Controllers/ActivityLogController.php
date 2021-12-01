@@ -49,7 +49,9 @@ class ActivityLogController extends Controller
           WHERE
             topic_id = topics.id AND
             collection_id = ?
-          GROUP BY topic_id
+          GROUP BY
+            topic_id,
+            name
         ", [ $collection->id ]);
 
         $topics = [];
