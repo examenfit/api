@@ -57,7 +57,7 @@ class ActivityLogController extends Controller
         $topics = [];
         foreach ($counts as $count) {
           $topic = [];
-          $topic['id'] = $count->topic_id;
+          $topic['id'] = Hashids::encode($count->topic_id);
           $topic['name'] = $count->name;
           $topic['devices'] = $count->devices;
           $topic['logs'] = $count->logs;
