@@ -34,39 +34,54 @@ class ActivityLogController extends Controller
         return response()->noContent(201);
     }
 
+
     public function collectionSummary(Collection $collection)
     {
         $counts = DB::select("
           SELECT
+            topic_id,
+            name,
             COUNT(DISTINCT device_key) AS devices,
             COUNT(*) AS logs
           FROM
-            activity_logs
+            activity_logs,
+            topics
           WHERE
+            topic_id = topics.id AND
             collection_id = ?
+          GROUP BY topic_id
         ", [ $collection->id ]);
 
-        $activities = DB::select("
-          SELECT DISTINCT
-            origin,
-            activity,
-            COUNT(DISTINCT device_key) AS devices,
-            COUNT(*) AS logs
-          FROM
-            activity_logs
-          WHERE
-            collection_id = ?
-          GROUP BY
-            origin, 
-            activity
-          ORDER BY
-            origin,
-            activity
-        ", [ $collection->id ]);
+        $topics = [];
+        foreach ($counts as $count) {
+          $topic = [];
+          $topic['id'] = $count->topic_id;
+          $topic['name'] = $count->name;
+          $topic['devices'] = $count->devices;
+          $topic['logs'] = $count->logs;
+          $topic['activities'] = DB::select("
+            SELECT DISTINCT
+              origin,
+              activity,
+              COUNT(DISTINCT device_key) AS devices,
+              COUNT(*) AS logs
+            FROM
+              activity_logs
+            WHERE
+              topic_id = ? AND
+              collection_id = ?
+            GROUP BY
+              origin, 
+              activity
+            ORDER BY
+              origin,
+              activity
+          ", [ $count->topic_id, $collection->id ]);
+          $topics[] = $topic;
+        }
 
         return [
-          'collection' => $counts[0],
-          'activities' => $activities
+          'topics' => $topics
         ];
     }
 
