@@ -25,6 +25,10 @@ class Privilege extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function seat()
+    {
+        return $this->belongsTo(Seat::class, 'actor_seat_id');
+    }
 
     public static function granted($action, $resource)
     {

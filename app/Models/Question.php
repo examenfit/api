@@ -79,7 +79,10 @@ class Question extends Model implements Auditable
 
     public function chapters()
     {
-        return $this->belongsToMany(Chapter::class, 'question_chapter');
+        return $this->belongsToMany(Chapter::class, 'question_chapter')
+            ->orderBy('methodology_id', 'ASC')
+            ->orderBy('name', 'ASC')
+            ->orderBy('title', 'ASC');
     }
 
     public function highlights()

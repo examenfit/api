@@ -4,6 +4,7 @@
 use Illuminate\Support\Facades\Route;
 
 
+use App\Http\Controllers\ContactRequestController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\TopicController;
 use App\Http\Controllers\ScoreController;
@@ -53,6 +54,10 @@ use App\Http\Controllers\Admin\ChapterController as AdminChapterController;
 Route::get('/custom/questions/with_multiple_answers', [CustomQueries::class, 'questions_with_multiple_answers']);
 Route::get('/custom/questions/complexity_is_null', [CustomQueries::class, 'questions_complexity_is_null']);
 
+Route::post('/contact-requests', [ContactRequestController::class, 'store']);
+Route::get('/contact-requests', [ContactRequestController::class, 'index']);
+Route::get('/contact-requests/{contactRequest}', [ContactRequestController::class, 'get']);
+Route::put('/contact-requests/{contactRequest}', [ContactRequestController::class, 'put']);
 
 // fixme these routes should probs not be public
 
@@ -104,6 +109,7 @@ Route::get('/streams/{stream}/formuleblad', [StreamController::class, 'formulebl
     Route::get('/score', [ScoreController::class, 'loadAll']);
     Route::put('/score', [ScoreController::class, 'saveAll']);
 
+
     Route::get('/streams/{stream}/scores', [ScoreController::class, 'getStreamScores']);
     Route::post('/streams/{stream}/scores', [ScoreController::class, 'postStreamScore']);
 
@@ -130,7 +136,12 @@ Route::get('/streams/{stream}/formuleblad', [StreamController::class, 'formulebl
     Route::get('/user/switch', [UserSwitchController::class, 'getUsers']);
     Route::post('/user/switch', [UserSwitchController::class, 'switchToUser']);
 
+    Route::get('/privileges/{privilege}/scores', [ScoreController::class, 'getPrivilegeScores']);
+
 Route::group(['middleware' => 'auth:sanctum'], function () {
+
+Route::get('/log/collection/{collection}', [ActivityLogController::class, 'collectionSummary']);
+Route::get('/log/latest/{privilege}', [ActivityLogController::class, 'latestActivity']);
 
     Route::get('/licenses', [LicenseController::class, 'index']);
     Route::post('/licenses', [LicenseController::class, 'index']);

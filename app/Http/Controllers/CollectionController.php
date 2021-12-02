@@ -221,6 +221,7 @@ class CollectionController extends Controller
 
     public function showCollectionQuestionsHtml(Request $request, Collection $collection)
     {
+        $app_url = config('app.dashboard_url');
         $markup = new DocumentMarkup();
 
         $collection->load([
@@ -309,7 +310,7 @@ class CollectionController extends Controller
                 $q = $question->hash_id;
                 $t = $topic->hash_id;
 
-                $question['url'] = "https://app.examenfit.nl/c/{$c}/{$t}/{$q}";
+                $question['url'] = "$app_url/c/{$c}/{$t}/{$q}";
             }
         }
 

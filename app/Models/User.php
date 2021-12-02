@@ -65,4 +65,9 @@ class User extends Authenticatable
         $mail = new PasswordResetMail($this, $token);
         Mail::to($this->email)->send($mail);
     }
+
+    public function seats()
+    {
+        return $this->hasMany(Seat::class, 'user_id');
+    }
 }

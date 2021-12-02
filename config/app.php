@@ -57,6 +57,7 @@ return [
     'asset_url' => env('ASSET_URL', null),
 
     'dashboard_url' => env('DASHBOARD_URL', null),
+    'contact_request_to' => env('APP_CONTACT_REQUEST_TO', 'info@examenfit.nl'),
 
     'examenfit_scripts_url' => env('EXAMENFIT_SCRIPTS_URL', '10.0.1.15'),
 
