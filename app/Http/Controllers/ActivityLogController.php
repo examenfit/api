@@ -111,7 +111,7 @@ class ActivityLogController extends Controller
             topics,
             exams
           WHERE
-            activity IN ('Kijk antwoord na', 'Ontvang een tip') AND
+            activity IN ('Begin met nakijken', 'Ontvang een tip') AND
             topic_id = topics.id AND
             exam_id = exams.id AND
             stream_id = ? AND
@@ -134,7 +134,7 @@ class ActivityLogController extends Controller
           FROM
             activity_logs
           WHERE
-            activity IN ('Kijk antwoord na', 'Ontvang een tip') AND
+            activity IN ('Begin met nakijken', 'Ontvang een tip') AND
             question_id IS NOT NULL AND
             collection_id = ? AND
             email = ?
