@@ -21,6 +21,7 @@ class LicenseResource extends JsonResource
             'begin' => $this->begin,
             'end' => $this->end,
             'is_active' => $this->is_active,
+            'description' => $this->description,
             'owner' => new UserResource($this->whenLoaded('owner')),
             'seats' => SeatResource::collection($this->whenLoaded('seats')),
         ];

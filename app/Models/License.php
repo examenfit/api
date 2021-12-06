@@ -19,7 +19,8 @@ class License extends Model
     public $fillable = [
         'type',
         'begin',
-        'end'
+        'end',
+        'description'
     ];
 
     public function owner()
@@ -36,12 +37,18 @@ class License extends Model
     {
         $begin = new DateTime;
         $end = new DateTime;
-        $end->add(new DateInterval('P21D'));
+        $end->add(new DateInterval('P10D'));
+
+        $feb1 = new DateTime('2022-02-01');
+        if ($end < $feb1) {
+            $end = $feb1;
+        }
 
         $license = License::create([
             'type' => 'proeflicentie',
             'begin' => $begin,
-            'end' => $end
+            'end' => $end,
+            'description' => 'proeflicentie ' . $user->email
         ]);
 
         $seat = $license->seats()->create([
