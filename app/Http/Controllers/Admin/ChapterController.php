@@ -37,4 +37,48 @@ class ChapterController extends Controller
 
         return MethodologyResource::collection($methodologies);
     }
+
+    public function addBook(Stream $stream, Request $request) {
+      $chapter = Chapter::create([
+        'stream_id' => $stream->id,
+        'methodology_id' => Hashids::decode($request->methodology_id)[0],
+        'name' => $request->name
+      ]);
+      $chapter->load('children');
+      return new ChapterResource($chapter);
+    }
+
+    public function updateBook(Chapter $book, Request $request) {
+      $book->name = $request->name;
+      $book->save();
+      return new ChapterResource($book);
+    }
+
+    public function deleteBook(Chapter $book) {
+      $book->delete();
+      return [ 'status' => 'ok' ];
+    }
+
+    public function addChapter(Chapter $book, Request $request) {
+      $chapter = Chapter::create([
+        'stream_id' => $book->stream_id,
+        'methodology_id' => $book->methodology_id,
+        'chapter_id' => $book->id,
+        'name' => $request->name,
+        'title' => $request->title
+      ]);
+      return new ChapterResource($chapter);
+    }
+
+    public function updateChapter(Chapter $chapter, Request $request) {
+      $chapter->name = $request->name;
+      $chapter->title = $request->title;
+      $chapter->save();
+      return new ChapterResource($chapter);
+    }
+
+    public function deleteChapter(Chapter $chapter) {
+      $chapter->delete();
+      return [ 'status' => 'ok' ];
+    }
 }
