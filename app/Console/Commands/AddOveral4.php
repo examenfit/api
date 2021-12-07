@@ -74,15 +74,14 @@ class AddOveral4 extends Command
       // Natuurkunde vwo
 
       $this->stream_id = 6;
+
       $this->createBook('4 vwo');
-/*
-      $this->createChapter('H1', '');
-      $this->createChapter('H2', '');
-      $this->createChapter('H3', '');
-      $this->createChapter('H4', '');
-      $this->createChapter('H5', '');
-      $this->createChapter('H6', '');
-*/
+      $this->createChapter('H1', 'Bewegen in beeld');
+      $this->createChapter('H2', 'Elektriciteit');
+      $this->createChapter('H3', 'Krachten');
+      $this->createChapter('H4', 'Trillingen');
+      $this->createChapter('H5', 'Straling');
+      $this->createChapter('H6', 'Arbeid en energie');
       $this->createBook('5 vwo');
       $this->createChapter('H7', 'Stoffen en materialen');
       $this->createChapter('H8', 'Hemelmechanica');
