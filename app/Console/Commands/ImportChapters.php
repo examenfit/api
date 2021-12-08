@@ -133,6 +133,8 @@ class ImportChapters extends Command {
     $nova = 0;
     $newton4 = 0;
     $newton5 = 0;
+    $overal4 = 0;
+    $overal5 = 0;
 
     $this->info($this->year.'-'.$this->term);
     for ($x = 1; $x < 99; $x += 1) {
@@ -145,6 +147,20 @@ class ImportChapters extends Command {
           $nova = $x;
         } else {
           $this->info('"Nova" niet beschikbaar');
+        }
+      } else if ($name === 'hoofdstuk overal') {
+        if ($druk === '5de druk') {
+          if (array_key_exists('Overal Natuurkunde 5 ed.', $this->methodologies)) {
+            $overal5 = $x;
+          } else {
+            $this->info('"Overal Natuurkunde 5 ed." niet beschikbaar');
+          }
+        } else {
+          if (array_key_exists('Overal Natuurkunde 4 ed.', $this->methodologies)) {
+            $overal4 = $x;
+          } else {
+            $this->info('"Overal Natuurkunde 4 ed." niet beschikbaar');
+          }
         }
       } else if ($name === 'hoofdstuk newton') {
         if ($druk === '5de druk') {
@@ -177,19 +193,29 @@ class ImportChapters extends Command {
       }
 
       if ($nova) {
-        $this->importChapters('Nova', $vraagnr, $this->getValue($nova, $y));
+        $this->importChapters('Nova', $number, $this->getValue($nova, $y));
       }
       if ($newton4) {
-        $this->importChapters('Newton 4 ed.', $vraagnr, $this->getValue($newton4, $y));
+        $this->importChapters('Newton 4 ed.', $number, $this->getValue($newton4, $y));
       }
       if ($newton5) {
-        $this->importChapters('Newton 5 ed.', $vraagnr, $this->getValue($newton5, $y));
+        $this->importChapters('Newton 5 ed.', $number, $this->getValue($newton5, $y));
+      }
+      if ($overal4) {
+        $this->importChapters('Overal Natuurkunde 4 ed.', $number, $this->getValue($overal4, $y));
+      }
+      if ($overal5) {
+        $this->importChapters('Overal Natuurkunde 5 ed.', $number, $this->getValue($overal5, $y));
       }
     }
   }
 
-  function importChapters($methodology, $vraagnr, $str) {
-    $this->question = $this->getQuestion($vraagnr);
+  function importChapters($methodology, $number, $str) {
+    $this->question = $this->getQuestion($number);
+    if (!$this->question) {
+      $this->info("Vraag niet gevonden: $number");
+      return;
+    }
     $this->methodology_id = $this->methodologies[$methodology];
     DB::delete("
       DELETE FROM
@@ -208,6 +234,7 @@ class ImportChapters extends Command {
       $year = $this->year;
       $term = $this->term;
       $chapters = explode("\n", trim($str));
+      $this->info($number.' '.join(',',$chapters).' ('.$methodology.')');
       foreach($chapters as $name) {
         $chapter = $this->getChapter($name);
         if ($chapter) {
@@ -221,7 +248,11 @@ class ImportChapters extends Command {
 
   function getQuestion($number) {
     $r = $this->queryQuestion($number);
-    return $r[0];
+    if (count($r)) {
+      return $r[0];
+    } else {
+      return null;
+    }
   }
 
   function queryQuestion($number) {

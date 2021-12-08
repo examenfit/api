@@ -6,6 +6,7 @@ use App\Models\Chapter;
 use App\Models\Stream;
 use App\Models\Methodology;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Http\Resources\ChapterResource;
 use App\Http\Resources\MethodologyResource;
 use App\Http\Resources\StreamResource;
@@ -36,6 +37,22 @@ class ChapterController extends Controller
         ->get();
 
         return MethodologyResource::collection($methodologies);
+    }
+
+    public function unused(Stream $stream)
+    {
+        return array_map(fn($rec) => [
+          'id' => Hashids::encode($rec->id),
+          'name' => $rec->name
+        ], DB::select("
+          SELECT id, name
+          FROM methodologies
+          WHERE id NOT IN (
+            SELECT methodology_id
+            FROM chapters
+            WHERE stream_id = ?
+          )
+        ", [ $stream->id ]));
     }
 
     public function addBook(Stream $stream, Request $request) {
