@@ -210,6 +210,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('/courses/{stream}/tags', [AdminTagController::class, 'index']);
         Route::get('/domains/{domain}/tags', [AdminTagController::class, 'perDomain']);
         Route::get('/courses/{stream}/chapters', [AdminChapterController::class, 'index']);
+        Route::get('/courses/{stream}/unused-chapters', [AdminChapterController::class, 'unused']);
         Route::post('/courses/{stream}/tags', [AdminTagController::class, 'store']);
         Route::get('/courses/{stream}/meta', [AdminCourseController::class, 'showMeta']);
 
