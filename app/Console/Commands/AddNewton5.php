@@ -70,8 +70,6 @@ class AddNewton5 extends Command
       // Natuurkunde havo
 
       $this->stream_id = 5;
-      $this->createBook('4 havo');
-      $this->createBook('5 havo');
 
       // Natuurkunde vwo
 

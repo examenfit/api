@@ -95,6 +95,5 @@ class AddOveral4 extends Command
       $this->createChapter('H15', 'Quantumwereld');
       $this->createChapter('H16', 'Finale');
 
-
     }
 }
