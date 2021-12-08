@@ -53,6 +53,7 @@ use App\Http\Controllers\Admin\ChapterController as AdminChapterController;
 
 Route::get('/custom/questions/with_multiple_answers', [CustomQueries::class, 'questions_with_multiple_answers']);
 Route::get('/custom/questions/complexity_is_null', [CustomQueries::class, 'questions_complexity_is_null']);
+Route::get('/custom/questions/questions_not_in_oefensets', [CustomQueries::class, 'questions_not_in_oefensets']);
 Route::get('/log/collection/{collection}', [ActivityLogController::class, 'collectionSummary']);
 Route::get('/log/latest/{privilege}', [ActivityLogController::class, 'latestActivity']);
 

@@ -80,6 +80,36 @@ class CustomQueries extends Controller
         Vraag
     ";
 
+    const QUESTIONS_NOT_IN_OEFENSETS = "
+      SELECT
+        courses.name as Vak,
+        levels.name as Niveau,
+        year as Jaar,
+        term as Tijdvak,
+        number as Vraag
+      FROM
+        questions,
+        topics,
+        exams,
+        streams,
+        levels,
+        courses
+      WHERE
+        questions.id not in (select question_id from question_annotation) AND
+        topics.id = topic_id AND
+        exams.id = exam_id AND
+        streams.id = stream_id AND
+        levels.id = level_id AND
+        courses.id = course_id AND
+        topics.has_answers
+      ORDER BY
+        Vak,
+        Niveau,
+        Jaar,
+        Tijdvak,
+        Vraag
+    ";
+
     public function questions_with_multiple_answers()
     {
       return DB::select(CustomQueries::QUESTIONS_WITH_MULTIPLE_ANSWERS);
@@ -88,5 +118,10 @@ class CustomQueries extends Controller
     public function questions_complexity_is_null()
     {
       return DB::select(CustomQueries::QUESTION_COMPLEXITY_IS_NULL);
+    }
+
+    public function questions_not_in_oefensets()
+    {
+      return DB::select(CustomQueries::QUESTIONS_NOT_IN_OEFENSETS);
     }
 }
