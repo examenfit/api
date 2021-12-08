@@ -95,13 +95,18 @@ class CustomQueries extends Controller
         levels,
         courses
       WHERE
-        questions.id not in (select question_id from question_annotation) AND
-        topics.id = topic_id AND
-        exams.id = exam_id AND
-        streams.id = stream_id AND
-        levels.id = level_id AND
         courses.id = course_id AND
-        topics.has_answers
+        levels.id = level_id AND
+        streams.id = stream_id AND
+        exams.id = exam_id AND
+        topics.id = topic_id AND
+        topics.has_answers AND
+        questions.id NOT IN (
+          SElECT
+            question_id
+          FROM
+            question_annotation
+        )
       ORDER BY
         Vak,
         Niveau,
