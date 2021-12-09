@@ -92,14 +92,20 @@ i {
   text-align: right;
   padding-top: 3pt;
 }
+.formuleblad {
+  padding: 0 1in;
+  page-break-before: always;
+}
 .formuleblad-title {
   font-size: var(--title-size);
   font-weight: bold;
 }
 .formuleblad-header {
-  padding-bottom: 7pt;
-  border-bottom: solid 1pt black;
-  margin-bottom: 21pt;
+  font-size: 14pt;
+  font-weight: bold;
+  border-bottom: 4pt solid black;
+  padding: 4pt 0;
+  margin-bottom: 14pt;
 }
 .formuleblad-content {
   clear: both;
