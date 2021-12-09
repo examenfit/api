@@ -469,7 +469,6 @@ class CollectionQuestionsDocument
             'average' => 'gemiddeld',
             'high' => 'hoog',
         ];
-        $complexity = 'complexiteit: '.$COMPLEXITY[$question->complexity];
         $section = $this->currentSection();
         $table = $section->addTable([
             'unit' => \PhpOffice\PhpWord\Style\Table::WIDTH_PERCENT,
@@ -488,8 +487,11 @@ class CollectionQuestionsDocument
         $right = $row->addCell(2500);
         $txt = $right->addTextRun(['align' => 'right']);
         $txt->addText("{$question->time_in_minutes} min.", ['size' => 11]);
-        $txt->addText('   ');
-        $txt->addText("$complexity", ['size' => 11]);
+        if ($question->complexiteit) {
+          $complexity = 'complexiteit: '.$COMPLEXITY[$question->complexity];
+          $txt->addText('   ');
+          $txt->addText("$complexity", ['size' => 11]);
+        }
     }
 
     function createQrUrl($question)
