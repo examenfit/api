@@ -113,8 +113,8 @@ class FixAdminAccounts extends Command
           'name' => $admin->email . ' groep',
           'is_active' => 1
         ]);
-        $this->link($admin->link, 'Do', 'Cent, van der', 'docent', $group);
-        $this->link($admin->link, 'Leo', 'Eerling', 'leerling', $group);
+        $this->link($author->link, 'Demo docent', '', 'docent', $group);
+        $this->link($author->link, 'Demo leerling', '', 'leerling', $group);
       }
     }
 }

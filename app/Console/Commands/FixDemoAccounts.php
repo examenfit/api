@@ -109,8 +109,8 @@ class FixDemoAccounts extends Command
           $group = Group::firstWhere('license_id', $license->id);
           if ($group) {
             $demo = User::create([
-                'first_name' => 'Leonie',
-                'last_name' => 'Eerling',
+                'first_name' => 'Demo leerling',
+                'last_name' => '',
                 'role' => 'leerling',
                 'email' => 'leerling-'.Str::random(6).'@examenfit.nl',
                 'password' => '',
