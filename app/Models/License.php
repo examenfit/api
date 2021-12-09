@@ -117,8 +117,8 @@ class License extends Model
         $user->save();
 
         $leonie = User::create([
-            'first_name' => 'Leonie',
-            'last_name' => 'Eerling',
+            'first_name' => 'Demo leerling',
+            'last_name' => '',
             'role' => 'leerling',
             'email' => 'leerling-'.Str::random(6).'@examenfit.nl',
             'password' => '',
@@ -148,8 +148,8 @@ class License extends Model
 
         $user = auth()->user();
         $leonie = User::create([
-            'first_name' => 'Leonie',
-            'last_name' => 'Eerling',
+            'first_name' => 'Demo leerling',
+            'last_name' => '',
             'role' => 'leerling',
             'email' => 'leerling-'.Str::random(6).'@examenfit.nl',
             'password' => '',
