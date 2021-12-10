@@ -144,10 +144,10 @@ class ImportChapters extends Command {
       if ($name === 'vraag nr.') {
         $vraagnr = $x;
       } else if ($name === 'hoofdstuk nova') {
-        if (array_key_exists('Nova', $this->methodologies)) {
+        if (array_key_exists('Nova 2019-2021 ed.', $this->methodologies)) {
           $nova = $x;
         } else {
-          $this->info('"Nova" niet beschikbaar');
+          $this->info('"Nova 2019-2021 ed." niet beschikbaar');
         }
       } else if ($name === 'hoofdstuk sysnat') {
         if (array_key_exists('Systematische Natuurkunde 8 ed.', $this->methodologies)) {
@@ -200,7 +200,7 @@ class ImportChapters extends Command {
       }
 
       if ($nova) {
-        $this->importChapters('Nova', $number, $this->getValue($nova, $y));
+        $this->importChapters('Nova 2019-2021 ed.', $number, $this->getValue($nova, $y));
       }
       if ($newton4) {
         $this->importChapters('Newton 4 ed.', $number, $this->getValue($newton4, $y));
