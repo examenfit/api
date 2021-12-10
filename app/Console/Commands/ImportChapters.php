@@ -135,6 +135,7 @@ class ImportChapters extends Command {
     $newton5 = 0;
     $overal4 = 0;
     $overal5 = 0;
+    $sysnat = 0;
 
     $this->info($this->year.'-'.$this->term);
     for ($x = 1; $x < 99; $x += 1) {
@@ -212,6 +213,9 @@ class ImportChapters extends Command {
       }
       if ($overal5) {
         $this->importChapters('Overal Natuurkunde 5 ed.', $number, $this->getValue($overal5, $y));
+      }
+      if ($sysnat) {
+        $this->importChapters('Systematische Natuurkunde 8 ed.', $number, $this->getValue($overal5, $y));
       }
     }
   }
