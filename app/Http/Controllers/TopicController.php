@@ -10,13 +10,20 @@ class TopicController extends Controller
 {
     public function show(Topic $topic)
     {
+        $statuses = [ 'published' ];
+
+        $user = auth()->user();
+        $role = $user ? $user->role : '';
+        if ($role === 'admin' || $role === 'author') {
+          $statuses = [ 'published', 'concept' ];
+        }
+
         $topic->load([
             'exam.stream.course',
             'exam.stream.level',
-            //'questions.answers.sections',
+            'questions.answers' => fn($q) => $q->whereIn('status', $statuses),
             'questions.answers.sections.tips',
             'questions.attachments',
-            //'questions.chapters',
             'questions.chapters.parent',
             'questions.dependencies',
             'questions.domains.parent',

@@ -50,6 +50,7 @@ class UpdateTopicFlags extends Command
                 FROM questions q, answers a, answer_sections s
                 WHERE a.question_id = q.id
                   AND a.id = s.answer_id
+                  AND a.status = 'published'
                   AND s.text > ''
             )
         ");

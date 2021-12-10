@@ -50,7 +50,8 @@ class AnswerController extends Controller
         $answer = $question->answers()->create([
             'type' => $request->type,
             'position' => $n,
-            'name' => "Oplossingsstrategie nr. $n"
+            'name' => "Oplossingsstrategie nr. $n",
+            'status' => 'published'
         ]);
 
         return new AnswerResource($answer);
@@ -62,13 +63,14 @@ class AnswerController extends Controller
             'remark' => 'nullable|string',
             'name' => 'nullable|string',
             'position' => 'nullable|integer',
+            'status' => 'nullable|string',
             'sections' => 'array',
             'sections.*.id' => 'nullable',
             'sections.*.text' => 'required|string',
             'secionts.*.points' => 'required|integer'
         ]);
 
-        Log::info('remark = '.$data['remark']);
+        // Log::info('remark = '.$data['remark']);
 
         if (isset($data['sections']) && count($data['sections'])) {
             $answer->sections()->delete();
@@ -80,7 +82,8 @@ class AnswerController extends Controller
             $answer->update([
               'name' => $data['name'],
               'position' => $data['position'],
-              'remark' => $data['remark']
+              'remark' => $data['remark'],
+              'status' => $data['status']
             ]);
         //}
 
