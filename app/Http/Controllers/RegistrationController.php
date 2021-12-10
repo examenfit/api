@@ -148,16 +148,30 @@ class RegistrationController extends Controller
         }
     }
 
+    const PROEFLICENTIES = [
+      'proeflicentie' => [ 1, 2 ],
+      'proeflicentie-wiskunde-a' => [ 1, 2 ],
+      'proeflicentie-wiskunde-b' => [ 3, 4 ],
+      'proeflicentie-natuurkunde' => [ 5, 6 ]
+    ];
+
     private function activateProeflicentie($user, $registration)
     {
         $user->role = 'docent';
         $user->newsletter = $registration->newsletter ?: 0;
         $user->save();
 
-        License::createProeflicentie($user);
+        $streams = RegistrationController::PROEFLICENTIES[$registration->license];
+
+        License::createProeflicentie($user, $streams);
 
         $registration->activated = new DateTime();
         $registration->save();
+    }
+
+    function isValidProeflicentie($license)
+    {
+      return array_key_exists($license, RegistrationController::PROEFLICENTIES);
     }
 
     public function activateLicense(Request $request)
@@ -176,7 +190,7 @@ class RegistrationController extends Controller
                 $this->activateProeflicentie($user, $registration);
                 return $registration;
             }
-            if ($registration->license === 'proeflicentie') {
+            if ($this->isValidProeflicentie($registration->license)) {
                 $this->activateProeflicentie($user, $registration);
                 return $registration;
             }
