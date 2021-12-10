@@ -33,7 +33,7 @@ class License extends Model
         return $this->hasMany(Seat::class);
     }
 
-    public static function createProeflicentie($user, $streams = [ 1, 2 ])
+    public static function createProeflicentie($user, $streams = [ 1, 2 ], $descr = 'proeflicentie')
     {
         $begin = new DateTime;
         $end = new DateTime;
@@ -48,7 +48,7 @@ class License extends Model
             'type' => 'proeflicentie',
             'begin' => $begin,
             'end' => $end,
-            'description' => 'proeflicentie ' . $user->email
+            'description' => $descr.' ' . $user->email
         ]);
 
         $seat = $license->seats()->create([

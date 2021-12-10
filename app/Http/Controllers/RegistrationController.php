@@ -149,10 +149,17 @@ class RegistrationController extends Controller
     }
 
     const PROEFLICENTIES = [
+      'proeflicentie' => 'proeflicentie',
+      'proeflicentie-natuurkunde' => 'proeflicentie natuurkunde havo / vwo',
+      'proeflicentie-wiskunde-a' => 'proeflicentie wiskunde A havo / vwo',
+      'proeflicentie-wiskunde-b' => 'proeflicentie wiskunde B havo / vwo',
+    ];
+
+    const STREAMS = [
       'proeflicentie' => [ 1, 2 ],
+      'proeflicentie-natuurkunde' => [ 5, 6 ],
       'proeflicentie-wiskunde-a' => [ 1, 2 ],
       'proeflicentie-wiskunde-b' => [ 3, 4 ],
-      'proeflicentie-natuurkunde' => [ 5, 6 ]
     ];
 
     private function activateProeflicentie($user, $registration)
@@ -161,9 +168,10 @@ class RegistrationController extends Controller
         $user->newsletter = $registration->newsletter ?: 0;
         $user->save();
 
-        $streams = RegistrationController::PROEFLICENTIES[$registration->license];
+        $descr = RegistrationController::PROEFLICENTIES[$registration->license];
+        $streams = RegistrationController::STREAMS[$registration->license];
 
-        License::createProeflicentie($user, $streams);
+        License::createProeflicentie($user, $streams, $descr);
 
         $registration->activated = new DateTime();
         $registration->save();
