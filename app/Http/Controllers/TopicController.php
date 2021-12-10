@@ -14,15 +14,10 @@ class TopicController extends Controller
 
         $user = auth()->user();
         $role = $user ? $user->role : '';
-        if ($role === 'admin' || $role === 'author') {
-          $statuses = [ 'published', 'concept' ];
-        }
 
-        $topic->load([
+        $fields = [
             'exam.stream.course',
             'exam.stream.level',
-            'questions.answers' => fn($q) => $q->whereIn('status', $statuses),
-            'questions.answers.sections.tips',
             'questions.attachments',
             'questions.chapters.parent',
             'questions.dependencies',
@@ -31,7 +26,13 @@ class TopicController extends Controller
             'questions.questionType',
             'questions.tags',
             'questions.tips',
-        ]);
+        ];
+
+        if ($topic->exam->show_answers || $role === 'admin' || $role === 'author') {
+            $fields[] = 'questions.answers.sections.tips';
+        }
+
+        $topic->load($fields);
 
         return new TopicResource($topic);
     }

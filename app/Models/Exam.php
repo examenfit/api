@@ -19,6 +19,7 @@ class Exam extends Model implements Auditable
         'term',
         'standardization_value',
         'is_pilot',
+        'show_answers',
         'status',
         'introduction',
         'assignment_contents',
