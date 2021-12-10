@@ -215,7 +215,7 @@ class ImportChapters extends Command {
         $this->importChapters('Overal Natuurkunde 5 ed.', $number, $this->getValue($overal5, $y));
       }
       if ($sysnat) {
-        $this->importChapters('Systematische Natuurkunde 8 ed.', $number, $this->getValue($overal5, $y));
+        $this->importChapters('Systematische Natuurkunde 8 ed.', $number, $this->getValue($sysnat, $y));
       }
     }
   }
