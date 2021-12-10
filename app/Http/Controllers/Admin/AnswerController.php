@@ -63,7 +63,6 @@ class AnswerController extends Controller
             'remark' => 'nullable|string',
             'name' => 'nullable|string',
             'position' => 'nullable|integer',
-            'status' => 'nullable|string',
             'sections' => 'array',
             'sections.*.id' => 'nullable',
             'sections.*.text' => 'required|string',
@@ -82,8 +81,7 @@ class AnswerController extends Controller
             $answer->update([
               'name' => $data['name'],
               'position' => $data['position'],
-              'remark' => $data['remark'],
-              'status' => $data['status']
+              'remark' => $data['remark']
             ]);
         //}
 
