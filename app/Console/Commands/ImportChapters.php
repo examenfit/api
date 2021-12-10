@@ -148,6 +148,12 @@ class ImportChapters extends Command {
         } else {
           $this->info('"Nova" niet beschikbaar');
         }
+      } else if ($name === 'hoofdstuk sysnat') {
+        if (array_key_exists('Systematische Natuurkunde 8 ed.', $this->methodologies)) {
+          $sysnat = $x;
+        } else {
+          $this->info('"Systematische Natuurkunde 8 ed." niet beschikbaar');
+        }
       } else if ($name === 'hoofdstuk overal') {
         if ($druk === '5de druk') {
           if (array_key_exists('Overal Natuurkunde 5 ed.', $this->methodologies)) {
