@@ -113,8 +113,8 @@ class FixAuthorAccounts extends Command
           'name' => $author->email . ' groep',
           'is_active' => 1
         ]);
-        $this->link($author->link, 'Do', 'Cent, van der', 'docent', $group);
-        $this->link($author->link, 'Leo', 'Eerling', 'leerling', $group);
+        $this->link($author->link, 'Demo docent', '', 'docent', $group);
+        $this->link($author->link, 'Demo leerling', '', 'leerling', $group);
       }
     }
 }

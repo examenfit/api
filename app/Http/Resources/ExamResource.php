@@ -26,6 +26,7 @@ class ExamResource extends JsonResource
             'notes' => $this->notes,
             'year' => $this->year,
             'term' => $this->term,
+            'show_answers' => $this->show_answers,
             'standardization_value' => $this->standardization_value,
             'is_pilot' => $this->is_pilot,
             'introduction' => $this->introduction,

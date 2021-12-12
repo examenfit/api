@@ -15,6 +15,7 @@ class Answer extends Model
         'type',
         'remark',
         'position',
+        'status'
     ];
 
     public function sections()

@@ -4,21 +4,22 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\QueryException;
 
 class ImportOefensets extends Command {
 
-  protected $signature = 'ef:import:oefensets {--dir=../meta} {--file=} {vak} {niveau}';
+  protected $signature = 'ef:import:oefensets {--dir=../meta} {--file=} {--sheet=oefenreeksen} {vak} {niveau}';
   protected $description = 'Imports an Excel sheet';
 
   const COURSE = [
-    //'natuurkunde' => 'Natuurkunde',
-    //'wiskunde'  => 'Wiskunde',
+    'natuurkunde' => 'Natuurkunde',
+    'wiskunde'  => 'Wiskunde',
     'wiskunde-a'  => 'Wiskunde A',
-    //'wiskunde-b'  => 'Wiskunde B',
+    'wiskunde-b'  => 'Wiskunde B',
   ];
 
   const LEVEL = [
-    //'vmbo' => 'Vmbo GL en TL',
+    'vmbo' => 'Vmbo GL en TL',
     'havo' => 'Havo',
     'vwo' => 'Vwo',
   ];
@@ -93,13 +94,14 @@ class ImportOefensets extends Command {
       $this->file = $this->option('file');
     } else {
       $dir = $this->option('dir');
-      $this->file = "{$dir}/{$this->vak}-{$this->niveau}.xlsx"; 
+      $this->file = "{$dir}/{$this->vak}-{$this->niveau}-oefensets.xlsx"; 
     }
   }
 
   function initXlsx() {
     $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx;
     $xlsx = $reader->load($this->file);
+    $this->title = $this->option('sheet');
     $this->sheets = $xlsx->getAllSheets();
   }
 
@@ -107,12 +109,12 @@ class ImportOefensets extends Command {
     foreach($this->sheets as $key => $sheet) {
       $this->sheet = $sheet;
       $title = mb_strtolower($sheet->getTitle());
-      if ($title === 'oefenreeksen') {
+      if ($title === $this->title) {
         $this->import($sheet);
         return;
       }
     }
-    $this->error("Werkblad 'oefenreeksen' niet gevonden.");
+    $this->error('Werkblad "'.$this->title.'" niet gevonden.');
   }
 
   const DELETE_ANNOTATIONS = "
@@ -411,19 +413,26 @@ class ImportOefensets extends Command {
   function importOnderwerp($row)
   {
     for ($col = 3; $col < 99; $col += 1) {
+      $used = $this->getValue($col, 1);
       $set = join(', ', explode("\n", trim($this->getValue($col, $row))));
       if ($set) {
         $type = mb_strtolower($this->getValue($col, 1));
         $vragen = explode("\n", trim($this->getValue($col, $row+1)));
-        if (substr($type, 0, 5) === 'basis') {
-          $this->initBasisvaardigheid($set);
-          //$this->deleteBasisvaardigheidAnnotations();
-          $this->importBasisvaardigheid($vragen);
-        } else {
-          //$this->initGecombineerdeOpgave($set);
-          $this->initGecombineerdeOpgave('Gecombineerde opgaven');
-          //$this->deleteGecombineerdeOpgave();
-          $this->importGecombineerdeOpgave($vragen);
+        try {
+          if (substr($type, 0, 5) === 'basis') {
+            $this->initBasisvaardigheid($set);
+            //$this->deleteBasisvaardigheidAnnotations();
+            $this->importBasisvaardigheid($vragen);
+          }
+          if (substr($type, 0, 5) === 'doord') {
+            //$this->initGecombineerdeOpgave($set);
+            $this->initGecombineerdeOpgave('Gecombineerde opgaven');
+            //$this->deleteGecombineerdeOpgave();
+            $this->importGecombineerdeOpgave($vragen);
+          }
+        } catch(QueryException $e) {
+          $this->warn($row.','.$col);
+          $this->warn($e->getMessage());
         }
       }
     }

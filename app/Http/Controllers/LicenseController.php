@@ -47,7 +47,8 @@ class LicenseController extends Controller
           l.type,
           l.begin,
           l.end,
-          l.is_active
+          l.is_active,
+          l.description
         from
           licenses l,
           seats s
@@ -108,6 +109,9 @@ class LicenseController extends Controller
 
     public function put(License $license)
     {
+      $data = $request->validate([
+      ]);
+      return [ 'status' => 'ok' ];
       return response()->noContent(501);
     }
 

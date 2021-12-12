@@ -153,6 +153,11 @@ class CollectionController extends Controller
 
     public function show(Collection $collection, Topic $topic)
     {
+        $user = auth()->user();
+        $role = $user ? $user->role : '';
+        $isAuthor = $role === 'admin' || $role === 'author';
+        $statuses = $isAuthor ? [ 'published', 'concept' ] : [ 'published' ];
+
         $collection->load([
             'author',
             'questions' => function ($query) use ($topic) {
@@ -163,6 +168,7 @@ class CollectionController extends Controller
                 $query->orderBy('topic_id', 'ASC')
                     ->orderBy('number', 'ASC');
             },
+            'questions.answers' => fn($q) => $q->whereIn('status', $statuses),
             'questions.answers.sections.tips',
             'questions.tips',
             'questions.topic.attachments',

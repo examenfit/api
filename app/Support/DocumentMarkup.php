@@ -26,12 +26,16 @@ class DocumentMarkup {
     return $text;
   }
 
+  // @see https://www.php.net/manual/en/function.escapeshellcmd.php
   function latexToMathML($formula)
   {
     $katex = base_path('/node_modules/katex/cli.js');
-    $input = addslashes(addslashes($formula));
-    $result = shell_exec("echo \"{$input}\" | {$katex}");
-    return trim($result);
+
+    $cmd = str_replace(array('\\', '%'), array('\\\\', '%%'), $formula);
+    $cmd = escapeshellarg($cmd);
+
+    $output = shell_exec("printf $cmd | $katex");
+    return trim($output);
   }
 
   public function fixLatex($text) {

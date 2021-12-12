@@ -26,7 +26,7 @@ class RegistrationRequest extends FormRequest
             'last_name' => 'required|string|max:255',
             'email' => 'required|email:rfc',
             'newsletter' => 'boolean',
-            'license' => 'required|string|max:255',
+            'license' => 'required|string|max:255'
         ];
     }
 }

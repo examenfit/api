@@ -6,5 +6,6 @@
 <body>
 @include('pdf.collection')
 @include('pdf.appendixes')
+@include('pdf.formuleblad')
 </body>
 </html>

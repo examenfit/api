@@ -19,7 +19,8 @@ class License extends Model
     public $fillable = [
         'type',
         'begin',
-        'end'
+        'end',
+        'description'
     ];
 
     public function owner()
@@ -32,16 +33,22 @@ class License extends Model
         return $this->hasMany(Seat::class);
     }
 
-    public static function createProeflicentie($user, $streams = [ 1, 2 ])
+    public static function createProeflicentie($user, $streams = [ 1, 2 ], $descr = 'proeflicentie')
     {
         $begin = new DateTime;
         $end = new DateTime;
-        $end->add(new DateInterval('P21D'));
+        $end->add(new DateInterval('P10D'));
+
+        $feb1 = new DateTime('2022-02-01');
+        if ($end < $feb1) {
+            $end = $feb1;
+        }
 
         $license = License::create([
             'type' => 'proeflicentie',
             'begin' => $begin,
-            'end' => $end
+            'end' => $end,
+            'description' => $descr.' ' . $user->email
         ]);
 
         $seat = $license->seats()->create([
@@ -110,8 +117,8 @@ class License extends Model
         $user->save();
 
         $leonie = User::create([
-            'first_name' => 'Leonie',
-            'last_name' => 'Eerling',
+            'first_name' => 'Demo leerling',
+            'last_name' => '',
             'role' => 'leerling',
             'email' => 'leerling-'.Str::random(6).'@examenfit.nl',
             'password' => '',
@@ -141,8 +148,8 @@ class License extends Model
 
         $user = auth()->user();
         $leonie = User::create([
-            'first_name' => 'Leonie',
-            'last_name' => 'Eerling',
+            'first_name' => 'Demo leerling',
+            'last_name' => '',
             'role' => 'leerling',
             'email' => 'leerling-'.Str::random(6).'@examenfit.nl',
             'password' => '',

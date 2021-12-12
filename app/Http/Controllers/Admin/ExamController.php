@@ -71,6 +71,7 @@ class ExamController extends Controller
             'status' => 'nullable|in:concept,published,frozen',
             'year' => 'required|integer|min:2010',
             'term' => 'required|integer|in:1,2,3',
+            'show_answers' => 'nullable|boolean',
             'standardization_value' => 'nullable|numeric',
             'is_pilot' => 'nullable|boolean',
             'introduction' => 'nullable|string',
