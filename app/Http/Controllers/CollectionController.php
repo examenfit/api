@@ -158,7 +158,7 @@ class CollectionController extends Controller
         $isAuthor = $role === 'admin' || $role === 'author';
         $statuses = $isAuthor ? [ 'published', 'concept' ] : [ 'published' ];
 
-        $collection->load([
+        $load = [
             'author',
             'questions' => function ($query) use ($topic) {
                 if ($topic->id) {
@@ -168,8 +168,6 @@ class CollectionController extends Controller
                 $query->orderBy('topic_id', 'ASC')
                     ->orderBy('number', 'ASC');
             },
-            'questions.answers' => fn($q) => $q->whereIn('status', $statuses),
-            'questions.answers.sections.tips',
             'questions.tips',
             'questions.topic.attachments',
             'questions.attachments',
@@ -177,7 +175,13 @@ class CollectionController extends Controller
             'questions.dependencies',
             'questions.chapters.methodology',
             'questions.chapters.parent',
-        ]);
+        ];
+
+        if ($collection->questions[0]->topic->exam->show_answers) {
+          $load[] = 'questions.answers.sections.tips';
+        }
+
+        $collection->load($load);
 
         return new CollectionResource($collection);
     }
