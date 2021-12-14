@@ -441,11 +441,13 @@ class ImportOefensets extends Command {
   function importBasisvaardigheid($vragen)
   {
     foreach($vragen as $vraag) {
-      preg_match('/(\\d+)-([iI]+) (\\d+)/', $vraag, $matches);
+      $vraag = trim($vraag);
+      preg_match('/(\\d+)-([iI]+)[ -](\\d+)/', $vraag, $matches);
       if ($matches) {
         $year = +$matches[1];
         $term = strlen($matches[2]);
         $number = +$matches[3];
+        $this->info("$year-$term $number");
         if ($this->initQuestion($year, $term, $number)) {
           $this->createBasisvaardigheidAnnotation();
         }
@@ -458,7 +460,7 @@ class ImportOefensets extends Command {
   function importGecombineerdeOpgave($vragen)
   {
     foreach($vragen as $vraag) {
-      preg_match('/(\\d+)-([iI]+) (\\d+)/', $vraag, $matches);
+      preg_match('/(\\d+)-([iI]+)[ -](\\d+)/', $vraag, $matches);
       if ($matches) {
         $year = +$matches[1];
         $term = strlen($matches[2]);

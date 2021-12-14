@@ -9,7 +9,7 @@
 
 <p>Je hebt je aangemeld voor een proeflicentie. Hiermee kun je:</p>
 <ul>
-    <li>Drie weken gratis ExamenFit uitproberen, zonder verplichtingen</li>
+    <li>Tot 1 februari 2022 gratis ExamenFit uitproberen, zonder verplichtingen</li>
     <li>Al je leerlingen zonder licentie laten oefenen, met jouw selectie van vragen</li>
     <li>Voor drie leerlingen proeflicenties aanmaken, om zelfstandig te oefenen</li>
 </ul>

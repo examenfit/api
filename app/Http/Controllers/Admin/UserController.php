@@ -2,17 +2,28 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\User;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\UserResource;
+use App\Models\User;
+
+use Illuminate\Http\Request;
+
+use Vinkla\Hashids\Facades\Hashids;
 
 class UserController extends Controller
 {
-    public function index()
-    {
-        $users = User::all();
-        return UserResource::collection($users);
+    public function index(Request $request)
+    { 
+        if ($request->email) {
+          $user = User::firstWhere('email', $request->email);
+          $user->load([
+            'seats' => fn($q) => $q->where('role', 'docent'),
+            'seats.license',
+            'seats.privileges'
+          ]);
+          return new UserResource($user);
+        }
+        return UserResource::collection(User::all());
     }
 
     public function store(Request $request)
