@@ -60,11 +60,51 @@ class StreamController extends Controller
 
     public function tags(Stream $stream)
     {
+        $statuses = "'published'";
+        $user = auth()->user();
+        $role = $user ? $user->role : '';
+        if ($role === 'admin' || $role === 'author') {
+          $statuses = "'published','concept'";
+        }
+        return array_map(fn($row) => [
+          'id' => Hashids::encode($row->id),
+          'stream_id' => Hashids::encode($row->stream_id),
+          'name' => $row->name,
+          'topics_count' => $row->topics_count,
+          'children' => []
+        ], DB::select("
+          SELECT
+            tags.id,
+            tags.stream_id,
+            tags.name,
+            count(*) AS topics_count
+          FROM
+            tags,
+            question_tag,
+            questions,
+            topics,
+            exams
+          WHERE
+            tag_id = tags.id AND
+            question_id = questions.id AND
+            topic_id = topics.id AND
+            exam_id = exams.id AND
+            exams.status IN ($statuses) AND
+            tags.stream_id = ?
+          GROUP BY
+            tags.id,
+            tags.stream_id,
+            name
+          ORDER BY 
+            name
+        ", [ $stream->id ]));
+/*
         $stream->load(['tags' => function ($query) {
             $query->withCount(['topics']);
         }]);
 
         return TagResource::collection($stream->tags->sortBy('name'));
+*/
     }
 
     public function tag(Stream $stream, Tag $tag)
