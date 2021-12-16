@@ -54,6 +54,7 @@ class SetTopicCache extends Command
                 'course_id' => $topic->exam->stream->course_id,
                 'level_id' => $topic->exam->stream->level_id,
                 'examStatus' => $topic->exam->status,
+                'examAnswers' => $topic->exam->show_answers,
                 'course' => $topic->exam->stream->course->name,
                 'level' => $topic->exam->stream->level->name,
                 'year' => $topic->exam->year,

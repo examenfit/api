@@ -22,6 +22,7 @@ class TopicCacheResource extends JsonResource
     {
         return [
             'examStatus' => $this->resource['examStatus'],
+            'examAnswers' => $this->resource['examAnswers'],
             'stream_id' => Hashids::encode($this->resource['stream_id']),
             'course' => $this->resource['course'],
             'course_id' => Hashids::encode($this->resource['course_id']),

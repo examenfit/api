@@ -19,7 +19,7 @@ class TopicController extends Controller
             'exam.stream.course',
             'exam.stream.level',
             'questions.attachments',
-            'questions.answers.sections.tips';
+            'questions.answers.sections.tips',
             'questions.chapters.parent',
             'questions.dependencies',
             'questions.domains.parent',
