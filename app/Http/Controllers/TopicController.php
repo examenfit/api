@@ -19,6 +19,7 @@ class TopicController extends Controller
             'exam.stream.course',
             'exam.stream.level',
             'questions.attachments',
+            'questions.answers.sections.tips';
             'questions.chapters.parent',
             'questions.dependencies',
             'questions.domains.parent',
@@ -27,10 +28,6 @@ class TopicController extends Controller
             'questions.tags',
             'questions.tips',
         ];
-
-        if ($topic->exam->show_answers || $role === 'admin' || $role === 'author') {
-            $fields[] = 'questions.answers.sections.tips';
-        }
 
         $topic->load($fields);
 
