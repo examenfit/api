@@ -16,8 +16,10 @@ class UserController extends Controller
     { 
         if ($request->email) {
           $user = User::firstWhere('email', $request->email);
+          if (!$user) {
+            return response()->json(null);
+          }
           $user->load([
-            'seats' => fn($q) => $q->where('role', 'docent'),
             'seats.license',
             'seats.privileges'
           ]);
