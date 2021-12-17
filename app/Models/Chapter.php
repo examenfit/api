@@ -18,7 +18,8 @@ class Chapter extends Model
         'stream_id',
         'chapter_id',
         'name',
-        'title'
+        'title',
+        'import_id'
     ];
 
     public function methodology()
