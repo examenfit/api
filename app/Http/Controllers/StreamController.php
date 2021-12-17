@@ -77,7 +77,7 @@ class StreamController extends Controller
             tags.id,
             tags.stream_id,
             tags.name,
-            count(*) AS topics_count
+            count(DISTINCT topic_id) AS topics_count
           FROM
             tags,
             question_tag,
