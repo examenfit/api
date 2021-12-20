@@ -51,9 +51,6 @@ use App\Http\Controllers\Admin\ChapterController as AdminChapterController;
 |
 */
 
-Route::get('/custom/questions/with_multiple_answers', [CustomQueries::class, 'questions_with_multiple_answers']);
-Route::get('/custom/questions/complexity_is_null', [CustomQueries::class, 'questions_complexity_is_null']);
-Route::get('/custom/questions/questions_not_in_oefensets', [CustomQueries::class, 'questions_not_in_oefensets']);
 Route::get('/log/collection/{collection}', [ActivityLogController::class, 'collectionSummary']);
 Route::get('/log/latest/{privilege}', [ActivityLogController::class, 'latestActivity']);
 
@@ -82,24 +79,6 @@ Route::get('/download-collection-pdf/{collection}', [CollectionController::class
 Route::get('/download-appendixes-html/{topic}', [TopicController::class, 'html']);
 Route::get('/download-appendixes-pdf/{topic}', [TopicController::class, 'pdf']);
 
-/*
-Route::get('/invalid_domains/', [StreamController::class, 'invalid_domains']);
-Route::get('/fixable_domains/', [StreamController::class, 'fixable_domains']);
-Route::get('/fix_domains/', [StreamController::class, 'fix_domains']);
-Route::get('/invalid_tags/', [StreamController::class, 'invalid_tags']);
-Route::get('/fixable_tags/', [StreamController::class, 'fixable_tags']);
-Route::get('/fix_tags/', [StreamController::class, 'fix_tags']);
-
-Route::get('/unknown_usage', [CollectionController::class, 'unknown_usage']);
-Route::get('/fix_usage', [CollectionController::class, 'fix_usage']);
-
-Route::get('/null_stream_chapters/', [StreamController::class, 'null_stream_chapters']);
-Route::get('/fix_null_stream_chapters/', [StreamController::class, 'fix_null_stream_chapters']);
-
-Route::get('/0step_answer_sections/', [StreamController::class, 'Ostep_answer_sections']);
-Route::get('/fix_answer_sections/', [StreamController::class, 'fix_answer_sections']);
-*/
-
 Route::get('/collections/{collection}/{topic?}', [CollectionController::class, 'show']);
 Route::post('/collections/{collection}/{question}/elaborations', [CollectionController::class, 'storeElaboration']);
 
@@ -109,32 +88,26 @@ Route::post('/log', [ActivityLogController::class, 'store']);
 Route::get('/streams/', [StreamController::class, 'index']);
 Route::get('/streams/{stream}/formuleblad', [StreamController::class, 'formuleblad']);
 
-    Route::get('/score', [ScoreController::class, 'loadAll']);
-    Route::put('/score', [ScoreController::class, 'saveAll']);
+Route::get('/score', [ScoreController::class, 'loadAll']);
+Route::put('/score', [ScoreController::class, 'saveAll']);
 
+Route::get('/streams/{stream}/scores', [ScoreController::class, 'getStreamScores']);
+Route::post('/streams/{stream}/scores', [ScoreController::class, 'postStreamScore']);
 
-    Route::get('/streams/{stream}/scores', [ScoreController::class, 'getStreamScores']);
-    Route::post('/streams/{stream}/scores', [ScoreController::class, 'postStreamScore']);
+Route::get('/streams/{stream}', [ScoreController::class, 'getStreamScores']);
+Route::post('/streams/{stream}/{question}', [ScoreController::class, 'postStreamScore']);
 
-    Route::get('/streams/{stream}', [ScoreController::class, 'getStreamScores']);
-    Route::post('/streams/{stream}/{question}', [ScoreController::class, 'postStreamScore']);
+Route::post('/register', [RegistrationController::class, 'register']);
+Route::get('/activation-status', [RegistrationController::class, 'activationStatus']);
+Route::post('/activate-account', [RegistrationController::class, 'activateAccount']);
+Route::post('/activate-license', [RegistrationController::class, 'activateLicense']);
 
-    Route::post('/register', [RegistrationController::class, 'register']);
-    Route::get('/activation-status', [RegistrationController::class, 'activationStatus']);
-    Route::post('/activate-account', [RegistrationController::class, 'activateAccount']);
-    Route::post('/activate-license', [RegistrationController::class, 'activateLicense']);
+Route::post('/forgot-password', [PasswordResetLinkController::class, 'store']); // csrf?
+Route::post('/reset-password', [NewPasswordController::class, 'save'])->name('password.reset');
 
-    Route::post('/forgot-password', [PasswordResetLinkController::class, 'store']); // csrf?
-    Route::post('/reset-password', [NewPasswordController::class, 'save'])->name('password.reset');
-
-    Route::get('/activity_summary/{collection}', [CollectionController::class, 'activity_summary']);
-
-    Route::get('/invite-status', [LicenseController::class, 'getInviteStatus']);
-    Route::post('/invite-account', [LicenseController::class, 'postInviteAccount']);
-    Route::post('/invite-ok', [LicenseController::class, 'postInviteOk']);
-
-//Route::get('/registrations/{registration}', [RegistrationController::class, 'get']);
-//Route::get('/registrations', [RegistrationController::class, 'all']);
+Route::get('/invite-status', [LicenseController::class, 'getInviteStatus']);
+Route::post('/invite-account', [LicenseController::class, 'postInviteAccount']);
+Route::post('/invite-ok', [LicenseController::class, 'postInviteOk']);
 
     Route::get('/user/switch', [UserSwitchController::class, 'getUsers']);
     Route::post('/user/switch', [UserSwitchController::class, 'switchToUser']);
@@ -143,6 +116,7 @@ Route::get('/streams/{stream}/formuleblad', [StreamController::class, 'formulebl
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
 
+    Route::get('/activity_summary/{collection}', [CollectionController::class, 'activity_summary']);
 
     Route::get('/licenses', [LicenseController::class, 'index']);
     Route::post('/licenses', [LicenseController::class, 'index']);
@@ -163,14 +137,11 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('/groups/{group}', [LicenseController::class, 'getGroup']);
     Route::put('/groups/{group}', [LicenseController::class, 'putGroup']);
 
-
     Route::post('/collections/{collection}/share', [CollectionController::class, 'shareCollection']);
-
 
     Route::post('/privilege', [PrivilegeController::class, 'privilege']);
     Route::post('/privileges', [PrivilegeController::class, 'privileges']);
     Route::post('/objects', [PrivilegeController::class, 'objects']);
-
 
     Route::get('/latest', [CollectionController::class, 'latest']);
     Route::get('/constraints/{course}', [CollectionController::class, 'constraints']);
@@ -204,6 +175,10 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 
     Route::group(['prefix' => 'admin', 'middleware' => 'role:admin,author'], function () {
         Route::get('/', [AdminIndexController::class, 'index']);
+
+        Route::get('/custom/questions/with_multiple_answers', [CustomQueries::class, 'questions_with_multiple_answers']);
+        Route::get('/custom/questions/complexity_is_null', [CustomQueries::class, 'questions_complexity_is_null']);
+        Route::get('/custom/questions/questions_not_in_oefensets', [CustomQueries::class, 'questions_not_in_oefensets']);
 
         Route::get('/courses', [AdminCourseController::class, 'index']);
         Route::get('/courses/{stream}', [AdminCourseController::class, 'show']);
@@ -260,12 +235,31 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 
         Route::post('/misc/topics/cache', [TopicController::class, 'cache']);
         Route::post('/misc/answers/fix', [AnswerController::class, 'fix']);
+
     });
 
     Route::group(['prefix' => 'admin', 'middleware' => 'role:admin'], function () {
         Route::get('/audit', [AdminAuditController::class, 'index']);
 
+        Route::get('/users/:hash', [AdminUserController::class, 'get']);
         Route::get('/users', [AdminUserController::class, 'index']);
         Route::post('/users', [AdminUserController::class, 'store']);
+/*
+        Route::get('/invalid_domains/', [StreamController::class, 'invalid_domains']);
+        Route::get('/fixable_domains/', [StreamController::class, 'fixable_domains']);
+        Route::get('/fix_domains/', [StreamController::class, 'fix_domains']);
+        Route::get('/invalid_tags/', [StreamController::class, 'invalid_tags']);
+        Route::get('/fixable_tags/', [StreamController::class, 'fixable_tags']);
+        Route::get('/fix_tags/', [StreamController::class, 'fix_tags']);
+        Route::get('/unknown_usage', [CollectionController::class, 'unknown_usage']);
+        Route::get('/fix_usage', [CollectionController::class, 'fix_usage']);
+        Route::get('/null_stream_chapters/', [StreamController::class, 'null_stream_chapters']);
+        Route::get('/fix_null_stream_chapters/', [StreamController::class, 'fix_null_stream_chapters']);
+        Route::get('/0step_answer_sections/', [StreamController::class, 'Ostep_answer_sections']);
+        Route::get('/fix_answer_sections/', [StreamController::class, 'fix_answer_sections']);
+*/
+        Route::get('/registrations/{registration}', [RegistrationController::class, 'get']);
+        Route::get('/registrations', [RegistrationController::class, 'all']);
+
     });
 });

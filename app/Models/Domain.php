@@ -25,7 +25,7 @@ class Domain extends Model
 
     public function children()
     {
-        return $this->hasMany(Self::class, 'parent_id');
+        return $this->hasMany(Self::class, 'parent_id')->orderBy('position');
     }
 
     public function question()

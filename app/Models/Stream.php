@@ -32,7 +32,7 @@ class Stream extends Model
 
     public function domains()
     {
-        return $this->hasMany(Domain::class);
+        return $this->hasMany(Domain::class)->orderBy('position');
     }
 
     public function tags()

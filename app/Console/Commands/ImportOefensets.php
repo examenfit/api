@@ -19,7 +19,8 @@ class ImportOefensets extends Command {
   ];
 
   const LEVEL = [
-    'vmbo' => 'Vmbo GL en TL',
+    'vmbo' => 'Vmbo GT',
+    //'vmbo' => 'Vmbo GL en TL',
     'havo' => 'Havo',
     'vwo' => 'Vwo',
   ];
