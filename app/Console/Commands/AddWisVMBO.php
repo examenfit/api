@@ -76,7 +76,8 @@ class AddWisVMBO extends Command
 
     public function handle() {
 
-      $this->useStream('Wiskunde', 'Vmbo GL en TL');
+      $this->useStream('Wiskunde', 'Vmbo GT');
+      //$this->useStream('Wiskunde', 'Vmbo GL en TL');
 
       $this->useMethode('Getal & Ruimte 12 ed.');
 

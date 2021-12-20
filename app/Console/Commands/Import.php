@@ -19,7 +19,8 @@ class Import extends Command {
 
   const LEVEL = [
     'havo' => 'Havo',
-    'vmbo' => 'Vmbo GL en TL',
+    'vmbo' => 'Vmbo GT',
+    //'vmbo' => 'Vmbo GL en TL',
     'vwo' => 'Vwo',
   ];
 
