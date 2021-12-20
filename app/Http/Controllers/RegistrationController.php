@@ -153,6 +153,7 @@ class RegistrationController extends Controller
       'proeflicentie-natuurkunde' => 'proeflicentie natuurkunde havo / vwo',
       'proeflicentie-wiskunde-a' => 'proeflicentie wiskunde A havo / vwo',
       'proeflicentie-wiskunde-b' => 'proeflicentie wiskunde B havo / vwo',
+      'proeflicentie-wiskunde' => 'proeflicentie wiskunde vmbo GT',
     ];
 
     const STREAMS = [
@@ -160,6 +161,7 @@ class RegistrationController extends Controller
       'proeflicentie-natuurkunde' => [ 5, 6 ],
       'proeflicentie-wiskunde-a' => [ 1, 2 ],
       'proeflicentie-wiskunde-b' => [ 3, 4 ],
+      'proeflicentie-wiskunde' => [ 7 ],
     ];
 
     private function activateProeflicentie($user, $registration)
