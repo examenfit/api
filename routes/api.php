@@ -114,9 +114,10 @@ Route::post('/invite-ok', [LicenseController::class, 'postInviteOk']);
 
     Route::get('/privileges/{privilege}/scores', [ScoreController::class, 'getPrivilegeScores']);
 
+    Route::get('/activity_summary/{collection}', [CollectionController::class, 'activity_summary']);
+
 Route::group(['middleware' => 'auth:sanctum'], function () {
 
-    Route::get('/activity_summary/{collection}', [CollectionController::class, 'activity_summary']);
 
     Route::get('/licenses', [LicenseController::class, 'index']);
     Route::post('/licenses', [LicenseController::class, 'index']);
