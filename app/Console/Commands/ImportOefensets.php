@@ -443,8 +443,10 @@ class ImportOefensets extends Command {
   {
     foreach($vragen as $vraag) {
       $vraag = trim($vraag);
-      preg_match('/(\\d+)-([iI]+)[ -](\\d+)/', $vraag, $matches);
+      $this->info('vraag: "'.$vraag.'"');
+      preg_match('/\\s*(\\d+)-([iI]+)[\\s-]+(\\d+)\\s*/', $vraag, $matches);
       if ($matches) {
+        $this->info('match: "'.$matches[0].'"');
         $year = +$matches[1];
         $term = strlen($matches[2]);
         $number = +$matches[3];
@@ -461,7 +463,7 @@ class ImportOefensets extends Command {
   function importGecombineerdeOpgave($vragen)
   {
     foreach($vragen as $vraag) {
-      preg_match('/(\\d+)-([iI]+)[ -](\\d+)/', $vraag, $matches);
+      preg_match('/(\\d+)-([iI]+)[\\s-]+(\\d+)/', $vraag, $matches);
       if ($matches) {
         $year = +$matches[1];
         $term = strlen($matches[2]);
