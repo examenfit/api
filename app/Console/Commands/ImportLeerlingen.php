@@ -12,6 +12,7 @@ use App\Models\Seat;
 use App\Models\Privilege;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Str;
 
 ini_set("auto_detect_line_endings", true);
 
@@ -179,8 +180,13 @@ class ImportLeerlingen extends Command {
     if ($this->confirm('Uitnodigingen versturen?')) {
       foreach($this->seats as $to) {
         $seat = Seat::firstWhere('email', $to['email']);
+        $seat->token = Str::random(32);
+        $seat->save();
+
         $user = $this->docent;
+
         $mail = new InviteMail($seat, $user);
+
         Mail::to($seat->email)->send($mail);
       }
     }
