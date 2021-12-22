@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use Throwable;
+
 use Mail;
 use App\Mail\InviteMail;
 
@@ -161,6 +163,7 @@ class ImportLeerlingen extends Command {
       'role' => 'leerling',
       'first_name' => $data['first_name'],
       'last_name' => $data['last_name'],
+      'token' => Str::random(32),
       'email' => $data['email'],
     ]);
     $seat->groups()->sync([ $this->group->id ]);
@@ -180,14 +183,17 @@ class ImportLeerlingen extends Command {
     if ($this->confirm('Uitnodigingen versturen?')) {
       foreach($this->seats as $to) {
         $seat = Seat::firstWhere('email', $to['email']);
-        $seat->token = Str::random(32);
-        $seat->save();
-
         $user = $this->docent;
-
         $mail = new InviteMail($seat, $user);
-
-        Mail::to($seat->email)->send($mail);
+        try {
+          Mail::to($seat->email)->send($mail);
+        } catch(Throwable $err) {
+          $this->info($err->getMessage());
+        }
+      }
+      foreach($this->seats as $to) {
+        $seat = Seat::firstWhere('email', $to['email']);
+        $this->info($seat->email.' '.$seat->token);
       }
     }
   }
