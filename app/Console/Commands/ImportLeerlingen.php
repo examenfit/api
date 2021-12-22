@@ -2,21 +2,31 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
+use Throwable;
+
+use Mail;
+use App\Mail\InviteMail;
+
 use App\Models\User;
 use App\Models\Stream;
 use App\Models\Group;
 use App\Models\Seat;
 use App\Models\Privilege;
 
+use Illuminate\Console\Command;
+use Illuminate\Support\Str;
+
+ini_set("auto_detect_line_endings", true);
+
 class ImportLeerlingen extends Command {
 
-  protected $signature = 'ef:import:leerlingen {--docent=} {--file=} {--email=email} {--first_name=first_name} {--last_name=last_name}';
+  protected $signature = 'ef:import:leerlingen {--docent=} {--file=} {--email=email} {--first_name=first_name} {--middle_name=} {--last_name=last_name} {--separator=} {--invite=}';
   protected $description = 'Imports leerlingen for a specific docent';
 
   public function handle() {
     $this->init();
     $this->import();
+    $this->invite();
   }
 
   function abort($message) {
@@ -81,6 +91,29 @@ class ImportLeerlingen extends Command {
     $this->abort("onbekend type bestand\n");
   }
 
+  function emptySeats() {
+    $streams = [];
+    foreach($this->streams as $stream) {
+      $streams[] = $stream->id;
+    };
+    sort($streams);
+    $empty = [];
+    foreach ($this->license->seats as $seat) {
+      if ($seat->role === 'leerling' && !$seat->email && !$seat->user) {
+        $ids = [];
+        foreach($seat->privileges as $priv) {
+          if ($priv->action === 'oefensets uitvoeren') {
+            $ids[] = $priv->object_id;
+          }
+        }
+        if ($streams === $ids) {
+          $empty[] = $seat;
+        }
+      }
+    }
+    return $empty;
+  }
+
   function import() {
     $user = $this->docent;
     $this->info('Docent: '.$user->first_name.' '.$user->last_name.' <'.$user->email.'>');
@@ -90,10 +123,38 @@ class ImportLeerlingen extends Command {
       $this->info('Vak/niveau: '.$stream->course->name.' '.$stream->level->name);
     }
 
+    $empty = $this->emptySeats();
+    
+    $import = count($this->seats);
+    $avail = count($empty);
+
+    if ($avail < $import) {
+    $this->warn('in te lezen: '.$import);
+    $this->warn('beschikbaar: '.$avail);
+      $diff = $import - $avail;
+      $cont = $this->confirm("ontbrekende posities toevoegen?");
+      if (!$cont) die();
+    }
+
+    $n = 0;
+    $filled = 0;
+    $added = 0;
     foreach ($this->seats as $seat) {
       $this->info('Leerling: '.$seat['first_name'].' '.$seat['last_name'].' <'.$seat['email'].'>');
-      $this->createSeat($seat);
+      if ($n < count($empty)) {
+        $empty[$n]->email = $seat['email'];
+        $empty[$n]->first_name = $seat['first_name'];
+        $empty[$n]->last_name = $seat['last_name'];
+        $empty[$n]->save();
+        $filled++;
+      } else {
+        $this->createSeat($seat);
+        $added++;
+      }
+      ++$n;
     }
+    $this->info('gevuld: '.$filled);
+    $this->info('aangemaakt: '.$added);
   }
 
   function createSeat($data) {
@@ -102,6 +163,7 @@ class ImportLeerlingen extends Command {
       'role' => 'leerling',
       'first_name' => $data['first_name'],
       'last_name' => $data['last_name'],
+      'token' => Str::random(32),
       'email' => $data['email'],
     ]);
     $seat->groups()->sync([ $this->group->id ]);
@@ -114,6 +176,25 @@ class ImportLeerlingen extends Command {
         'begin' => $this->license->begin,
         'end' => $this->license->end
       ]);
+    }
+  }
+
+  function invite() {
+    if ($this->confirm('Uitnodigingen versturen?')) {
+      foreach($this->seats as $to) {
+        $seat = Seat::firstWhere('email', $to['email']);
+        $user = $this->docent;
+        $mail = new InviteMail($seat, $user);
+        try {
+          Mail::to($seat->email)->send($mail);
+        } catch(Throwable $err) {
+          $this->info($err->getMessage());
+        }
+      }
+      foreach($this->seats as $to) {
+        $seat = Seat::firstWhere('email', $to['email']);
+        $this->info($seat->email.' '.$seat->token);
+      }
     }
   }
 
@@ -140,16 +221,17 @@ class ImportLeerlingen extends Command {
 
   function readCsv() {
     $this->seats = [];
-    $f = fopen($this->file, 'r');
-    if ($f === FALSE) {
-      $this->abort("kan bestand niet openen");
-    }
-    $names = fgetcsv($f);
+
+    $sep = $this->option('separator');
+    $lines = file($this->file);
+    $names = explode($sep, array_shift($lines));
+
     $index = [];
     for ($column = 0; $column < count($names); ++$column) {
       $index[$column+1] = $column;
     }
     for ($column = 0; $column < count($names); ++$column) {
+      $this->info($names[$column]);
       $index[$names[$column]] = $column;
     }
 
@@ -157,12 +239,36 @@ class ImportLeerlingen extends Command {
     $index['first_name'] = $index[$this->option('first_name')];
     $index['last_name'] = $index[$this->option('last_name')];
 
-    while ($values = fgetcsv($f)) {
-      $this->seats[] = [
-        'email' => $values[$index['email']],
-        'first_name' => $values[$index['first_name']],
-        'last_name' => $values[$index['last_name']],
-      ];
+    if ($this->option('middle_name')) {
+      $index['middle_name'] = $index[$this->option('middle_name')];
+    }
+
+    foreach($lines as $line) {
+      $line = trim($line);
+      if (!$line) {
+        continue;
+      }
+      $values = explode($sep, $line);
+      if (count($values) !== count($names)) {
+        die('csv parse error');
+      }
+      if ($this->option('middle_name')) {
+        $this->seats[] = [
+          'email' => $values[$index['email']],
+          'first_name' => $values[$index['first_name']],
+          'last_name' => trim(
+            strtolower($values[$index['middle_name']]).
+            ' '.
+            $values[$index['last_name']],
+          )
+        ];
+      } else {
+        $this->seats[] = [
+          'email' => $values[$index['email']],
+          'first_name' => $values[$index['first_name']],
+          'last_name' => $values[$index['last_name']],
+        ];
+      }
     }
   }
 
