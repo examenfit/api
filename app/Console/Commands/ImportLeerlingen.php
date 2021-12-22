@@ -50,10 +50,16 @@ class ImportLeerlingen extends Command {
         $seats[] = $seat;
       }
     }
-    if (count($seats) !== 1) {
-      $this->abort("verkeerd aantal gebruikerslicenties: ".count($seats)."\n");
+    if (count($seats) === 0) {
+      $this->abort("docentlicentie niet gevonden\n");
     }
-    $seat = $seats[0];
+    if (count($seats) > 1) {
+      $this->warn("meerdere docentlicenties: ".count($seats)."\n");
+      if (!$this->confirm("Meerdere docentlicenties gevonden (".count($seats)."). Meest recente gebruiken?")) {
+        die();
+      }
+    }
+    $seat = array_pop($seats);
     $privileges = [];
     $streams = [];
     $groups = [];
@@ -66,7 +72,7 @@ class ImportLeerlingen extends Command {
       }
     }
     if (count($streams) === 0) {
-      $this->abort ("geen vakken/niveaus gevonden\n");
+      $this->abort("geen vak/niveau combinaties gevonden\n");
     }
     if (count($groups) !== 1) {
       $this->abort ("verkeerd aantal groepen: ".count($groups)."\n");
