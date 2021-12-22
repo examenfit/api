@@ -13,6 +13,9 @@ class Seat extends Model
     public $fillable = [
         'license_id',
         'user_id',
+        'first_name',
+        'last_name',
+        'email',
         'role'
     ];
 
