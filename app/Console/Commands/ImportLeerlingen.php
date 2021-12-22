@@ -145,6 +145,7 @@ class ImportLeerlingen extends Command {
         $empty[$n]->email = $seat['email'];
         $empty[$n]->first_name = $seat['first_name'];
         $empty[$n]->last_name = $seat['last_name'];
+        $empty[$n]->token = Str::random(32);
         $empty[$n]->save();
         $filled++;
       } else {
