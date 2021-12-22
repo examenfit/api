@@ -54,8 +54,12 @@ class ImportLeerlingen extends Command {
       $this->abort("docentlicentie niet gevonden\n");
     }
     if (count($seats) > 1) {
-      $this->warn("meerdere docentlicenties: ".count($seats)."\n");
-      if (!$this->confirm("Meerdere docentlicenties gevonden (".count($seats)."). Meest recente gebruiken?")) {
+      $this->warn("Meerdere docentlicenties gevonden:");
+      $n = 0;
+      foreach($seats as $seat) {
+        $this->info('#'.(++$n).'. '.($seat->license->description ?: 'geen omschrijving'));
+      }
+      if (!$this->confirm("Meest recente (#$n) gebruiken?")) {
         die();
       }
     }
