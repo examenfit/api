@@ -169,7 +169,7 @@ class ImportOefensets extends Command {
 
   function createOnderwerp($onderwerp)
   {
-    $this->info("createOnderwerp: $onderwerp");
+    $this->info("\nOnderwerp: $onderwerp");
     DB::insert(ImportOefensets::INSERT_ONDERWERP, [
       $this->stream->id,
       $onderwerp
@@ -228,7 +228,7 @@ class ImportOefensets extends Command {
 
   function createBasisvaardigheid($basisvaardigheid)
   {
-    $this->info("createBasisvaardigheid: $basisvaardigheid");
+    $this->info("Basisvaardigheid: $basisvaardigheid");
     return DB::insert(ImportOefensets::INSERT_BASISVAARDIGHEID, [
       $this->stream->id,
       $this->onderwerp->id,
@@ -285,7 +285,7 @@ class ImportOefensets extends Command {
 
   function createGecombineerdeOpgave($opgave)
   {
-    $this->info("createGecombineerdeOpgave: $opgave");
+    $this->info("GecombineerdeOpgave: $opgave");
     return DB::insert(ImportOefensets::INSERT_GECOMBINEERDE_OPGAVE, [
       $this->stream->id,
       $this->onderwerp->id,
@@ -307,6 +307,7 @@ class ImportOefensets extends Command {
     SELECT
       questions.id,
       exams.status,
+      exams.show_answers,
       topics.has_answers
     FROM
       questions,
@@ -318,6 +319,8 @@ class ImportOefensets extends Command {
       number = ? AND
       stream_id = ? AND
       exam_id = exams.id AND
+      exams.status IS NOT NULL AND
+      exams.status <> 'frozen' AND
       topic_id = topics.id
   ";
 
@@ -341,10 +344,11 @@ class ImportOefensets extends Command {
   {
     $row = $this->getQuestion($year, $term, $number);
     if (!$row) {
-      die("failed to get: $year-$term #$number");
-    }
-    if ($row->status !== 'published') {
+      $this->warn("$year-$term #$number: Niet gevonde.");
+    } else if ($row->status !== 'published') {
       $this->warn("$year-$term #$number: Ongeldige status: ".$row->status);
+    } else if (!$row->show_answers) {
+      $this->warn("$year-$term #$number: Antwoorden worden niet getoond");
     } else if (!$row->has_answers) {
       $this->warn("$year-$term #$number: Heeft geen antwoorden");
     } else {
@@ -443,19 +447,17 @@ class ImportOefensets extends Command {
   {
     foreach($vragen as $vraag) {
       $vraag = trim($vraag);
-      $this->info('vraag: "'.$vraag.'"');
+      $this->info('Vraag: "'.$vraag.'"');
       preg_match('/\\s*(\\d+)-([iI]+)[\\s-]+(\\d+)\\s*/', $vraag, $matches);
       if ($matches) {
-        $this->info('match: "'.$matches[0].'"');
         $year = +$matches[1];
         $term = strlen($matches[2]);
         $number = +$matches[3];
-        $this->info("$year-$term $number");
         if ($this->initQuestion($year, $term, $number)) {
           $this->createBasisvaardigheidAnnotation();
         }
       } else {
-        $this->error(" FAILED: \"$vraag\"");
+        $this->error("Ongeldig invoerformaat: \"$vraag\".");
       }
     }
   }
@@ -463,6 +465,8 @@ class ImportOefensets extends Command {
   function importGecombineerdeOpgave($vragen)
   {
     foreach($vragen as $vraag) {
+      $vraag = trim($vraag);
+      $this->info('Vraag: "'.$vraag.'"');
       preg_match('/(\\d+)-([iI]+)[\\s-]+(\\d+)/', $vraag, $matches);
       if ($matches) {
         $year = +$matches[1];
@@ -487,11 +491,16 @@ class ImportOefensets extends Command {
   }
 
   function fix() {
+    $isExplained = false;
     $annotations = DB::select("SELECT * FROM annotations WHERE parent_id IS NOT NULL");
     foreach($annotations as $annotation) {
       $questions = DB::select("SELECT * FROM question_annotation WHERE annotation_id = ?", [ $annotation->id ]);
       if (!count($questions)) {
-        $this->info('removing #'.$annotation->id.' ('.$annotation->type.' '.$annotation->name.')');
+        if (!$isExplained) {
+          $this->info('Opschonen van entries waar geen vragen aan gekoppeld zijn:');
+          $isExplained = true;
+        }
+        $this->info('#'.$annotation->id.' ('.$annotation->type.' '.$annotation->name.')');
         DB::delete("DELETE FROM annotations WHERE id = ?", [ $annotation->id ]);
       }
     }

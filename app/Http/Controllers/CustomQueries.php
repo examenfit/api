@@ -99,6 +99,9 @@ class CustomQueries extends Controller
         levels.id = level_id AND
         streams.id = stream_id AND
         exams.id = exam_id AND
+        exams.status IS NOT NULL AND
+        exams.status <> 'frozen' AND
+        exams.show_answers AND
         topics.id = topic_id AND
         topics.has_answers AND
         questions.id NOT IN (
