@@ -307,6 +307,7 @@ class ImportOefensets extends Command {
     SELECT
       questions.id,
       exams.status,
+      exams.show_answers,
       topics.has_answers
     FROM
       questions,
@@ -343,10 +344,11 @@ class ImportOefensets extends Command {
   {
     $row = $this->getQuestion($year, $term, $number);
     if (!$row) {
-      die("failed to get: $year-$term #$number");
-    }
-    if ($row->status !== 'published') {
+      $this->warn("$year-$term #$number: Niet gevonde.");
+    } else if ($row->status !== 'published') {
       $this->warn("$year-$term #$number: Ongeldige status: ".$row->status);
+    } else if (!$row->show_answers) {
+      $this->warn("$year-$term #$number: Antwoorden worden niet getoond");
     } else if (!$row->has_answers) {
       $this->warn("$year-$term #$number: Heeft geen antwoorden");
     } else {
