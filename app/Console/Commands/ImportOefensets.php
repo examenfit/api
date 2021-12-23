@@ -115,7 +115,7 @@ class ImportOefensets extends Command {
         return;
       }
     }
-    $this->error('Werkblad "'.$this->title.'" niet gevonden.');
+    $this->error('!! Werkblad "'.$this->title.'" niet gevonden.');
   }
 
   const DELETE_ANNOTATIONS = "
@@ -129,7 +129,7 @@ class ImportOefensets extends Command {
     DB::delete(ImportOefensets::DELETE_ANNOTATIONS, [ $this->stream->id ]);
     $vak = $this->vak;
     $niveau = $this->niveau;
-    $this->warn("Metadata voor $vak $niveau gewist");
+    $this->warn("!! Metadata voor $vak $niveau gewist");
   }
 
   const QUERY_ONDERWERP = "
@@ -344,13 +344,13 @@ class ImportOefensets extends Command {
   {
     $row = $this->getQuestion($year, $term, $number);
     if (!$row) {
-      $this->warn("$year-$term #$number: Niet gevonde.");
+      $this->warn("!! $year-$term #$number: Niet gevonde.");
     } else if ($row->status !== 'published') {
-      $this->warn("$year-$term #$number: Ongeldige status: ".$row->status);
+      $this->warn("!! $year-$term #$number: Ongeldige status: ".$row->status);
     } else if (!$row->show_answers) {
-      $this->warn("$year-$term #$number: Antwoorden worden niet getoond");
+      $this->warn("!! $year-$term #$number: Antwoorden worden niet getoond");
     } else if (!$row->has_answers) {
-      $this->warn("$year-$term #$number: Heeft geen antwoorden");
+      $this->warn("!! $year-$term #$number: Heeft geen antwoorden");
     } else {
       $this->question = $row;
       return true;
@@ -397,7 +397,7 @@ class ImportOefensets extends Command {
     if (mb_strtolower($this->getValue(2,1)) === 'naam oefenreeks') {
       return true;
     }
-    $this->error("'Naam oefenreeks' expected in B1");
+    $this->error("!! 'Naam oefenreeks' expected in B1");
   }
 
   function import()
@@ -436,8 +436,8 @@ class ImportOefensets extends Command {
             $this->importGecombineerdeOpgave($vragen);
           }
         } catch(QueryException $e) {
-          $this->warn($row.','.$col);
-          $this->warn($e->getMessage());
+          $this->warn('!! '.$row.','.$col);
+          $this->warn('!! '.$e->getMessage());
         }
       }
     }
@@ -457,7 +457,7 @@ class ImportOefensets extends Command {
           $this->createBasisvaardigheidAnnotation();
         }
       } else {
-        $this->error("Ongeldig invoerformaat: \"$vraag\".");
+        $this->error("!! Ongeldig invoerformaat: \"$vraag\".");
       }
     }
   }
@@ -476,7 +476,7 @@ class ImportOefensets extends Command {
           $this->createGecombineerdeOpgaveAnnotation();
         }
       } else {
-        $this->error(" FAILED: \"$vraag\"");
+        $this->error("!! Ongeldig invoerformaat: \"$vraag\".");
       }
     }
   }
