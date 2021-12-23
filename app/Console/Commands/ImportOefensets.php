@@ -318,6 +318,8 @@ class ImportOefensets extends Command {
       number = ? AND
       stream_id = ? AND
       exam_id = exams.id AND
+      exams.status IS NOT NULL AND
+      exams.status <> 'frozen' AND
       topic_id = topics.id
   ";
 
