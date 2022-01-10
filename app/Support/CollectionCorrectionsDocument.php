@@ -517,7 +517,7 @@ class CollectionCorrectionsDocument
         $txt = $left->addTextRun(['align' => 'left']);
         $txt->addText("Vraag {$question->number} ", ['size' => 11, 'bold' => true]);
         $txt->addText(" {$question->points} punten", ['size' => 11]);
-
+/*
         $right = $row->addCell(2500);
         $txt = $right->addTextRun(['align' => 'right']);
         $txt->addText("{$question->time_in_minutes} min.", ['size' => 11]);
@@ -526,6 +526,7 @@ class CollectionCorrectionsDocument
           $txt->addText('   ');
           $txt->addText("$complexity", ['size' => 11]);
         }
+*/
     }
 
     function createQrUrl($question)
