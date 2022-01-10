@@ -3,13 +3,13 @@
 namespace App\Console\Commands;
 
 use App\Models\Collection;
-use App\Support\CollectionQuestionsDocument;
+use App\Support\CollectionCorrectionsDocument;
 use Illuminate\Console\Command;
 
-class GenerateCollectionQuestionsDocument extends Command
+class GenerateCollectionCorrectionsDocument extends Command
 {
-    protected $signature = 'ef:cqdoc {collection} {format=docx}';
-    protected $description = 'Document met vragen van een opgaveset aanmaken voor docenten';
+    protected $signature = 'ef:ccdoc {collection} {format=docx}';
+    protected $description = 'Document met uitwerkingen van een opgaveset aanmaken voor docenten';
 
     public $collection = null;
     public $document = null;
@@ -28,8 +28,8 @@ class GenerateCollectionQuestionsDocument extends Command
     public function handle()
     {
         $collection = $this->findCollection();
-        $file = CollectionQuestionsDocument::storage_file($collection, 'docx');
-        $document = new CollectionQuestionsDocument();
+        $file = CollectionCorrectionsDocument::storage_file($collection, 'docx');
+        $document = new CollectionCorrectionsDocument();
         $document->createDocument($collection);
         $document->saveDocument($file, "docx");
         $this->info("Aangemaakt: $file\n");
@@ -44,10 +44,6 @@ class GenerateCollectionQuestionsDocument extends Command
             'questions' => fn($q) => $q->orderBy('topic_id', 'ASC')->orderBy('number', 'ASC'),
             'questions.topic',
         ]);
-        if (!$collection) {
-            $this->error('Opgavenset niet gevonden');
-            die("\n");
-        }
         return $collection;
     }
 

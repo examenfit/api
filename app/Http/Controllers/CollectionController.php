@@ -25,6 +25,7 @@ use Illuminate\Support\Facades\DB;
 use Vinkla\Hashids\Facades\Hashids;
 use App\Http\Resources\CollectionResource;
 use App\Support\CollectionQuestionsDocument;
+use App\Support\CollectionCorrectionsDocument;
 use App\Support\DocumentMarkup;
 
 class CollectionController extends Controller
@@ -188,12 +189,26 @@ class CollectionController extends Controller
 
     public function showCollectionQuestionsDocument(Request $request, Collection $collection)
     {
-        $path = storage_path("app/public/collections/{$collection->hash_id}.docx");
+        $name = $collection->name;
+        $filename = "ExamenFit opgaven {$name}.docx";
+        $file = storage_path("app/public/collections/{$collection->hash_id}.docx");
 
         $document = new CollectionQuestionsDocument();
         $document->createDocument($collection);
-        $document->saveDocument($path, 'docx');
-        return response()->download($path, 'collection.docx');
+        $document->saveDocument($file, 'docx');
+        return response()->download($file, $filename);
+    }
+
+    public function showCollectionCorrectionsDocument(Request $request, Collection $collection)
+    {
+        $name = $collection->name;
+        $filename = "ExamenFit correctievoorschrift {$name}.docx";
+        $file = storage_path("app/public/collections/{$collection->hash_id}.docx");
+
+        $document = new CollectionCorrectionsDocument();
+        $document->createDocument($collection);
+        $document->saveDocument($file, 'docx');
+        return response()->download($file, $filename);
     }
 
     public function showCollectionQuestionsPdf(Request $request, Collection $collection)
@@ -226,7 +241,7 @@ class CollectionController extends Controller
         shell_exec($retrieve);
 
         Log::info("response");
-        return response()->download($tmp);
+        return response()->download($tmp, 'ExamenFit opgaven '.$collection->name.'.pdf');
     }
 
     public function showCollectionQuestionsHtml(Request $request, Collection $collection)
@@ -244,6 +259,7 @@ class CollectionController extends Controller
             'questions.topic.exam.stream.course',
             'questions.topic.exam.stream.level',
             'questions.dependencies',
+            'questions.answers.sections',
         ]);
 
         $topic_id = -1;
@@ -321,6 +337,12 @@ class CollectionController extends Controller
                 $t = $topic->hash_id;
 
                 $question['url'] = "$app_url/c/{$c}/{$t}/{$q}";
+                
+                foreach ($question['answers'] as $answer) {
+                  foreach ($answer['sections']  as $section) {
+                    $section['correction'] = $markup->fix($section['correction']);
+                  }
+                }
             }
         }
 

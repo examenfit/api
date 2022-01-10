@@ -73,6 +73,7 @@ Route::get('/annotations/{stream}/oefensets', [AnnotationController::class, 'oef
 Route::get('/annotations/{stream}/{annotation}', [AnnotationController::class, 'get']);
 
 Route::get('/download-collection/{collection}', [CollectionController::class, 'showCollectionQuestionsDocument']);
+Route::get('/download-collection-corrections/{collection}', [CollectionController::class, 'showCollectionCorrectionsDocument']);
 Route::get('/download-collection-html/{collection}', [CollectionController::class, 'showCollectionQuestionsHtml']);
 Route::get('/download-collection-pdf/{collection}', [CollectionController::class, 'showCollectionQuestionsPdf']);
 
