@@ -328,8 +328,6 @@ class CollectionCorrectionsDocument
         $txt->addText("$questions vragen");
         $txt->addText('  |  ');
         $txt->addText("$points punten");
-        $txt->addText('  |  ');
-        $txt->addText("$time_in_minutes min.");
 
         $section->addTextRun()->addTextBreak(2);
     }
