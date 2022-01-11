@@ -11,6 +11,7 @@ use App\Models\Topic;
 use App\Models\Course;
 use App\Models\Question;
 use App\Models\Collection;
+use App\Models\Group;
 use App\Models\Elaboration;
 
 use App\Models\License;
@@ -421,6 +422,38 @@ class CollectionController extends Controller
         return new CollectionResource($collection);
     }
 
+    function shareCollectionWithSeat($collection, $seat) {
+      $id = $collection->id;
+      foreach($seat->privileges as $priv) {
+        $hasAction = $priv->action === 'opgavenset uitvoeren';
+        $hasObject = $priv->object_id === $id;
+        if ($hasAction && $hasObject) {
+          return 0;
+        }
+      }
+      Privilege::create([
+        'actor_seat_id' => $seat->id,
+        'action' => 'opgavenset uitvoeren',
+        'object_type' => 'collection',
+        'object_id' => $collection->id,
+        'begin' => $seat->license->begin,
+        'end' => $seat->license->end
+      ]);
+      return 1;
+    }
+
+    public function shareCollectionWithGroup(Collection $collection, Group $group)
+    {
+        $n = 0;
+        foreach($group->seats as $leerling) {
+          $n += $this->shareCollectionWithSeat($collection, $leerling);
+        }
+        return response()->json([
+          'status' => 'ok',
+          'shared' => $n
+        ]);
+    }
+
     public function shareCollection(Collection $collection)
     {
         $user_id = $collection->user_id;
@@ -435,26 +468,7 @@ class CollectionController extends Controller
             ->where('role', 'leerling')
             ->where('license_id', $docent->license_id);
           foreach($leerlingen->get() as $leerling) {
-            $leerling->load('privileges');
-            $has_priv = false;
-            foreach($leerling->privileges as $priv) {
-              if ($priv->object_type === 'collection' &&
-                  $priv->object_id === $collection->id &&
-                  $priv->action === 'opgavenset uitvoeren') {
-                $has_priv = true;
-              }
-            }
-            if (!$has_priv) {
-              Privilege::create([
-                  'actor_seat_id' => $leerling->id,
-                  'action' => 'opgavenset uitvoeren',
-                  'object_type' => 'collection',
-                  'object_id' => $collection->id,
-                  'begin' => $docent->license->begin,
-                  'end' => $docent->license->end
-              ]);
-              $n++;
-            }
+            $n += $this->shareCollectionWithSeat($collection, $leerling);
           }
         }
         return response()->json([

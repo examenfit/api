@@ -40,7 +40,8 @@ class LicenseController extends Controller
         'type' => $license->type,
         'begin' => $license->begin,
         'end' => $license->end,
-        'is_active' => $license->is_active
+        'is_active' => $license->is_active,
+        'description' => $license->description
       ], DB::select("
         select
           l.id,
@@ -103,6 +104,7 @@ class LicenseController extends Controller
       $license->load([
         'seats.privileges',
         'seats.user',
+        'seats.groups',
       ]);
       return new LicenseResource($license);
     }
@@ -313,6 +315,21 @@ class LicenseController extends Controller
           'seats', fn($q) => $q->where('user_id', $user_id)
         );
         return GroupResource::collection($groups->get());
+    }
+
+    public function getOwnedGroups()
+    {
+        $user = auth()->user();
+        $user->load(['seats.privileges' => fn($q) => $q->where('action', 'groepen beheren')]);
+        $groups = [];
+        foreach ($user->seats as $seat) {
+            foreach ($seat->privileges as $priv) {
+                $group = Group::find($priv->object_id);
+                $group->load('license');
+                $groups[] = $group;
+            }
+        }
+        return GroupResource::collection($groups);
     }
 
     public function getGroup(Group $group)

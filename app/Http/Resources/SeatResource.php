@@ -27,6 +27,7 @@ class SeatResource extends JsonResource
             'user' => new UserResource($this->whenLoaded('user')),
             'license' => new LicenseResource($this->whenLoaded('license')),
             'privileges' => PrivilegeResource::collection($this->whenLoaded('privileges')),
+            'groups' => GroupResource::collection($this->whenLoaded('groups')),
         ];
     }
 }
