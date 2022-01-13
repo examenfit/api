@@ -148,14 +148,6 @@ class RegistrationController extends Controller
         }
     }
 
-    { label: 'Natuurkunde havo / vwo', value: 'proeflicentie-natuurkunde' },
-    { label: 'Scheikunde havo / vwo', value: 'proeflicentie-scheikunde' },
-    { label: 'Wiskunde A havo / vwo', value: 'proeflicentie-wiskunde-a' },
-    { label: 'Wiskunde B havo / vwo', value: 'proeflicentie-wiskunde-b' },
-    { label: 'Wiskunde vmbo GT', value: 'proeflicentie-wiskunde' },
-    { label: 'NaSk 1 vmbo GT', value: 'proeflicentie-nask1' },
-    { label: 'NaSk 2 vmbo GT', value: 'proeflicentie-nask2' }
-
     const PROEFLICENTIES = [
       'proeflicentie' => 'proeflicentie',
       'proeflicentie-natuurkunde' => 'proeflicentie natuurkunde havo / vwo',
