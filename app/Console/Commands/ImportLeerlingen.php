@@ -10,17 +10,18 @@ use App\Mail\InviteMail;
 use App\Models\User;
 use App\Models\Stream;
 use App\Models\Group;
+use App\Models\License;
 use App\Models\Seat;
 use App\Models\Privilege;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 
-ini_set("auto_detect_line_endings", true);
+ini_set('auto_detect_line_endings', true);
 
 class ImportLeerlingen extends Command {
 
-  protected $signature = 'ef:import:leerlingen {--docent=} {--file=} {--email=email} {--first_name=first_name} {--middle_name=} {--last_name=last_name} {--separator=} {--invite=}';
+  protected $signature = 'ef:import:leerlingen {--docent=} {--file=} {--email=email} {--first_name=first_name} {--middle_name=} {--last_name=last_name} {--separator=} {--invite=} {--group=} {--streams=} {--seat=} {--license=}';
   protected $description = 'Imports leerlingen for a specific docent';
 
   public function handle() {
@@ -30,7 +31,7 @@ class ImportLeerlingen extends Command {
   }
 
   function abort($message) {
-    $this->error($message);
+    $this->error("$message\n");
     die();
   }
 
@@ -42,49 +43,128 @@ class ImportLeerlingen extends Command {
   function initDocent() {
     $user = User::firstWhere('email', $this->option('docent'));
     if (!$user) {
-      $this->abort("gebruiker niet gevonden\n");
+      $this->abort('gebruiker niet gevonden');
     }
     $seats = [];
+    $license_id = $this->option('license');
     foreach($user->seats as $seat) {
       if ($seat->role === 'docent') {
-        $seats[] = $seat;
+        if (!$license_id || $seat->license->id == $license_id) {
+          $seats[] = $seat;
+        }
       }
     }
     if (count($seats) === 0) {
-      $this->abort("docentlicentie niet gevonden\n");
+      $this->abort('docentlicentie niet gevonden');
     }
     if (count($seats) > 1) {
-      $this->warn("Meerdere docentlicenties gevonden:");
+      $this->warn('Meerdere docentlicenties gevonden:');
       $n = 0;
       foreach($seats as $seat) {
-        $this->info('#'.(++$n).'. '.($seat->license->description ?: 'geen omschrijving'));
+        $this->info((++$n).'. #'.($seat->id).' '.($seat->license->description ?: 'type='.$seat->license->type));
       }
-      if (!$this->confirm("Meest recente (#$n) gebruiken?")) {
-        die();
+      if ($this->option('seat')) {
+        $seat = Seat::find($this->option('seat'));
+      } else {
+        $seat = Seat::find($this->ask('license?'));
       }
+      //if (!$this->confirm("Meest recente (#$n) gebruiken?")) {
+        //die();
+      //}
     }
-    $seat = array_pop($seats);
+    //$seat = array_pop($seats);
     $privileges = [];
+
+    $this->docent = $user;
+    $this->license = $seat->license;
+    $this->streams = $this->initStreams($seat);
+    $this->group = $this->initGroup($seat);
+  }
+
+  function initStreams($seat) {
+    if ($this->option('streams')) {
+      return $this->getStreamsOption($seat);
+    } else {
+      return $this->getStreams($seat);
+    }
+  }
+
+  function getStreamsOption($seat) {
     $streams = [];
-    $groups = [];
+    foreach(explode(',', $this->option('streams')) as $slug) {
+      $slug = trim($slug);
+      "--streams=... $slug";
+      $stream = Stream::firstWhere('slug', $slug);
+      if (!$stream) {
+        $this->abort("\"$stream\" niet gevonden");
+      }
+      $streams[] = $stream;
+    }
+    return $streams;
+  }
+
+  function getStreams($seat) {
+    $streams = [];
     foreach($seat->privileges as $privilege) {
       if (str_ends_with($privilege->action, 'opgavensets samenstellen')) {
         $streams[] = Stream::find($privilege->object_id);
       }
-      if (str_ends_with($privilege->action, 'groepen beheren')) {
-        $groups[] = Group::find($privilege->object_id);
+    }
+    return $streams;
+  }
+
+  function initGroup($seat) {
+    if ($this->option('group')) {
+      return $this->getGroupOption($seat);
+    }
+    $groups = $this->getGroups($seat);
+    if (count($groups) === 1) {
+      return array_pop($groups);
+    } else {
+      $this->abort ('verkeerd aantal groepen: '.count($groups));
+    }
+  }
+
+  function getGroupOption($seat) {
+    $name = $this->option('group');
+    foreach($this->getGroups($seat) as $group) {
+      if ($group->name === $name) {
+        return $group;
       }
     }
-    if (count($streams) === 0) {
-      $this->abort("geen vak/niveau combinaties gevonden\n");
+    $group = Group::create([
+      'name' => $name,
+      'license_id' => $seat->license->id,
+      'is_active' => TRUE
+    ]);
+    $this->createGroupPrivilege($seat, $group);
+    return $group;
+  }
+
+  function createGroupPrivilege($seat, $group) {
+    Privilege::create([
+      'actor_seat_id' => $seat->id,
+      'action' => 'groepen beheren',
+      'object_type' => 'group',
+      'object_id' => $group->id,
+      'begin' => $seat->license->begin,
+      'end' => $seat->license->end
+    ]);
+  }
+
+  function getGroups($seat) {
+    $groups = [];
+    foreach($seat->privileges as $privilege) {
+      if (str_ends_with($privilege->action, 'groepen beheren')) {
+        $group = Group::find($privilege->object_id);
+        if ($group) {
+          $groups[] = $group;
+        } else {
+          $this->abort('groep niet gevonden');
+        }
+      }
     }
-    if (count($groups) !== 1) {
-      $this->abort ("verkeerd aantal groepen: ".count($groups)."\n");
-    }
-    $this->docent = $user;
-    $this->license = $seat->license;
-    $this->streams = $streams;
-    $this->group = $groups[0];
+    return $groups;
   }
 
   function initFile() {
@@ -98,7 +178,7 @@ class ImportLeerlingen extends Command {
     if (str_ends_with($this->file, 'csv')) {
       return $this->readCsv($this->file);
     }
-    $this->abort("onbekend type bestand\n");
+    $this->abort('onbekend type bestand');
   }
 
   function emptySeats() {
@@ -127,7 +207,7 @@ class ImportLeerlingen extends Command {
   function import() {
     $user = $this->docent;
     $this->info('Docent: '.$user->first_name.' '.$user->last_name.' <'.$user->email.'>');
-    $this->info('Licentie: '.$this->license->description);
+    $this->info('Licentie: '.($this->license->description ?: 'type='.$this->license->type));
     $this->info('Groep: '.$this->group->name);
     foreach($this->streams as $stream) {
       $this->info('Vak/niveau: '.$stream->course->name.' '.$stream->level->name);
@@ -142,7 +222,7 @@ class ImportLeerlingen extends Command {
     $this->warn('in te lezen: '.$import);
     $this->warn('beschikbaar: '.$avail);
       $diff = $import - $avail;
-      $cont = $this->confirm("ontbrekende posities toevoegen?");
+      $cont = $this->confirm('ontbrekende posities toevoegen?');
       if (!$cont) die();
     }
 
@@ -254,6 +334,7 @@ class ImportLeerlingen extends Command {
       $index['middle_name'] = $index[$this->option('middle_name')];
     }
 
+    $linenr = 1;
     foreach($lines as $line) {
       $line = trim($line);
       if (!$line) {
@@ -261,7 +342,7 @@ class ImportLeerlingen extends Command {
       }
       $values = explode($sep, $line);
       if (count($values) !== count($names)) {
-        die('csv parse error');
+        $this->abort("csv parse error, line $linenr: $line");
       }
       if ($this->option('middle_name')) {
         $this->seats[] = [
@@ -280,13 +361,14 @@ class ImportLeerlingen extends Command {
           'last_name' => $values[$index['last_name']],
         ];
       }
+      $linenr++;
     }
   }
 
 // XLSX support
 
   function readXlsx() {
-    $this->abort("not implemented yet\n");
+    $this->abort('not implemented yet');
     $this->initXlsx();
     $this->processXlsx();
   }

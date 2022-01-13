@@ -11,6 +11,7 @@ use App\Models\Topic;
 use App\Models\Course;
 use App\Models\Question;
 use App\Models\Collection;
+use App\Models\Group;
 use App\Models\Elaboration;
 
 use App\Models\License;
@@ -25,6 +26,7 @@ use Illuminate\Support\Facades\DB;
 use Vinkla\Hashids\Facades\Hashids;
 use App\Http\Resources\CollectionResource;
 use App\Support\CollectionQuestionsDocument;
+use App\Support\CollectionCorrectionsDocument;
 use App\Support\DocumentMarkup;
 
 class CollectionController extends Controller
@@ -188,12 +190,26 @@ class CollectionController extends Controller
 
     public function showCollectionQuestionsDocument(Request $request, Collection $collection)
     {
-        $path = storage_path("app/public/collections/{$collection->hash_id}.docx");
+        $name = $collection->name;
+        $filename = "ExamenFit opgaven {$name}.docx";
+        $file = storage_path("app/public/collections/{$collection->hash_id}.docx");
 
         $document = new CollectionQuestionsDocument();
         $document->createDocument($collection);
-        $document->saveDocument($path, 'docx');
-        return response()->download($path, 'collection.docx');
+        $document->saveDocument($file, 'docx');
+        return response()->download($file, $filename);
+    }
+
+    public function showCollectionCorrectionsDocument(Request $request, Collection $collection)
+    {
+        $name = $collection->name;
+        $filename = "ExamenFit correctievoorschrift {$name}.docx";
+        $file = storage_path("app/public/collections/{$collection->hash_id}.docx");
+
+        $document = new CollectionCorrectionsDocument();
+        $document->createDocument($collection);
+        $document->saveDocument($file, 'docx');
+        return response()->download($file, $filename);
     }
 
     public function showCollectionQuestionsPdf(Request $request, Collection $collection)
@@ -226,7 +242,7 @@ class CollectionController extends Controller
         shell_exec($retrieve);
 
         Log::info("response");
-        return response()->download($tmp);
+        return response()->download($tmp, 'ExamenFit opgaven '.$collection->name.'.pdf');
     }
 
     public function showCollectionQuestionsHtml(Request $request, Collection $collection)
@@ -244,6 +260,7 @@ class CollectionController extends Controller
             'questions.topic.exam.stream.course',
             'questions.topic.exam.stream.level',
             'questions.dependencies',
+            'questions.answers.sections',
         ]);
 
         $topic_id = -1;
@@ -321,6 +338,12 @@ class CollectionController extends Controller
                 $t = $topic->hash_id;
 
                 $question['url'] = "$app_url/c/{$c}/{$t}/{$q}";
+                
+                foreach ($question['answers'] as $answer) {
+                  foreach ($answer['sections']  as $section) {
+                    $section['correction'] = $markup->fix($section['correction']);
+                  }
+                }
             }
         }
 
@@ -399,6 +422,38 @@ class CollectionController extends Controller
         return new CollectionResource($collection);
     }
 
+    function shareCollectionWithSeat($collection, $seat) {
+      $id = $collection->id;
+      foreach($seat->privileges as $priv) {
+        $hasAction = $priv->action === 'opgavenset uitvoeren';
+        $hasObject = $priv->object_id === $id;
+        if ($hasAction && $hasObject) {
+          return 0;
+        }
+      }
+      Privilege::create([
+        'actor_seat_id' => $seat->id,
+        'action' => 'opgavenset uitvoeren',
+        'object_type' => 'collection',
+        'object_id' => $collection->id,
+        'begin' => $seat->license->begin,
+        'end' => $seat->license->end
+      ]);
+      return 1;
+    }
+
+    public function shareCollectionWithGroup(Collection $collection, Group $group)
+    {
+        $n = 0;
+        foreach($group->seats as $leerling) {
+          $n += $this->shareCollectionWithSeat($collection, $leerling);
+        }
+        return response()->json([
+          'status' => 'ok',
+          'shared' => $n
+        ]);
+    }
+
     public function shareCollection(Collection $collection)
     {
         $user_id = $collection->user_id;
@@ -413,26 +468,7 @@ class CollectionController extends Controller
             ->where('role', 'leerling')
             ->where('license_id', $docent->license_id);
           foreach($leerlingen->get() as $leerling) {
-            $leerling->load('privileges');
-            $has_priv = false;
-            foreach($leerling->privileges as $priv) {
-              if ($priv->object_type === 'collection' &&
-                  $priv->object_id === $collection->id &&
-                  $priv->action === 'opgavenset uitvoeren') {
-                $has_priv = true;
-              }
-            }
-            if (!$has_priv) {
-              Privilege::create([
-                  'actor_seat_id' => $leerling->id,
-                  'action' => 'opgavenset uitvoeren',
-                  'object_type' => 'collection',
-                  'object_id' => $collection->id,
-                  'begin' => $docent->license->begin,
-                  'end' => $docent->license->end
-              ]);
-              $n++;
-            }
+            $n += $this->shareCollectionWithSeat($collection, $leerling);
           }
         }
         return response()->json([
