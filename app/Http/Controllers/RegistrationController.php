@@ -148,20 +148,34 @@ class RegistrationController extends Controller
         }
     }
 
+    { label: 'Natuurkunde havo / vwo', value: 'proeflicentie-natuurkunde' },
+    { label: 'Scheikunde havo / vwo', value: 'proeflicentie-scheikunde' },
+    { label: 'Wiskunde A havo / vwo', value: 'proeflicentie-wiskunde-a' },
+    { label: 'Wiskunde B havo / vwo', value: 'proeflicentie-wiskunde-b' },
+    { label: 'Wiskunde vmbo GT', value: 'proeflicentie-wiskunde' },
+    { label: 'NaSk 1 vmbo GT', value: 'proeflicentie-nask1' },
+    { label: 'NaSk 2 vmbo GT', value: 'proeflicentie-nask2' }
+
     const PROEFLICENTIES = [
       'proeflicentie' => 'proeflicentie',
       'proeflicentie-natuurkunde' => 'proeflicentie natuurkunde havo / vwo',
+      'proeflicentie-scheikunde' => 'proeflicentie scheikunde havo / vwo',
       'proeflicentie-wiskunde-a' => 'proeflicentie wiskunde A havo / vwo',
       'proeflicentie-wiskunde-b' => 'proeflicentie wiskunde B havo / vwo',
       'proeflicentie-wiskunde' => 'proeflicentie wiskunde vmbo GT',
+      'proeflicentie-nask1' => 'proeflicentie nask1 vmbo GT',
+      'proeflicentie-nask2' => 'proeflicentie nask2 vmbo GT',
     ];
 
     const STREAMS = [
       'proeflicentie' => [ 1, 2 ],
       'proeflicentie-natuurkunde' => [ 5, 6 ],
+      'proeflicentie-scheikunde' => [ 8, 9 ],
       'proeflicentie-wiskunde-a' => [ 1, 2 ],
       'proeflicentie-wiskunde-b' => [ 3, 4 ],
       'proeflicentie-wiskunde' => [ 7 ],
+      'proeflicentie-nask1' => [ 10 ],
+      'proeflicentie-nask2' => [ 11 ],
     ];
 
     private function activateProeflicentie($user, $registration)
