@@ -445,6 +445,7 @@ class CollectionQuestionsDocument
 
     function addQuestionText($question) {
         $section = $this->currentSection();
+/*
         $table = $section->addTable([
             'unit' => \PhpOffice\PhpWord\Style\Table::WIDTH_PERCENT,
             'width' => 100 * 50,
@@ -458,6 +459,8 @@ class CollectionQuestionsDocument
             'borderSize' => 12
         ]);
         $txt = $cell->addTextRun();
+*/
+        $txt = $section->addTextRun();
         $this->formatText($question->text, $txt);
     }
 
