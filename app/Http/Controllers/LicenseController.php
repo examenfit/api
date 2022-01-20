@@ -282,7 +282,15 @@ class LicenseController extends Controller
 
     public function deleteSeat(License $license, Seat $seat)
     {
-      return response()->noContent(501);
+      $id = $seat->hash_id;
+      $seat->groups()->sync([]);
+      $seat->privileges()->delete();
+      $seat->delete();
+
+      return response()->json([
+        'status' => 'ok',
+        'message' => 'deleted seat #'.$id
+      ]);
     }
 
     public function postPrivilege(License $license, Seat $seat, Request $request)
