@@ -20,6 +20,7 @@ class License extends Model
         'type',
         'begin',
         'end',
+        'is_active',
         'description'
     ];
 
