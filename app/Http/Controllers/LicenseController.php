@@ -102,19 +102,46 @@ class LicenseController extends Controller
     public function get(License $license)
     {
       $license->load([
+        'seats.groups',
         'seats.privileges',
         'seats.user',
-        'seats.groups',
       ]);
       return new LicenseResource($license);
     }
 
-    public function put(License $license)
+    public function put(License $license, Request $request)
     {
       $data = $request->validate([
+        'type' => 'string|required',
+        'begin' => 'date|required',
+        'end' => 'date|required',
+        'is_active' => 'integer|nullable',
+        'description' => 'string|nullable'
       ]);
-      return [ 'status' => 'ok' ];
-      return response()->noContent(501);
+
+      if ($data['type'] !== 'proeflicentie' && $data['type'] !== $license['type']) {
+        foreach($license->seats as $seat) {
+          foreach($seat->privileges as $privilege) {
+            if (str_starts_with($privilege->action, 'beperkt ')) {
+              $privilege->action = substr($privilege->action, 8);
+              $privilege->save();
+            }
+          }
+        }
+      }
+
+      if ($data['end'] !== $license['end']) {
+        foreach($license->seats as $seat) {
+          foreach($seat->privileges as $privilege) {
+            $privilege->end = $data['end'];
+            $privilege->save();
+          }
+        }
+      }
+
+      $license->fill($data);
+      $license->save();
+      return new LicenseResource($license);
     }
 
     public function delete(License $license)
