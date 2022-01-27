@@ -16,6 +16,7 @@ class StreamResource extends JsonResource
     {
         return [
             'id' => $this->hash_id,
+            'slug' => $this->slug,
             'status' => $this->status,
             'formuleblad' => $this->formuleblad,
             'level' => new LevelResource($this->whenLoaded('level')),

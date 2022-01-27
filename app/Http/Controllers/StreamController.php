@@ -17,6 +17,7 @@ class StreamController extends Controller
             return [
               'id' => Hashids::encode($row->id),
               'status' => $row->status,
+              'slug' => $row->slug,
               'course' => [
                 'id' => Hashids::encode($row->course_id),
                 'name' => $row->course,
@@ -31,6 +32,7 @@ class StreamController extends Controller
         }, DB::select("
             SELECT
               s.id,
+              s.slug,
               s.status,
               course_id,
               c.name AS course,
