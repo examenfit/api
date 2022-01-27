@@ -102,6 +102,7 @@ class LicenseController extends Controller
     public function get(License $license)
     {
       $license->load([
+        'groups',
         'seats.groups',
         'seats.privileges',
         'seats.user',
