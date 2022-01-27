@@ -155,6 +155,51 @@ class LicenseController extends Controller
       return response()->noContent(501);
     }
 
+    function createLeerling($data)
+    {
+      $license_id = Hashids::decode($data['license_id'])[0];
+      $seat = Seat::create([
+        'license_id' => $license_id,
+        'role' => 'leerling',
+        'token' => Str::random(32),
+      ]);
+
+      $license = $seat->license;
+
+      $group = Group::firstWhere('name', $data['group']);
+      if (!$group) {
+        $group = Group::create([
+          'license_id' => $license->id,
+          'name' => $data['group'],
+          'is_active' => TRUE,
+        ]);
+      }
+      $seat->groups()->sync([ $group->id ]);
+
+      foreach ($data['streams'] as $stream_hash_id) {
+        $stream_id = Hashids::decode($stream_hash_id)[0];
+        Privilege::create([
+          'actor_seat_id' => $seat->id,
+          'action' => 'oefensets uitvoeren',
+          'object_type' => 'stream',
+          'object_id' => $stream_id,
+          'begin' => $license->begin,
+          'end' => $license->end,
+        ]);
+      }
+
+      return $seat;
+    }
+
+    public function postLeerlingen(Request $request)
+    {
+      $seats = [];
+      foreach($request->seats as $data) {
+        $seats[] = $this->createLeerling($data);
+      }
+      return SeatResource::collection($seats);
+    }
+
     public function getSeat(License $license, Seat $seat)
     {
       $seat->load([
