@@ -155,6 +155,16 @@ class LicenseController extends Controller
       return response()->noContent(501);
     }
 
+    function getDocent($license)
+    {
+      foreach($license->seats as $seat) {
+        if ($seat->role === 'docent') {
+          return $seat;
+        }
+      }
+      return NULL;
+    }
+
     function createLeerling($data)
     {
       $license_id = Hashids::decode($data['license_id'])[0];
@@ -197,11 +207,24 @@ class LicenseController extends Controller
       return $seat;
     }
 
+    function inviteLeerling($seat) {
+      if ($seat->email) {
+        $docent = $this->getDocent($seat->license);
+        if ($docent) {
+          $mail = new InviteMail($seat, $docent->user);
+          Mail::to($seat->email)->send($mail);
+        }
+      }
+    }
+
     public function postLeerlingen(Request $request)
     {
       $seats = [];
       foreach($request->seats as $data) {
         $seats[] = $this->createLeerling($data);
+      }
+      foreach($seats as $seat) {
+        $this->inviteLeerling($seat);
       }
       return SeatResource::collection($seats);
     }
