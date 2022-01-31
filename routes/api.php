@@ -134,6 +134,8 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('/licenses/{license}/{seat}/{privilege}', [LicenseController::class, 'getPrivilege']);
     Route::put('/licenses/{license}/{seat}/{privilege}', [LicenseController::class, 'putPrivilege']);
     Route::delete('/licenses/{license}/{seat}/{privilege}', [LicenseController::class, 'deletePrivilege']);
+    Route::post('/create-leerlingen', [LicenseController::class, 'postLeerlingen']);
+    Route::post('/upload-leerlingen', [LicenseController::class, 'postUpload']);
 
     Route::get('/owned-groups', [LicenseController::class, 'getOwnedGroups']);
     Route::get('/groups', [LicenseController::class, 'getGroups']);
@@ -180,9 +182,10 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::group(['prefix' => 'admin', 'middleware' => 'role:admin,author'], function () {
         Route::get('/', [AdminIndexController::class, 'index']);
 
-        Route::get('/custom/questions/with_multiple_answers', [CustomQueries::class, 'questions_with_multiple_answers']);
+        Route::get('/custom/questions/complexity_count', [CustomQueries::class, 'questions_complexity_count']);
         Route::get('/custom/questions/complexity_is_null', [CustomQueries::class, 'questions_complexity_is_null']);
         Route::get('/custom/questions/questions_not_in_oefensets', [CustomQueries::class, 'questions_not_in_oefensets']);
+        Route::get('/custom/questions/with_multiple_answers', [CustomQueries::class, 'questions_with_multiple_answers']);
 
         Route::get('/courses', [AdminCourseController::class, 'index']);
         Route::get('/courses/{stream}', [AdminCourseController::class, 'show']);
@@ -245,8 +248,9 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::group(['prefix' => 'admin', 'middleware' => 'role:admin'], function () {
         Route::get('/audit', [AdminAuditController::class, 'index']);
 
-        Route::get('/users/:hash', [AdminUserController::class, 'get']);
+        //Route::get('/users/:hash', [AdminUserController::class, 'get']);
         Route::get('/users', [AdminUserController::class, 'index']);
+        Route::get('/users/log', [AdminUserController::class, 'log']);
         Route::post('/users', [AdminUserController::class, 'store']);
 /*
         Route::get('/invalid_domains/', [StreamController::class, 'invalid_domains']);

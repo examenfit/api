@@ -34,6 +34,11 @@ class License extends Model
         return $this->hasMany(Seat::class);
     }
 
+    public function groups()
+    {
+        return $this->hasMany(Group::class);
+    }
+
     public static function createProeflicentie($user, $streams = [ 1, 2 ], $descr = 'proeflicentie')
     {
         $begin = new DateTime;

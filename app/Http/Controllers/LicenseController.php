@@ -102,6 +102,7 @@ class LicenseController extends Controller
     public function get(License $license)
     {
       $license->load([
+        'groups',
         'seats.groups',
         'seats.privileges',
         'seats.user',
@@ -152,6 +153,80 @@ class LicenseController extends Controller
     public function postSeat(License $license, Request $request)
     {
       return response()->noContent(501);
+    }
+
+    function getDocent($license)
+    {
+      foreach($license->seats as $seat) {
+        if ($seat->role === 'docent') {
+          return $seat;
+        }
+      }
+      return NULL;
+    }
+
+    function createLeerling($data)
+    {
+      $license_id = Hashids::decode($data['license_id'])[0];
+      $init = [
+        'license_id' => $license_id,
+        'role' => 'leerling',
+        'token' => Str::random(32),
+      ];
+
+      if (isset($data['email'])) $init['email'] = $data['email'];
+      if (isset($data['first_name'])) $init['first_name'] = $data['first_name'];
+      if (isset($data['last_name'])) $init['last_name'] = $data['last_name'];
+
+      $seat = Seat::create($init);
+
+      $license = $seat->license;
+
+      $group = Group::firstWhere('name', $data['group']);
+      if (!$group) {
+        $group = Group::create([
+          'license_id' => $license->id,
+          'name' => $data['group'],
+          'is_active' => TRUE,
+        ]);
+      }
+      $seat->groups()->sync([ $group->id ]);
+
+      foreach ($data['streams'] as $stream_hash_id) {
+        $stream_id = Hashids::decode($stream_hash_id)[0];
+        Privilege::create([
+          'actor_seat_id' => $seat->id,
+          'action' => 'oefensets uitvoeren',
+          'object_type' => 'stream',
+          'object_id' => $stream_id,
+          'begin' => $license->begin,
+          'end' => $license->end,
+        ]);
+      }
+
+      return $seat;
+    }
+
+    function inviteLeerling($seat) {
+      if ($seat->email) {
+        $docent = $this->getDocent($seat->license);
+        if ($docent) {
+          $mail = new InviteMail($seat, $docent->user);
+          Mail::to($seat->email)->send($mail);
+        }
+      }
+    }
+
+    public function postLeerlingen(Request $request)
+    {
+      $seats = [];
+      foreach($request->seats as $data) {
+        $seats[] = $this->createLeerling($data);
+      }
+      foreach($seats as $seat) {
+        $this->inviteLeerling($seat);
+      }
+      return SeatResource::collection($seats);
     }
 
     public function getSeat(License $license, Seat $seat)
