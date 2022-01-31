@@ -158,11 +158,17 @@ class LicenseController extends Controller
     function createLeerling($data)
     {
       $license_id = Hashids::decode($data['license_id'])[0];
-      $seat = Seat::create([
+      $init = [
         'license_id' => $license_id,
         'role' => 'leerling',
         'token' => Str::random(32),
-      ]);
+      ];
+
+      if (isset($data['email'])) $init['email'] = $data['email'];
+      if (isset($data['first_name'])) $init['first_name'] = $data['first_name'];
+      if (isset($data['last_name'])) $init['last_name'] = $data['last_name'];
+
+      $seat = Seat::create($init);
 
       $license = $seat->license;
 
