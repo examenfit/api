@@ -7,6 +7,7 @@ use App\Http\Resources\UserResource;
 use App\Models\User;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 use Vinkla\Hashids\Facades\Hashids;
 
@@ -26,6 +27,30 @@ class UserController extends Controller
           return new UserResource($user);
         }
         return UserResource::collection(User::all());
+    }
+
+    public function log(Request $request)
+    { 
+        $request->validate([
+          'email' => 'required|email',
+          'count' => 'nullable|integer',
+        ]);
+
+        return DB::select("
+          SELECT
+            activity,
+            created_at AS ts
+          FROM
+            activity_logs
+          WHERE
+            email = ?
+          ORDER BY
+            2 DESC
+          LIMIT ?
+        ", [
+          $request->email,
+          $request->count ?: 10
+        ]);
     }
 
     public function store(Request $request)
