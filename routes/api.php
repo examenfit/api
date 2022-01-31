@@ -135,6 +135,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::put('/licenses/{license}/{seat}/{privilege}', [LicenseController::class, 'putPrivilege']);
     Route::delete('/licenses/{license}/{seat}/{privilege}', [LicenseController::class, 'deletePrivilege']);
     Route::post('/create-leerlingen', [LicenseController::class, 'postLeerlingen']);
+    Route::post('/upload-leerlingen', [LicenseController::class, 'postUpload']);
 
     Route::get('/owned-groups', [LicenseController::class, 'getOwnedGroups']);
     Route::get('/groups', [LicenseController::class, 'getGroups']);
@@ -247,8 +248,9 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::group(['prefix' => 'admin', 'middleware' => 'role:admin'], function () {
         Route::get('/audit', [AdminAuditController::class, 'index']);
 
-        Route::get('/users/:hash', [AdminUserController::class, 'get']);
+        //Route::get('/users/:hash', [AdminUserController::class, 'get']);
         Route::get('/users', [AdminUserController::class, 'index']);
+        Route::get('/users/log', [AdminUserController::class, 'log']);
         Route::post('/users', [AdminUserController::class, 'store']);
 /*
         Route::get('/invalid_domains/', [StreamController::class, 'invalid_domains']);
