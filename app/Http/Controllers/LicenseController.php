@@ -395,26 +395,34 @@ class LicenseController extends Controller
       ]);
     }
 
-    public function postPrivilege(License $license, Seat $seat, Request $request)
+    public function getPrivilege(License $license, Seat $seat, Privilege $privilege)
     {
       return response()->noContent(501);
     }
 
-    public function getPrivilege(License $license, Seat $seat, Privilege $privilege)
+    public function postPrivilege(License $license, Seat $seat, Request $request)
     {
-      return response()->json([
-        'privilege' => null
-      ], 501);
+      $data = $request->validate([
+        'action' => 'required|string',
+        'object_type' => 'required|string',
+        'object_id' => 'required|string',
+        'begin' => 'required|date',
+        'end' => 'required|date',
+      ]);
+      $data['actor_seat_id'] = $seat->id;
+      $data['object_id'] = Hashids::decode($request->object_id)[0];
+      return Privilege::create($data);
     }
 
     public function putPrivilege(License $license, Seat $seat, Privilege $privilege)
     {
-      return response()->noContent(501);
+      return response()->noContent(403);
     }
 
-    public function deletePrivilege(License $license, Seat $seat, Privilege $privilege)
+    public function deletePrivilege(Privilege $privilege)
     {
-      return response()->noContent(501);
+      $privilege->delete();
+      return response()->noContent(204);
     }
 
     public function getGroups()
