@@ -347,11 +347,17 @@ class LicenseController extends Controller
       }
 
       $data = $request->validate([
-        'email' => 'required|email',
-        'first_name' => 'required|string',
-        'last_name' => 'required|string',
+        'user_id' => 'nullable|string',
+        'email' => 'nullable|email',
+        'first_name' => 'nullable|string',
+        'last_name' => 'nullable|string',
         'is_active' => 'boolean'
       ]);
+      if ($request->user_id) {
+        $seat->user_id = Hashids::decode($request->user_id)[0];
+      } else {
+        $seat->user_id = null;
+      }
       $seat->email = $data['email'];
       $seat->first_name = $data['first_name'];
       $seat->last_name = $data['last_name'];
@@ -359,7 +365,9 @@ class LicenseController extends Controller
       $seat->token = Str::random(32);
       $seat->save();
 
-      $this->sendInviteMail($seat);
+      if ($seat->email && $seat->first_name) {
+        $this->sendInviteMail($seat);
+      }
 
       return new SeatResource($seat);
 
