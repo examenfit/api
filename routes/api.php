@@ -131,9 +131,9 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::put('/licenses/{license}/{seat}', [LicenseController::class, 'putSeat']);
     Route::delete('/licenses/{license}/{seat}', [LicenseController::class, 'deleteSeat']);
     Route::post('/licenses/{license}/{seat}', [LicenseController::class, 'createPrivilege']);
-    Route::get('/licenses/{license}/{seat}/{privilege}', [LicenseController::class, 'getPrivilege']);
-    Route::put('/licenses/{license}/{seat}/{privilege}', [LicenseController::class, 'putPrivilege']);
-    Route::delete('/licenses/{license}/{seat}/{privilege}', [LicenseController::class, 'deletePrivilege']);
+    //Route::get('/licenses/{license}/{seat}/{privilege}', [LicenseController::class, 'getPrivilege']);
+    //Route::put('/licenses/{license}/{seat}/{privilege}', [LicenseController::class, 'putPrivilege']);
+    //Route::delete('/licenses/{license}/{seat}/{privilege}', [LicenseController::class, 'deletePrivilege']);
     Route::post('/create-leerlingen', [LicenseController::class, 'postLeerlingen']);
     Route::post('/upload-leerlingen', [LicenseController::class, 'postUpload']);
 
@@ -243,6 +243,8 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::post('/misc/topics/cache', [TopicController::class, 'cache']);
         Route::post('/misc/answers/fix', [AnswerController::class, 'fix']);
 
+        Route::post('/licenses/{license}/{seat}', [LicenseController::class, 'postPrivilege']);
+        Route::delete('/privileges/{privilege}', [LicenseController::class, 'deletePrivilege']);
     });
 
     Route::group(['prefix' => 'admin', 'middleware' => 'role:admin'], function () {
