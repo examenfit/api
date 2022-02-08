@@ -57,6 +57,24 @@ class AnswerController extends Controller
         return new AnswerResource($answer);
     }
 
+    public function deleteScores(Answer $answer)
+    {
+
+        $answer->scores = NULL;
+        $answer->save();
+
+        return response()->json(['message' => 'ok'], 200);
+    }
+
+    public function updateScores(Request $request, Answer $answer)
+    {
+
+        $answer->scores = json_encode($request->all());
+        $answer->save();
+
+        return response()->json(['message' => 'ok'], 200);
+    }
+
     public function update(Request $request, Answer $answer)
     {
         $data = $request->validate([
