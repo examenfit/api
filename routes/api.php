@@ -225,6 +225,8 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 
         Route::get('/answers/{answer}', [AnswerController::class, 'show']);
         Route::put('/answers/{answer}', [AnswerController::class, 'update']);
+        Route::put('/answers/{answer}/scores', [AnswerController::class, 'updateScores']);
+        Route::delete('/answers/{answer}/scores', [AnswerController::class, 'deleteScores']);
         Route::delete('/answers/{answer}', [AnswerController::class, 'delete']);
         Route::post('/answers/{answer}', [AnswerController::class, 'addStep']);
         Route::put('/answers/{answer}/sections/{answerSection}', [AnswerController::class, 'updateSection']);
