@@ -25,22 +25,39 @@ class CopyExam extends Command
       $replTopic = $topic->replicate();
       $replTopic->exam_id = $replExam->id;
       $replTopic->save();
-      $this->info("Topic#{$replTopic->hash_id} {$topic->name}");
+      $this->info("Topic#{$replTopic->hash_id} :: \"{$topic->name}\"");
+
+      if (count($topic->attachments)) {
+        $this->info("Topic.Attachments");
+        $replTopic->attachments()->attach($topic->attachments);
+      }
 
       foreach ($topic->questions as $question) {
         $replQuestion = $question->replicate();
         $replQuestion->topic_id = $replTopic->id;
         $replQuestion->save();
-        $this->info("Question#{$replQuestion->hash_id} {$question->number}");
+        $this->info("Question#{$replQuestion->hash_id} :: Nr. {$question->number}");
 
-        $this->info("Question.Tags");
-        $replQuestion->tags()->attach($question->tags);
-        $this->info("Question.Appendixes");
-        $replQuestion->appendixes()->attach($question->appendixes);
-        $this->info("Question.Domains");
-        $replQuestion->domains()->attach($question->domains);
-        $this->info("Question.Chapters");
-        $replQuestion->chapters()->attach($question->chapters);
+        if (count($question->tags)) {
+          $this->info("Question.Tags");
+          $replQuestion->tags()->attach($question->tags);
+        }
+        if (count($question->appendixes)) {
+          $this->info("Question.Appendixes");
+          $replQuestion->appendixes()->attach($question->appendixes);
+        }
+        if (count($question->attachments)) {
+          $this->info("Question.Attachments");
+          $replQuestion->attachments()->attach($question->attachments);
+        }
+        if (count($question->domains)) {
+          $this->info("Question.Domains");
+          $replQuestion->domains()->attach($question->domains);
+        }
+        if (count($question->chapters)) {
+          $this->info("Question.Chapters");
+          $replQuestion->chapters()->attach($question->chapters);
+        }
 
         foreach ($question->tips as $tip) {
           $replTip = $tip->replicate();
