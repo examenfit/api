@@ -29,6 +29,7 @@ class AuthenticatedSessionController extends Controller
 
         if ($user && $this->isAuthorized($user)) {
           $user->load([
+            'seats.groups',
             'seats.license',
             'seats.privileges',
           ]);

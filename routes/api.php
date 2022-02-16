@@ -99,6 +99,7 @@ Route::get('/streams/{stream}', [ScoreController::class, 'getStreamScores']);
 Route::post('/streams/{stream}/{question}', [ScoreController::class, 'postStreamScore']);
 
 Route::post('/register', [RegistrationController::class, 'register']);
+Route::post('/register-leerling', [RegistrationController::class, 'registerLeerling']);
 Route::get('/activation-status', [RegistrationController::class, 'activationStatus']);
 Route::post('/activate-account', [RegistrationController::class, 'activateAccount']);
 Route::post('/activate-license', [RegistrationController::class, 'activateLicense']);

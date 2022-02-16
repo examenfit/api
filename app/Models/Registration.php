@@ -14,6 +14,7 @@ class Registration extends Model
         'newsletter',
         'license',
         'activation_code',
-        'activated'
+        'activated',
+        'stream_slugs'
     ];
 }
