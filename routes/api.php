@@ -77,6 +77,9 @@ Route::get('/download-collection-corrections/{collection}', [CollectionControlle
 Route::get('/download-collection-html/{collection}', [CollectionController::class, 'showCollectionQuestionsHtml']);
 Route::get('/download-collection-pdf/{collection}', [CollectionController::class, 'showCollectionQuestionsPdf']);
 
+Route::get('/download-appendixes-html/{collection}', [CollectionController::class, 'showCollectionAppendixesHtml']);
+Route::get('/download-appendixes-pdf/{collection}', [CollectionController::class, 'showCollectionAppendixesPdf']);
+
 Route::get('/download-appendixes-html/{topic}', [TopicController::class, 'html']);
 Route::get('/download-appendixes-pdf/{topic}', [TopicController::class, 'pdf']);
 

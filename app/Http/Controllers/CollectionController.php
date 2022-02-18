@@ -224,8 +224,8 @@ class CollectionController extends Controller
         $server = config('app.examenfit_scripts_url');
 
         $hash = $collection->hash_id;
-        $pdf = "${hash}.pdf";
-        $tmp = "/tmp/${pdf}";
+        $pdf = $hash.".pdf";
+        $tmp = "/tmp/".$pdf;
 
         Log::info("pdf=$pdf");
         Log::info("tmp=$tmp");
@@ -365,6 +365,159 @@ class CollectionController extends Controller
         //return response()->json($collection);
 
         return view('pdf', $collection);
+    }
+
+    public function showCollectionAppendixesPdf(Request $request, Collection $collection)
+    {
+        Log::info('showCollectionAppendixesPdf');
+
+        $api = url("/api/download-appendixes-html");
+        $api = str_replace("http://localhost:8000", "https://staging-api.examenfit.nl", $api);
+
+        Log::info("api=$api");
+
+        $server = config('app.examenfit_scripts_url');
+
+        $hash = $collection->hash_id."-appendixes";
+        $pdf = $hash.".pdf";
+        $tmp = "/tmp/".$pdf;
+
+        Log::info("pdf=$pdf");
+        Log::info("tmp=$tmp");
+
+        // currently ssh authentication goes with public key authentication
+        // in the future this may need to become ssh -i id_rsa or something alike
+        $generate = "ssh examenfit@$server make/pdf $hash $api";
+        $retrieve = "scp examenfit@$server:pdf/$pdf $tmp";
+
+        Log::info($generate);
+        shell_exec($generate);
+
+        Log::info($retrieve);
+        shell_exec($retrieve);
+
+        Log::info("response");
+        return response()->download($tmp, 'ExamenFit uitwerkbijlages '.$collection->name.'.pdf');
+    }
+
+    public function showCollectionAppendixesHtml(Request $request, Collection $collection)
+    {
+        $app_url = config('app.dashboard_url');
+        $markup = new DocumentMarkup();
+
+        $collection->load([
+            //'author',
+            'questions' => fn ($q) => $q->orderBy('topic_id', 'ASC')->orderBy('number', 'ASC'),
+            //'questions.attachments',
+            //'questions.topic',
+            //'questions.topic.attachments',
+            //'questions.topic.exam',
+            //'questions.topic.exam.stream.course',
+            //'questions.topic.exam.stream.level',
+            'questions.dependencies',
+            //'questions.answers.sections',
+        ]);
+
+        $topic_id = -1;
+        //$points = 0;
+        //$time_in_minutes = 0;
+
+        $topics = [];
+        $questions = [];
+
+        //$use_text = [];
+        //$use_introduction = [];
+        //$use_attachments = [];
+        $use_appendixes = [];
+
+        foreach ($collection['questions'] as $question) {
+
+            //$points += $question['points'];
+            //$time_in_minutes += $question['time_in_minutes'];
+
+            $id = $question['id'];
+            //$use_text[$id] = true;
+            //$use_introduction[$id] = true;
+            //$use_attachments[$id] = true;
+            $use_appendixes[$id] = true;
+
+            foreach ($question['dependencies'] as $dependency) {
+                $pivot = $dependency['pivot'];
+                $id = $pivot['question_id'];
+
+                //if ($pivot['introduction']) $use_introduction[$id] = true;
+                //if ($pivot['attachments']) $use_attachments[$id] = true;
+                if ($pivot['appendixes']) $use_appendixes[$id] = true;
+            }
+
+            $topic = $question['topic'];
+            if ($topic['id'] !== $topic_id) {
+                $topics[] = $topic;
+                $topic_id = $topic['id'];
+            }
+
+            //$question['has_answers'] = $topic['has_answers'];
+            $questions[] = $question;
+        }
+
+        $appendixes = [];
+        $appendix_added = [];
+
+        foreach ($topics as $topic) {
+            //$topic['introduction'] = $markup->fix($topic['introduction']);
+
+            foreach ($topic['questions'] as $question) {
+                $id = $question['id'];
+
+                //$question['use_text'] = array_key_exists($id, $use_text);
+                //$question['use_introduction'] = array_key_exists($id, $use_introduction);
+                //$question['use_attachments'] = array_key_exists($id, $use_attachments);
+
+                if (array_key_exists($id, $use_appendixes)) {
+                    foreach ($question['appendixes'] as $appendix) {
+                        $id = $appendix->id;
+                        if (array_key_exists($id, $appendix_added)) {
+                            /* skip */
+                        } else {
+                            $appendixes[] = $appendix;
+                            $appendix_added[$id] = true;
+                        }
+                    }
+                }
+
+                //$question['introduction'] = $markup->fix($question['introduction']);
+                //$question['text'] = $markup->fix($question['text']);
+
+                //$c = $collection->hash_id;
+                //$q = $question->hash_id;
+                //$t = $topic->hash_id;
+
+                //$question['url'] = "$app_url/c/{$c}/{$t}/{$q}";
+                
+                //foreach ($question['answers'] as $answer) {
+                  //foreach ($answer['sections']  as $section) {
+                    //$section['correction'] = $markup->fix($section['correction']);
+                  //}
+                //}
+            }
+        }
+
+        //$formuleblad = $topics[0]->exam->stream->formuleblad;
+
+        //$collection['formuleblad'] = $markup->fix($formuleblad);
+        //$collection['topics'] = $topics;
+        //$collection['questions'] = $questions;
+        //$collection['points'] = $points;
+        //$collection['time_in_minutes'] = $time_in_minutes;
+
+        $collection['appendixes'] = $appendixes;
+
+        date_default_timezone_set('CET');
+        $timestamp = date('Y-m-d H:i');
+
+        $collection['timestamp'] = $timestamp;
+
+        return view('appendixes', $collection);
     }
 
     public function store(Request $request)
