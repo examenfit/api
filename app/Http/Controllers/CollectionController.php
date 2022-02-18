@@ -223,9 +223,9 @@ class CollectionController extends Controller
 
         $server = config('app.examenfit_scripts_url');
 
-        $hash = $collection->hash_id;
-        $pdf = $hash.".pdf";
-        $tmp = "/tmp/".$pdf;
+        $hash = $collection->hash_id; // note: this name conflicts with the appendixes pdf
+        $pdf = $hash.".pdf";          //       but as they are not downloaded at the same time
+        $tmp = "/tmp/".$pdf;          //       there _should_ be no problem
 
         Log::info("pdf=$pdf");
         Log::info("tmp=$tmp");
@@ -378,9 +378,9 @@ class CollectionController extends Controller
 
         $server = config('app.examenfit_scripts_url');
 
-        $hash = $collection->hash_id."-appendixes";
-        $pdf = $hash.".pdf";
-        $tmp = "/tmp/".$pdf;
+        $hash = $collection->hash_id; // note: this name conflicts with the collections pdf
+        $pdf = $hash.".pdf";          //       but as they are not downloaded at the same time
+        $tmp = "/tmp/".$pdf;          //       there _should_ be no problem
 
         Log::info("pdf=$pdf");
         Log::info("tmp=$tmp");
