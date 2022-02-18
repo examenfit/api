@@ -90,6 +90,27 @@ class RegistrationController extends Controller
         }
     }
 
+    public function registerLeerling(RegistrationRequest $request)
+    {
+        $data = $request->validated();
+        $leerlingData = $request->validate([
+          'streams' => 'required|array',
+          'streams.*' => 'required|string'
+        ]);
+
+        try
+        {
+            $data['stream_slugs'] = json_encode($leerlingData['streams']);
+            $registration = $this->createRegistration($data);
+            $this->sendRegistrationMail($registration);
+            return response()->json([ 'status' => 'success' ]);
+        }
+        catch (Exception $error)
+        {
+            return response()->json([ 'status' => 'failed', 'message' => $error->getMessage() ]);
+        }
+    }
+
     private function getRegistration(Request $request)
     {
         $activation_code = $request->activation_code;
@@ -185,9 +206,50 @@ class RegistrationController extends Controller
         $registration->save();
     }
 
+    const STREAM_SLUGS = [
+      'wiskunde-a-havo' => 1,
+      'wiskunde-a-vwo' => 2,
+      'wiskunde-b-havo' => 3,
+      'wiskunde-b-vwo' => 4,
+      'natuurkunde-havo' => 5,
+      'natuurkunde-vwo' => 6,
+      'wiskunde-vmbo' => 7,
+      'scheikunde-havo' => 8,
+      'scheikunde-vwo' => 9,
+      'nask1-vmbo' => 10,
+      'nask2-vmbo' => 11
+    ];
+
+    private function mapStreams($stream_slugs)
+    {
+        $mapping = RegistrationController::STREAM_SLUGS;
+        return array_map(fn($slug) => $mapping[$slug], $stream_slugs);
+    }
+
+    private function activateLeerlinglicentie($user, $registration)
+    {
+        $user->role = 'leerling';
+        $user->newsletter = $registration->newsletter ?: 0;
+        $user->save();
+
+        $stream_slugs = json_decode($registration->stream_slugs);
+        $descr = $registration->license. ' ' . implode('+', $stream_slugs);
+        $streams = $this->mapStreams($stream_slugs);
+
+        License::createLeerlinglicentie($user, $streams, $descr);
+
+        $registration->activated = new DateTime();
+        $registration->save();
+    }
+
     function isValidProeflicentie($license)
     {
       return array_key_exists($license, RegistrationController::PROEFLICENTIES);
+    }
+
+    function isLeerlinglicentie($license)
+    {
+      return str_starts_with($license, 'leerlinglicentie');
     }
 
     public function activateLicense(Request $request)
@@ -208,6 +270,10 @@ class RegistrationController extends Controller
             }
             if ($this->isValidProeflicentie($registration->license)) {
                 $this->activateProeflicentie($user, $registration);
+                return $registration;
+            }
+            if ($this->isLeerlinglicentie($registration->license)) {
+                $this->activateLeerlinglicentie($user, $registration);
                 return $registration;
             }
             return response()->json(['message' => 'license invalid'], 406);

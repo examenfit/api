@@ -33,6 +33,13 @@ class UserSwitchController extends Controller
         ->first();
 
       Auth::login($login);
+
+      $login->load([
+        'seats.groups',
+        'seats.license',
+        'seats.privileges',
+      ]);
+
       return new UserResource($login);
     }
 }

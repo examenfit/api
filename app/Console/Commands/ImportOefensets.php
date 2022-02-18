@@ -12,7 +12,10 @@ class ImportOefensets extends Command {
   protected $description = 'Imports an Excel sheet';
 
   const COURSE = [
+    'nask1'  => 'NaSk 1',
+    'nask2'  => 'NaSk 2',
     'natuurkunde' => 'Natuurkunde',
+    'scheikunde' => 'Scheikunde',
     'wiskunde'  => 'Wiskunde',
     'wiskunde-a'  => 'Wiskunde A',
     'wiskunde-b'  => 'Wiskunde B',

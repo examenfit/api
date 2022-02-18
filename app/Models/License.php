@@ -39,6 +39,38 @@ class License extends Model
         return $this->hasMany(Group::class);
     }
 
+    public static function createLeerlinglicentie($user, $streams, $descr = 'leerlinglicentie')
+    {
+        $begin = new DateTime;
+        $end = new DateTime;
+        $end->add(new DateInterval('P1D')); // 24 hours
+
+        $license = License::create([
+            'type' => 'leerlinglicentie',
+            'begin' => $begin,
+            'end' => $end,
+            'description' => $descr.' ' . $user->email
+        ]);
+
+        $seat = $license->seats()->create([
+            'user_id' => $user->id,
+            'role' => 'leerling'
+        ]);
+
+        foreach ($streams as $stream_id) {
+            Privilege::create([
+                'actor_seat_id' => $seat->id,
+                'action' => 'oefensets uitvoeren',
+                'object_type' => 'stream',
+                'object_id' => $stream_id,
+                'begin' => $begin,
+                'end' => $end
+            ]);
+        }
+
+        return $license;
+    }
+
     public static function createProeflicentie($user, $streams = [ 1, 2 ], $descr = 'proeflicentie')
     {
         $begin = new DateTime;
@@ -117,7 +149,6 @@ class License extends Model
                 ]);
             }
         }
-
 
         $user->link = Str::random(32);
         $user->save();

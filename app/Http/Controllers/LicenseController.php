@@ -224,7 +224,7 @@ class LicenseController extends Controller
         $seats[] = $this->createLeerling($data);
       }
       foreach($seats as $seat) {
-        $this->inviteLeerling($seat);
+        $this->inviteLeerling($seat); // todo error handling & tracking
       }
       return SeatResource::collection($seats);
     }
