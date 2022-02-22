@@ -28,6 +28,7 @@ class TopicController extends Controller
         $data = $request->validate([
             'name' => 'required|string',
             'introduction' => 'nullable|string',
+            'position' => 'nullable|integer',
             'attachments' => 'array',
             'attachments.*.id' => ['required', new HashIdExists('attachments')],
         ]);
@@ -52,12 +53,12 @@ class TopicController extends Controller
 
     public function update(Request $request, Topic $topic)
     {
-
         $data = $request->validate([
             'complexity' => 'nullable|in:low,average,high',
             'popularity' => 'nullable|numeric|max:5',
             'name' => 'nullable|string',
             'introduction' => 'nullable|string',
+            'position' => 'nullable|integer',
             'attachments' => 'nullable|array',
             'attachments.*.id' => ['required', new HashIdExists('attachments')],
         ]);

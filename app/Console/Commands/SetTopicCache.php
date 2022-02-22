@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Exam;
 use App\Models\Topic;
 use Illuminate\Console\Command;
 
@@ -12,7 +13,7 @@ class SetTopicCache extends Command
      *
      * @var string
      */
-    protected $signature = 'ef:cache:topics';
+    protected $signature = 'ef:cache:topics {--stream=}';
 
     /**
      * The console command description.
@@ -38,132 +39,150 @@ class SetTopicCache extends Command
      */
     public function handle()
     {
-        Topic::with([
-            'questions.domains.parent',
-            'questions.tags',
-            'questions.questionType',
-            'questions.chapters',
-            'questions.highlights',
-            'exam',
-            'exam.stream.course',
-            'exam.stream.level',
-        ])->get()->each(function ($topic) {
-            $proportionSum = 0;
-            $cache = collect([
-                'stream_id' => $topic->exam->stream->id,
-                'course_id' => $topic->exam->stream->course_id,
-                'level_id' => $topic->exam->stream->level_id,
-                'examStatus' => $topic->exam->status,
-                'examAnswers' => $topic->exam->show_answers,
-                'course' => $topic->exam->stream->course->name,
-                'level' => $topic->exam->stream->level->name,
-                'year' => $topic->exam->year,
-                'term' => $topic->exam->term,
-                'totalPoints' => 0,
-                'weightedProportionValue' => 0,
-                'questionCount' => count($topic->questions),
-                'questionsId' => collect(),
-                'totalTimeInMinutes' => 0,
-                'questionTypes' => collect(),
-                'questionTypesId' => [],
-                'tags' => collect(),
-                'tagsId' => [],
-                'domains' => collect(),
-                'domainId' => [],
-                'methodologyId' => collect(),
-                'chapterId' => collect(),
-                'highlights' => collect(),
-            ]);
+        $stream_id = $this->option('stream');
+        if ($stream_id) {
+          foreach(Exam::where('stream_id', $stream_id)->get() as $exam) {
+            $this->updateTopics($exam->topics);
+          }
+        } else {
+          $this->updateTopics(Topic::all()->sortBy('updated_at'));
+        }
+    }
 
-            $topic->questions->each(function ($question) use (&$cache, &$proportionSum) {
-                $cache['questionsId']->push($question->id);
-                $cache['totalPoints'] += $question->points;
-                $cache['totalTimeInMinutes'] += $question->time_in_minutes;
-                $proportionSum += $question->points * $question->proportion_value;
+    function updateTopics($topics) {
+      foreach($topics as $topic) {
+        $this->cacheTopic($topic);
+       }
+    }
 
-                if ($question->questionType) {
-                    $cache['questionTypes'] = $cache['questionTypes']->push([
-                        'id' => $question->questionType->id,
-                        'name' => $question->questionType->name,
-                    ])->unique('id')->values();
-                    $cache['questionTypesId'] = $cache['questionTypes']->pluck('id');
-                }
+    function cacheTopic($topic) {
+       $this->info($topic->hash_id.' '.$topic->name);
+        $topic->load([
+          'questions.domains.parent',
+          'questions.tags',
+          'questions.questionType',
+          'questions.chapters',
+          'questions.highlights',
+          'exam',
+          'exam.stream.course',
+          'exam.stream.level',
+        ]);
+        $proportionSum = 0;
+        $cache = collect([
+            'stream_id' => $topic->exam->stream->id,
+            'course_id' => $topic->exam->stream->course_id,
+            'level_id' => $topic->exam->stream->level_id,
+            'examStatus' => $topic->exam->status,
+            'examAnswers' => $topic->exam->show_answers,
+            'course' => $topic->exam->stream->course->name,
+            'level' => $topic->exam->stream->level->name,
+            'year' => $topic->exam->year,
+            'term' => $topic->exam->term,
+            'totalPoints' => 0,
+            'weightedProportionValue' => 0,
+            'questionCount' => count($topic->questions),
+            'questionsId' => collect(),
+            'totalTimeInMinutes' => 0,
+            'questionTypes' => collect(),
+            'questionTypesId' => [],
+            'tags' => collect(),
+            'tagsId' => [],
+            'domains' => collect(),
+            'domainId' => [],
+            'methodologyId' => collect(),
+            'chapterId' => collect(),
+            'highlights' => collect(),
+        ]);
 
-                $question->chapters->each(function ($chapter) use (&$cache) {
-                    if ($chapter->parent_id) {
-                        $cache['chapterId']->push($chapter->parent_id);
-                    }
+        $topic->questions->each(function ($question) use (&$cache, &$proportionSum) {
+            $cache['questionsId']->push($question->id);
+            $cache['totalPoints'] += $question->points;
+            $cache['totalTimeInMinutes'] += $question->time_in_minutes;
+            $proportionSum += $question->points * $question->proportion_value;
 
-                    $cache['chapterId']->push($chapter->id);
-
-                    if (!$cache['methodologyId']->contains($chapter->methodology_id)) {
-                        $cache['methodologyId']->push($chapter->methodology_id);
-                    }
-                });
-
-                $question->tags->each(function ($tag) use (&$cache) {
-                    $cache['tags'] = $cache['tags']->push([
-                        'id' => $tag->id,
-                        'name' => $tag->name,
-                    ])->unique('id')->values();
-                });
-                $cache['tagsId'] = $cache['tags']->pluck('id');
-
-                $question->domains->each(function ($domain) use (&$cache) {
-                    if ($domain->parent) {
-                        $index = null;
-
-                        if (!$cache['domains']->contains('id', $domain->parent->id)) {
-                            $cache['domains']->push(collect([
-                                'id' => $domain->parent->id,
-                                'name' => $domain->parent->name,
-                                'children' => collect(),
-                            ]));
-
-                            $index = count($cache['domains']) - 1;
-                        } else {
-                            $index = $cache['domains']->search(
-                                fn ($item) => $item['id'] === $domain->parent->id
-                            );
-                        }
-
-                        if (!$cache['domains'][$index]['children']->contains('id', $domain->id)) {
-                            $cache['domains'][$index]['children']->push([
-                                'id' => $domain->id,
-                                'name' => $domain->name,
-                            ]);
-                        }
-                    } else {
-                        if (!$cache['domains']->contains('id', $domain->id)) {
-                            $cache['domains']->push(collect([
-                                'id' => $domain->id,
-                                'name' => $domain->name,
-                                'children' => collect(),
-                            ]));
-                        }
-                    }
-                });
-
-                $question->highlights->each(function ($highlight) use (&$cache) {
-                    // dd($highlight);
-                    $cache['highlights']->push([
-                        'id' => $highlight->id,
-                        'text' => $highlight->text,
-                    ]);
-                });
-            });
-
-            $cache['domainId'] = $cache['domains']
-                ->flatten()
-                ->filter(fn ($item) => is_int($item))
-                ->values();
-
-            if ($cache['questionCount'] && $cache['totalPoints'] > 0) {
-                $cache['weightedProportionValue'] =
-                    round($proportionSum / $cache['totalPoints']);
+            if ($question->questionType) {
+                $cache['questionTypes'] = $cache['questionTypes']->push([
+                    'id' => $question->questionType->id,
+                    'name' => $question->questionType->name,
+                ])->unique('id')->values();
+                $cache['questionTypesId'] = $cache['questionTypes']->pluck('id');
             }
 
-            $topic->update(['cache' => $cache->toArray()]);
+            $question->chapters->each(function ($chapter) use (&$cache) {
+                if ($chapter->parent_id) {
+                    $cache['chapterId']->push($chapter->parent_id);
+                }
+
+                $cache['chapterId']->push($chapter->id);
+
+                if (!$cache['methodologyId']->contains($chapter->methodology_id)) {
+                    $cache['methodologyId']->push($chapter->methodology_id);
+                }
+            });
+
+            $question->tags->each(function ($tag) use (&$cache) {
+                $cache['tags'] = $cache['tags']->push([
+                    'id' => $tag->id,
+                    'name' => $tag->name,
+                ])->unique('id')->values();
+            });
+            $cache['tagsId'] = $cache['tags']->pluck('id');
+
+            $question->domains->each(function ($domain) use (&$cache) {
+                if ($domain->parent) {
+                    $index = null;
+
+                    if (!$cache['domains']->contains('id', $domain->parent->id)) {
+                        $cache['domains']->push(collect([
+                            'id' => $domain->parent->id,
+                            'name' => $domain->parent->name,
+                            'children' => collect(),
+                        ]));
+
+                        $index = count($cache['domains']) - 1;
+                    } else {
+                        $index = $cache['domains']->search(
+                            fn ($item) => $item['id'] === $domain->parent->id
+                        );
+                    }
+
+                    if (!$cache['domains'][$index]['children']->contains('id', $domain->id)) {
+                        $cache['domains'][$index]['children']->push([
+                            'id' => $domain->id,
+                            'name' => $domain->name,
+                        ]);
+                    }
+                } else {
+                    if (!$cache['domains']->contains('id', $domain->id)) {
+                        $cache['domains']->push(collect([
+                            'id' => $domain->id,
+                            'name' => $domain->name,
+                            'children' => collect(),
+                        ]));
+                    }
+                }
+            });
+
+            $question->highlights->each(function ($highlight) use (&$cache) {
+                // dd($highlight);
+                $cache['highlights']->push([
+                    'id' => $highlight->id,
+                    'text' => $highlight->text,
+                ]);
+            });
         });
+
+        $cache['domainId'] = $cache['domains']
+            ->flatten()
+            ->filter(fn ($item) => is_int($item))
+            ->values();
+
+        if ($cache['questionCount'] && $cache['totalPoints'] > 0) {
+            $cache['weightedProportionValue'] =
+                round($proportionSum / $cache['totalPoints']);
+        }
+
+        $topic->update(['cache' => $cache->toArray()]);
+        $topic->save();
     }
 }

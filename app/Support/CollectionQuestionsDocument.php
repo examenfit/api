@@ -42,10 +42,8 @@ class CollectionQuestionsDocument
         Log::info($collection->hash_id);
         $this->setCollection($collection);
         $this->initDocument();
-        $this->setHeader();
-        $this->setFooter();
         $this->processQuestions();
-        $this->processAppendixes();
+        //$this->processAppendixes();
     }
 
     function setCollection($collection)
@@ -102,17 +100,6 @@ class CollectionQuestionsDocument
         $properties->setCompany('ExmenFit');
         $properties->setTitle($this->collection->name);
         $properties->setDescription("Lijst aangemaakt in ExamenFit");
-    }
-
-    function setHeader()
-    {
-        //$header = $this->section->addHeader();
-        //$header->addText('Collection');
-    }
-
-    function setFooter()
-    {
-        // ...
     }
 
     function addSection($isHeader = false)
@@ -261,8 +248,8 @@ class CollectionQuestionsDocument
             Log::info($attachment->url);
             $scale = 1;
             $textRun->addImage($attachment->url, [
-                'width' => $attachment->image_width * $scale,
-                'height' => $attachment->image_height * $scale
+                //'width' => $attachment->image_width * $scale,
+                //'height' => $attachment->image_height * $scale
             ]);
         }
     }
@@ -278,7 +265,7 @@ class CollectionQuestionsDocument
         // Title
 
         // Attachments
-        $this->addAttachments($topic->attachments, null, 'small');
+        //$this->addAttachments($topic->attachments, null, 'small');
 
         // Introduction
         $textRun = $this->currentSection()->addTextRun();
@@ -373,7 +360,7 @@ class CollectionQuestionsDocument
         if (!$parent) {
             $parent = $this->currentSection();
         }
-
+/*
         // If the image is 'small', we will inline the image on the right side.
         if ($type === 'small') {
             $textBoxStyleOptions = [
@@ -388,6 +375,7 @@ class CollectionQuestionsDocument
         if ($type === 'large') {
             $attachments = $attachments->filter(fn ($item) => $item->image_width >= 200);
         }
+*/
 
         foreach ($attachments as $attachment) {
             // Create textbox

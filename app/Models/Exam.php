@@ -36,7 +36,9 @@ class Exam extends Model implements Auditable
 
     public function topics()
     {
-        return $this->hasMany(Topic::class);
+        return $this->hasMany(Topic::class)
+            ->orderBy('position', 'ASC')
+            ->orderBy('id', 'ASC');
     }
 
     public function questions()
@@ -53,15 +55,4 @@ class Exam extends Model implements Auditable
     {
         return $this->hasManyThrough(Attachment::class, Question::class);
     }
-
-/*
-    public function setCourseIdAttribute($value)
-    {
-        $decodedValue = $this->hashToId($value);
-
-        $this->attributes['course_id'] = $decodedValue
-            ? $this->attributes['course_id'] = $decodedValue
-            : $this->attributes['course_id'] = $value;
-    }
-*/
 }

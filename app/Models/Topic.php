@@ -25,6 +25,7 @@ class Topic extends Model implements Auditable
         'complexity',
         'popularity',
         'cache',
+        'position'
     ];
 
     public $with = ['attachments'];
