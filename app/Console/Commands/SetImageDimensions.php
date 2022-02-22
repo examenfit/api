@@ -12,7 +12,7 @@ class SetImageDimensions extends Command
      *
      * @var string
      */
-    protected $signature = 'ef:setImageDimensions';
+    protected $signature = 'ef:setImageDimensions {--all}';
 
     /**
      * The console command description.
@@ -38,10 +38,13 @@ class SetImageDimensions extends Command
      */
     public function handle()
     {
-        $images = Attachment::whereNull('image_width')
+        if ($this->option('all')) {
+          $images = Attachment::all();
+        } else {
+          $images = Attachment::whereNull('image_width')
             ->whereNull('image_height')
-            ->orderBy('created_at', 'DESC')
             ->get();
+        }
 
         foreach ($images as $image) {
             $imageSize = @getimagesize($image->url);
