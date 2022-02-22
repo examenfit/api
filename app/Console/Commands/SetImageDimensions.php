@@ -38,20 +38,26 @@ class SetImageDimensions extends Command
      */
     public function handle()
     {
+        $n = 0;
         if ($this->option('all')) {
           $images = Attachment::all();
         } else {
           $images = Attachment::whereNull('image_width')
             ->whereNull('image_height')
             ->get();
-        }
+        } 
+        $c = count($images);
 
         foreach ($images as $image) {
+            ++$n;
             $imageSize = @getimagesize($image->url);
             if ($imageSize) {
                 $image->image_width = $imageSize[0] / 3;
                 $image->image_height = $imageSize[1] / 3;
                 $image->save();
+                $this->info($n.'/'.$c.' '.$image->name . ' ' . $image->image_width . 'x' . $image->image_height);
+            } else {
+                $this->info($n.'/'.$c.' '.$image->name);
             }
         }
     }
