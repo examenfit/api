@@ -248,8 +248,8 @@ class CollectionQuestionsDocument
             Log::info($attachment->url);
             $scale = 1;
             $textRun->addImage($attachment->url, [
-                //'width' => $attachment->image_width * $scale,
-                //'height' => $attachment->image_height * $scale
+                'width' => $attachment->image_width * $scale,
+                'height' => $attachment->image_height * $scale
             ]);
         }
     }
