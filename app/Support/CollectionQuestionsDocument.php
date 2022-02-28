@@ -247,7 +247,7 @@ class CollectionQuestionsDocument
             // Add image to the textbox
             Log::info($attachment->url);
             $w = attachment->image_width;
-            $h = attachment->image_h;
+            $h = attachment->image_height;
             while (4000 < $w || 6000 < $h) {
               $w = $w/2;
               $h = $h/2;
