@@ -253,8 +253,8 @@ class CollectionQuestionsDocument
               $h = $h/2;
             }
             $textRun->addImage($attachment->url, [
-                'width' => $attachment->image_width * $scale,
-                'height' => $attachment->image_height * $scale
+                'width' => $w,
+                'height' => $h,
             ]);
         }
     }
