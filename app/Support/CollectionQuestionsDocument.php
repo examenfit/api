@@ -246,7 +246,12 @@ class CollectionQuestionsDocument
 
             // Add image to the textbox
             Log::info($attachment->url);
-            $scale = 1;
+            $w = attachment->image_width;
+            $h = attachment->image_h;
+            while (4000 < $w || 6000 < $h) {
+              $w = $w/2;
+              $h = $h/2;
+            }
             $textRun->addImage($attachment->url, [
                 'width' => $attachment->image_width * $scale,
                 'height' => $attachment->image_height * $scale
