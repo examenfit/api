@@ -43,7 +43,7 @@ class CollectionQuestionsDocument
         $this->setCollection($collection);
         $this->initDocument();
         $this->processQuestions();
-        //$this->processAppendixes();
+        $this->processAppendixes();
     }
 
     function setCollection($collection)

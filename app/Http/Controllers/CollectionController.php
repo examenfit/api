@@ -195,6 +195,7 @@ class CollectionController extends Controller
         $file = storage_path("app/public/collections/{$collection->hash_id}.docx");
 
         $document = new CollectionQuestionsDocument();
+        $document->showAppendixes();
         $document->createDocument($collection);
         $document->saveDocument($file, 'docx');
         return response()->download($file, $filename);
