@@ -7,49 +7,63 @@ use Mollie\Api\MollieApiClient;
 
 class MollieController extends Controller
 {
-    function mollie()
+    function getMollie()
     {
         $mollie = new MollieApiClient();
         $mollie->setApiKey("test_vWbmdhrtRQvyVB5TSzvhGBSCU2Pw2f");
         return $mollie;
     }
 
-    public function test()
+    function getPayments()
     {
-        $mollie = $this->mollie();
+        $mollie = $this->getMollie();
         $payments = $mollie->payments;
+        return $payments;
+    }
 
+    function createPayment($description, $amount)
+    {
+        $payments = $this->getPayments();
         $payment = $payments->create([
             "amount" => [
                 "currency" => "EUR",
-                "value" => "20.00"
+                "value" => number_format($amount, 2, '.', '')
             ],
             "method" => null,
-            "description" => "Test, my 2000 cents",
+            "description" => $description,
             "redirectUrl" => "https://staging-api.examenfit.nl/",
             //"webhookUrl"  => "https://staging-api.examenfit.nl/",
         ]);
+        return $payment;
+    }
+
+    function getPayment($id)
+    {
+        $payments = $this->getPayments();
+        $payment = $payments->get($payment_id);
+        return $payment;
+    }
+
+    // www
+    public function test()
+    {
+        $payment = $this->createPayment("Test, my 2000 cents", 20.00);
 
         return response()->json($payment);
     }
 
     public function payment()
     {
-        $mollie = $this->mollie();
-        $payments = $mollie->payments;
-
-        $payment = $payments->get("tr_SyvJR3H9mv");
+        $id = "tr_SyvJR3H9mv";
+        $payment = $this->getPayment($id);
 
         return response()->json($payment);
     }
 
     public function checkout_url()
     {
-        $mollie = $this->mollie();
-        $payments = $mollie->payments;
-
         $id = "tr_SyvJR3H9mv";
-        $payment = $payments->get($id);
+        $payment = $this->getPayment($id);
 
         if ($payment->status !== 'open') {
             return response()->json($payment);
@@ -66,7 +80,7 @@ class MollieController extends Controller
     {
         $id = $request->input('id');
 
-        $mollie = $this->mollie();
+        $mollie = $this->getMollie();
         $payments = $mollie->payments;
 
         $payment = $payments->get($id);

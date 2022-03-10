@@ -20,7 +20,7 @@ class CollectionQuestionsDocument
 {
     public $collection = null;
     public $document = null;
-    public $sections = [];
+    public $section = null;
     public $dashboardUrl;
 
     public function __construct()
@@ -37,13 +37,21 @@ class CollectionQuestionsDocument
         $this->showQuestion = $show;
     }
 
+    private $created = null;
+
     function createDocument($collection)
     {
+        if ($this->created) {
+            throw new Exception('createDocument called more than once');
+        } else {
+            $this->created = true;
+        }
+
         Log::info($collection->hash_id);
         $this->setCollection($collection);
         $this->initDocument();
         $this->processQuestions();
-        //$this->processAppendixes();
+        $this->processAppendixes();
     }
 
     function setCollection($collection)
@@ -104,22 +112,16 @@ class CollectionQuestionsDocument
 
     function addSection($isHeader = false)
     {
-        if ($this->skipPageBreak) {
-            /* do nothing */
+        if ($this->section) {
+            $this->section->addTextBreak(2);
         } else {
-            if (count($this->sections)) {
-                $this->currentSection()->addPageBreak();
-            } else {
-                $section = $this->document->addSection([
-                    'marginTop' => 1200,
-                    'marginRight' => 1200,
-                    'marginBottom' => 1200,
-                    'marginLeft' => 1200,
-                ]);
-                $this->sections[] = $section;
-            }
+            $this->section = $this->document->addSection([
+                'marginTop' => 1200,
+                'marginRight' => 1200,
+                'marginBottom' => 1200,
+                'marginLeft' => 1200,
+            ]);
         }
-        $this->skipPageBreak = $isHeader;
     }
 
     function processQuestions()
@@ -150,9 +152,13 @@ class CollectionQuestionsDocument
         }
         $this->topics = $topics;
 
-        $this->addSection(true);
-        $this->addCollectionTitle($this->collection);
+        $addCollectionTitle = true;
         foreach($topics as $topic) {
+            $this->addSection();
+            if ($addCollectionTitle) {
+                $this->addCollectionTitle($this->collection);
+                $addCollectionTitle = false;
+            }
             $this->addTopic($topic);
             foreach($topic['questions'] as $question) {
                 $id = $question['id'];
@@ -183,11 +189,8 @@ class CollectionQuestionsDocument
         }
 
         if (count($appendixes)) {
-            $this->addSection(true);
             $this->addAppendixesTitle();
             $this->added = [];
-            $first = null;
-            //$this->addAppendixesTitle($this->collection);
             foreach($this->topics as $topic) {
                 foreach($topic['questions'] as $question) {
                     $id = $question->id;
@@ -198,7 +201,6 @@ class CollectionQuestionsDocument
             }
         }
     }
-
 
     function addAppendixesTitle() {
         $section = $this->currentSection();
@@ -213,6 +215,7 @@ class CollectionQuestionsDocument
 
         $left = $row->addCell();
         $left->addText('Uitwerkbijlage', ['size' => 14, 'bold' => true]);
+        $section->addTextBreak(1);
     }
 
     function addQuestionAppendixes($question) {
@@ -227,31 +230,39 @@ class CollectionQuestionsDocument
         if (array_key_exists($id, $this->added)) {
             /* skip */
         } else {
-            $attachment = $appendix;
-            $question = $appendix->question;
+            //$question = $appendix->question;
+            //$this->addQuestionTitle($question);
 
             $parent = $this->currentSection();
+            $scale = $this->getResizeFactor(
+                $appendix->image_width,
+                $appendix->image_height,
+                400*1.125, 600*1.125
+            );
 
-            // Create textbox
-            $textBox = $parent->addTextBox([
-                'width' => $attachment->image_width + 20, // Textbox padding compensation
-                'height' => $attachment->image_height + $titleHeight,
-                'borderColor' => '#FFFFFF',
-            ]);
-
-            $textRun = $textBox->addTextRun();
-
-            // Add title to the textbox
-            $textRun->addText($attachment->name . "\n", ['bold' => true]);
-
-            // Add image to the textbox
-            Log::info($attachment->url);
-            $scale = 1;
-            $textRun->addImage($attachment->url, [
-                //'width' => $attachment->image_width * $scale,
-                //'height' => $attachment->image_height * $scale
-            ]);
+            $this->addImage(
+                $parent,
+                $appendix->url,
+                $appendix->image_width * $scale,
+                $appendix->image_height * $scale,
+                $appendix->name
+            );
         }
+    }
+
+    function getResizeFactor($w, $h, $W = 4000, $H = 6000)
+    {
+        if ($w > $W) {
+          $scaleW = $W / $w;
+        } else {
+          $scaleW = 1;
+        }
+        if ($h > $H) {
+          $scaleH = $H / $h;
+        } else {
+          $scaleH = 1;
+        }
+        return min($scaleW, $scaleH);
     }
 
     function addTopic($topic)
@@ -259,20 +270,14 @@ class CollectionQuestionsDocument
         Log::info($topic->name);
 
         $this->addSection();
-
         $this->addTopicTitle($topic);
-
-        // Title
-
-        // Attachments
-        //$this->addAttachments($topic->attachments, null, 'small');
 
         // Introduction
         $textRun = $this->currentSection()->addTextRun();
         $this->formatText($topic->introduction, $textRun);
 
         // Attachments
-        $this->addAttachments($topic->attachments, null, 'large', 1.3);
+        $this->addAttachments($topic->attachments);
     }
 
     function addCollectionTitle($collection)
@@ -310,7 +315,7 @@ class CollectionQuestionsDocument
         $txt->addText('  |  ');
         $txt->addText("$time_in_minutes min.");
 
-        $section->addTextRun()->addTextBreak(2);
+        //$section->addTextRun()->addTextBreak(2);
     }
 
     function addCollectionEnd()
@@ -352,53 +357,38 @@ class CollectionQuestionsDocument
         $textRun->addTextBreak();
     }
 
-    function addAttachments($attachments, $parent = null, $type = null)
+    function addAttachments($attachments, $section = null)
     {
-        $textBoxStyleOptions = [];
-        $titleHeight = 20;
-
-        if (!$parent) {
-            $parent = $this->currentSection();
+        if (!$section) {
+            $section = $this->currentSection();
         }
-/*
-        // If the image is 'small', we will inline the image on the right side.
-        if ($type === 'small') {
-            $textBoxStyleOptions = [
-                'wrappingStyle' => 'square',
-                'positioning' => 'absolute',
-                'posHorizontal'    => \PhpOffice\PhpWord\Style\Image::POSITION_HORIZONTAL_RIGHT,
-                'posHorizontalRel' => 'margin',
-                'posVerticalRel' => 'line',
-            ];
-            $attachments = $attachments->filter(fn ($item) => $item->image_width < 200);
-        }
-        if ($type === 'large') {
-            $attachments = $attachments->filter(fn ($item) => $item->image_width >= 200);
-        }
-*/
-
         foreach ($attachments as $attachment) {
-            // Create textbox
-            $textBox = $parent->addTextBox(
-                array_merge([
-                    'width' => $attachment->image_width + 20, // Textbox padding compensation
-                    'height' => $attachment->image_height + $titleHeight,
-                    'borderColor' => '#FFFFFF',
-                ], $textBoxStyleOptions)
+            $this->addImage(
+                $section,
+                $attachment->url,
+                $attachment->image_width,
+                $attachment->image_height,
+                $attachment->name
             );
-
-            $textRun = $textBox->addTextRun();
-
-            // Add title to the textbox
-            $textRun->addText($attachment->name . "\n", ['bold' => true]);
-
-            // Add image to the textbox
-            Log::info($attachment->url);
-            $textRun->addImage($attachment->url, [
-                'width' => $attachment->image_width,
-                'height' => $attachment->image_height,
-            ]);
         }
+    }
+
+    function addImage($section, $url, $width, $height, $title)
+    {
+        $textBox = $section->addTextBox([
+            'width' => $width + 20,
+            'height' => $height + 20,
+            'borderColor' => '#FFFFFF',
+        ]);
+
+        $scale = 1;
+        $textRun = $textBox->addTextRun();
+        $textRun->addText($title, ['bold' => true]);
+        $textRun->addTextBreak();
+        $textRun->addImage($url, [
+            'width' => $width * $scale,
+            'height' => $height * $scale,
+        ]);
     }
 
     function addQuestion($question, $use_introduction, $use_attachments, $use_text)
@@ -410,7 +400,7 @@ class CollectionQuestionsDocument
         $section = $this->currentSection();
 
         if ($use_attachments) {
-            $this->addAttachments($question->attachments);
+            $this->addAttachments($question->attachments, $section);
         }
 
         // Introduction
@@ -644,12 +634,11 @@ class CollectionQuestionsDocument
      */
     function currentSection()
     {
-        return $this->sections[(count($this->sections) - 1)];
+        return $this->section;
     }
 
     function saveDocument($file, $type = 'docx')
     {
-        Log::info("{$file} ({$type})");
         switch ($type) {
             case 'pdf':
                 return $this->savePDF($file);

@@ -437,6 +437,12 @@ class CollectionCorrectionsDocument
         if (count($question->answers)) {
           foreach($question->answers as $answer) {
             $nr = $question->number;
+            if ($answer->remark) {
+              $this->addRemark($answer->remark);
+            }
+            $txt = $this->currentSection()->addTextRun();
+            $txt->addTextBreak(1);
+            $txt->addText('Tussenantwoord(en)', ['bold' => true]);
             foreach($answer->sections as $step) {
               $points = $step->points;
               $correction = $step->correction;
@@ -447,6 +453,14 @@ class CollectionCorrectionsDocument
         } else {
           $this->addNoCorrection();
         }
+    }
+
+    function addRemark($remark) {
+        $txt = $this->currentSection()->addTextRun();
+        $txt->addTextBreak(1);
+        $txt->addText('Opmerkingen', ['bold' => true]);
+        $txt->addTextBreak(1);
+        $this->formatText($remark, $txt);
     }
 
     function addNoCorrection() {

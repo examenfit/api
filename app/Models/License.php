@@ -41,9 +41,8 @@ class License extends Model
 
     public static function createLeerlinglicentie($user, $streams, $descr = 'leerlinglicentie')
     {
-        $begin = new DateTime;
-        $end = new DateTime;
-        $end->add(new DateInterval('P1D')); // 24 hours
+        $begin = new DateTime();
+        $end = new DateTime('2022-08-01');
 
         $license = License::create([
             'type' => 'leerlinglicentie',
@@ -55,6 +54,15 @@ class License extends Model
         $seat = $license->seats()->create([
             'user_id' => $user->id,
             'role' => 'leerling'
+        ]);
+
+        Privilege::create([
+            'actor_seat_id' => $seat->id,
+            'action' => 'licentie beheren',
+            'object_type' => 'license',
+            'object_id' => $license->id,
+            'begin' => $begin,
+            'end' => $end
         ]);
 
         foreach ($streams as $stream_id) {
