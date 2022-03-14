@@ -16,21 +16,24 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\PrivilegeController;
 use App\Http\Controllers\AnnotationController;
 use App\Http\Controllers\LicenseController;
-use App\Http\Controllers\Admin\TipController;
-use App\Http\Controllers\Admin\ExamController;
+use App\Http\Controllers\MollieController;
+
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\CollectionController;
 use App\Http\Controllers\CustomQueries;
 use App\Http\Controllers\RegistrationController;
-use App\Http\Controllers\Admin\AnswerController;
-use App\Http\Controllers\Admin\QuestionController;
-use App\Http\Controllers\Admin\AttachmentController;
-use App\Http\Controllers\Admin\TeacherDocumentController;
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\UserSwitchController;
+
+use App\Http\Controllers\Admin\TipController;
+use App\Http\Controllers\Admin\ExamController;
+use App\Http\Controllers\Admin\AnswerController;
+use App\Http\Controllers\Admin\QuestionController;
+use App\Http\Controllers\Admin\AttachmentController;
+use App\Http\Controllers\Admin\TeacherDocumentController;
 
 use App\Http\Controllers\Admin\TopicController as AdminTopicController;
 use App\Http\Controllers\Admin\CourseController as AdminCourseController;
@@ -50,6 +53,8 @@ use App\Http\Controllers\Admin\ChapterController as AdminChapterController;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+
+Route::get('/mollie/test', [MollieController::class, 'test']);
 
 Route::get('/log/collection/{collection}', [ActivityLogController::class, 'collectionSummary']);
 Route::get('/log/latest/{privilege}', [ActivityLogController::class, 'latestActivity']);
@@ -186,6 +191,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::group(['prefix' => 'admin', 'middleware' => 'role:admin,author'], function () {
         Route::get('/', [AdminIndexController::class, 'index']);
 
+        Route::get('/custom/activities/all', [CustomQueries::class, 'activities']);
         Route::get('/custom/questions/complexity_count', [CustomQueries::class, 'questions_complexity_count']);
         Route::get('/custom/questions/complexity_is_null', [CustomQueries::class, 'questions_complexity_is_null']);
         Route::get('/custom/questions/questions_not_in_oefensets', [CustomQueries::class, 'questions_not_in_oefensets']);
