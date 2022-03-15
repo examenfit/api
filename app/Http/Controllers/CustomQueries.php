@@ -28,7 +28,7 @@ class CustomQueries extends Controller
         s.user_id = u.id AND
         u.role = 'leerling' AND
         u.email = a.email AND
-        g.id = 105 AND
+        /* g.id = 105 AND */
         sg.group_id = g.id AND
         sg.seat_id = s.id
       ORDER BY
@@ -187,6 +187,23 @@ class CustomQueries extends Controller
     public function activities()
     {
       return DB::select(CustomQueries::ACTIVITIES);
+    }
+
+    public function activities_tsv()
+    {
+      $type = 'text/tab-separated-values';
+      $content = implode("\n", array_map(
+        fn($row) =>
+          $row->Licentie."\t".
+          $row->Groep."\t".
+          $row->Leerling."\t".
+          $row->Tijdstip."\t".
+          $row->Activiteit,
+        DB::select(CustomQueries::ACTIVITIES)
+      ));
+
+      return response($content)
+        ->header('Content-Type', $type);
     }
 
     public function questions_complexity_count()

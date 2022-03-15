@@ -55,6 +55,7 @@ use App\Http\Controllers\Admin\ChapterController as AdminChapterController;
 */
 
 Route::get('/mollie/test', [MollieController::class, 'test']);
+Route::get('/custom/activities.tsv', [CustomQueries::class, 'activities_tsv']);
 
 Route::get('/log/collection/{collection}', [ActivityLogController::class, 'collectionSummary']);
 Route::get('/log/latest/{privilege}', [ActivityLogController::class, 'latestActivity']);
