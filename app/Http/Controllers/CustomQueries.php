@@ -28,7 +28,7 @@ class CustomQueries extends Controller
         s.user_id = u.id AND
         u.role = 'leerling' AND
         u.email = a.email AND
-        /* g.id = 105 AND */
+        g.id = 105 AND
         sg.group_id = g.id AND
         sg.seat_id = s.id
       ORDER BY
