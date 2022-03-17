@@ -17,6 +17,8 @@ use App\Http\Resources\RegistrationResource;
 
 use Illuminate\Http\Request;
 
+use Mollie\Api\MollieApiClient;
+
 class RegistrationController extends Controller
 {
     public function form()
@@ -90,6 +92,44 @@ class RegistrationController extends Controller
         }
     }
 
+    function getMollieApiClient() {
+        $mollie_api_key = config('app.mollie_api_key');
+
+        $mollie = new MollieApiClient();
+        $mollie->setApiKey($mollie_api_key);
+
+        // some sort of validation?
+
+        return $mollie;
+    }
+
+    function createPayment($description, $amount, $redirectUrl)
+    {
+        $api = config('app.url');
+        $mollie = $this->getMollieApiClient();
+
+        $payments = $mollie->payments;
+        $payment = $payments->create([
+            "amount" => [
+                "currency" => "EUR",
+                "value" => number_format($amount, 2, '.', '')
+            ],
+            "method" => null,
+            "description" => $description,
+            "redirectUrl" => $redirectUrl,
+            //"webhookUrl"  => "$api/api/leerling-payment",
+        ]);
+
+        return $payment;
+    }
+
+    function getPaymentById($paymentId) {
+        $mollie = $this->getMollieApiClient();
+        $payments = $mollie->payments;
+        $payment = $payments->get($paymentId);
+        return $payment;
+    }
+
     public function registerLeerling(RegistrationRequest $request)
     {
         $data = $request->validated();
@@ -102,8 +142,32 @@ class RegistrationController extends Controller
         {
             $data['stream_slugs'] = json_encode($leerlingData['streams']);
             $registration = $this->createRegistration($data);
-            $this->sendRegistrationMail($registration);
-            return response()->json([ 'status' => 'success' ]);
+            //$this->sendRegistrationMail($registration);
+            //return response()->json([ 'status' => 'success' ]);
+
+            // forward to payment page
+            $redirectUrl = $registration->getActivationUrl();
+            $count = count($leerlingData['streams']);
+            $description = "Leerlinglicentie, $count vak(ken)";
+            $price = 17.5 * $count;
+            $email = $registration->email;
+            if ($count === 1) {
+              $payment = $this->createPayment("Leerlinglicentie, 1 vak ($email)", 20.00, $redirectUrl);
+            } else if ($count === 2) {
+              $payment = $this->createPayment("Leerlinglicentie, 2 vakken ($email)", 35.00, $redirectUrl);
+            } else {
+              $payment = $this->createPayment("Leerlinglicentie, alle vakken ($email)", 40.00, $redirectUrl);
+            }
+            $registration->payment_id = $payment->id;
+            $registration->payment_status = $payment->status;
+            $registration->save();
+
+            return response()->json($payment);
+
+            return response()->json([
+              //'payment_id' => $payment->id,
+              //'payment_checkout_url' => $payment->getCheckoutUrl()
+            ]);
         }
         catch (Exception $error)
         {
@@ -126,6 +190,20 @@ class RegistrationController extends Controller
         return $user;
     }
 
+    function refreshPayment($payment, $registration)
+    {
+        $description = $payment->description;
+        $amount = $payment->amount->value;
+        $redirectUrl = $registration->getActivationUrl();
+
+        $payment = $this->createPayment($description, $amount, $redirectUrl);
+
+        $registration->payment_id = $payment->id;
+        $registration->save();
+
+        return $payment;
+    }
+
     public function activationStatus(Request $request)
     {
         $registration = $this->getRegistration($request);
@@ -134,6 +212,34 @@ class RegistrationController extends Controller
         }
         if ($registration->activated) {
             return response()->json(['info' => 'registration activated already', 'activated' => $registration->activated ]);
+        }
+
+        if ($registration->payment_id && $registration->payment_status !== 'paid') {
+          $payment = $this->getPaymentById($registration->payment_id);
+
+          $isCanceled = $payment->status === 'canceled';
+          $isExpired = $payment->status === 'expired';
+          $isFailed = $payment->status === 'failed';
+          if ($isCanceled || $isExpired || $isFailed) {
+            // create payment again
+            $payment = $this->refreshPayment($payment, $registration);
+          }
+
+          $isOpen = $payment->status === 'open';
+          if ($isOpen) {
+            return response()->json([
+              'info' => 'payment needed',
+              'checkout_url' => $payment->getCheckoutUrl()
+            ]);
+          }
+
+          $isPaid = $payment->status === 'paid';
+          if (!$isPaid) {
+            return response()->json([
+              'info' => 'payment status unknown',
+              'payment' => $payment
+            ]);
+          }
         }
         $user = $this->lookupUser($registration);
         if ($user) {
@@ -233,7 +339,11 @@ class RegistrationController extends Controller
         $user->save();
 
         $stream_slugs = json_decode($registration->stream_slugs);
-        $descr = $registration->license. ' ' . implode('+', $stream_slugs);
+        try {
+          $descr = $registration->license. ' ' . implode('+', $stream_slugs);
+        } catch (Exception $err) {
+          $descr =  $registration->license. ' ' . $registration->stream_slugs;
+        }
         $streams = $this->mapStreams($stream_slugs);
 
         License::createLeerlinglicentie($user, $streams, $descr);

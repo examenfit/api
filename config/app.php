@@ -52,11 +52,11 @@ return [
     |
     */
 
-    'url' => env('APP_URL', 'http://localhost'),
+    'url' => env('APP_URL', 'http://localhost:8000'),
 
     'asset_url' => env('ASSET_URL', null),
 
-    'dashboard_url' => env('DASHBOARD_URL', null),
+    'dashboard_url' => env('DASHBOARD_URL', 'http://localhost:3000'),
     'mail_from_address' => env('MAIL_FROM_ADDRESS', 'info@examenfit.nl'),
     'contact_request_to' => env('APP_CONTACT_REQUEST_TO', 'info@examenfit.nl'),
 
@@ -235,4 +235,7 @@ return [
 
     ],
 
+    // Mollie
+    //'mollie_api_key' => env('MOLLIE_API_KEY', 'test_vWbmdhrtRQvyVB5TSzvhGBSCU2Pw2f'),
+    'mollie_api_key' => env('MOLLIE_API_KEY'),
 ];
