@@ -23,7 +23,6 @@ class Registration extends Model
         $app = config('app.dashboard_url');
         $code = $this->activation_code;
 
-        return "http://localhost:3000/activate/$code";
         return "$app/activate/$code";
     }
 }
