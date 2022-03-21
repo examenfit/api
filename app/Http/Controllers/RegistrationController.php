@@ -142,8 +142,6 @@ class RegistrationController extends Controller
         {
             $data['stream_slugs'] = json_encode($leerlingData['streams']);
             $registration = $this->createRegistration($data);
-            //$this->sendRegistrationMail($registration);
-            //return response()->json([ 'status' => 'success' ]);
 
             // forward to payment page
             $redirectUrl = $registration->getActivationUrl();
@@ -162,12 +160,8 @@ class RegistrationController extends Controller
             $registration->payment_status = $payment->status;
             $registration->save();
 
-            return response()->json($payment);
-
-            return response()->json([
-              //'payment_id' => $payment->id,
-              //'payment_checkout_url' => $payment->getCheckoutUrl()
-            ]);
+            $this->sendRegistrationMail($registration);
+            return response()->json([ 'status' => 'success' ]);
         }
         catch (Exception $error)
         {
