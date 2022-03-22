@@ -24,11 +24,11 @@ class CustomQueries extends Controller
         users u,
         activity_logs a
       WHERE
+        l.id IN (139,141,142) AND
         l.id = s.license_id AND
         s.user_id = u.id AND
         u.role = 'leerling' AND
         u.email = a.email AND
-        /* g.id = 105 AND */
         sg.group_id = g.id AND
         sg.seat_id = s.id
       ORDER BY
