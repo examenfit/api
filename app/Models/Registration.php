@@ -17,4 +17,12 @@ class Registration extends Model
         'activated',
         'stream_slugs'
     ];
+
+    public function getActivationUrl()
+    {
+        $app = config('app.dashboard_url');
+        $code = $this->activation_code;
+
+        return "$app/activate/$code";
+    }
 }

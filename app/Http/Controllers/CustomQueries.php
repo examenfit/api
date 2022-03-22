@@ -9,6 +9,35 @@ use Vinkla\Hashids\Facades\Hashids;
 
 class CustomQueries extends Controller
 {
+    const ACTIVITIES = "
+      SELECT
+        l.description AS Licentie,
+        g.name AS Groep,
+        u.email AS Leerling,
+        a.created_at AS Tijdstip,
+        a.activity AS Activiteit
+      FROM
+        licenses l,
+        seats s,
+        seat_group sg,
+        `groups` g,
+        users u,
+        activity_logs a
+      WHERE
+        l.id IN (139,141,142) AND
+        l.id = s.license_id AND
+        s.user_id = u.id AND
+        u.role = 'leerling' AND
+        u.email = a.email AND
+        sg.group_id = g.id AND
+        sg.seat_id = s.id
+      ORDER BY
+        Licentie,
+        Groep,
+        Leerling,
+        Tijdstip
+    ";
+
     const QUESTION_COMPLEXITY_COUNT = "
       SELECT
         courses.name AS Vak,
@@ -143,9 +172,7 @@ class CustomQueries extends Controller
       GROUP BY
         Vak,
         Niveau,
-        Jaar,
-        Tijdvak,
-        Opgave,
+        Jaar, Tijdvak, Opgave,
         Vraag
       HAVING
         Aantal > 1
@@ -156,6 +183,28 @@ class CustomQueries extends Controller
         Tijdvak,
         Vraag
     ";
+
+    public function activities()
+    {
+      return DB::select(CustomQueries::ACTIVITIES);
+    }
+
+    public function activities_tsv()
+    {
+      $type = 'text/tab-separated-values';
+      $content = implode("\n", array_map(
+        fn($row) =>
+          $row->Licentie."\t".
+          $row->Groep."\t".
+          $row->Leerling."\t".
+          $row->Tijdstip."\t".
+          $row->Activiteit,
+        DB::select(CustomQueries::ACTIVITIES)
+      ));
+
+      return response($content)
+        ->header('Content-Type', $type);
+    }
 
     public function questions_complexity_count()
     {
