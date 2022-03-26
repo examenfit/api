@@ -190,7 +190,7 @@ class CollectionController extends Controller
 
     public function showCollectionQuestionsDocument(Request $request, Collection $collection)
     {
-        $name = $collection->name;
+        $name = preg_replace('/[\/\\\\]+/', ' ', $collection->name);
         $filename = "ExamenFit opgaven {$name}.docx";
         $file = storage_path("app/public/collections/{$collection->hash_id}.docx");
 
@@ -203,7 +203,7 @@ class CollectionController extends Controller
 
     public function showCollectionCorrectionsDocument(Request $request, Collection $collection)
     {
-        $name = $collection->name;
+        $name = preg_replace('/[\/\\\\]+/', ' ', $collection->name);
         $filename = "ExamenFit correctievoorschrift {$name}.docx";
         $file = storage_path("app/public/collections/{$collection->hash_id}.docx");
 
@@ -243,7 +243,9 @@ class CollectionController extends Controller
         shell_exec($retrieve);
 
         Log::info("response");
-        return response()->download($tmp, 'ExamenFit opgaven '.$collection->name.'.pdf');
+        $name = preg_replace('/[\/\\\\]+/', ' ', $collection->name);
+        $filename = "ExamenFit opgaven {$name}.pdf";
+        return response()->download($tmp, $filename);
     }
 
     public function showCollectionQuestionsHtml(Request $request, Collection $collection)
@@ -398,7 +400,9 @@ class CollectionController extends Controller
         shell_exec($retrieve);
 
         Log::info("response");
-        return response()->download($tmp, 'ExamenFit uitwerkbijlages '.$collection->name.'.pdf');
+        $name = preg_replace('/[\/\\\\]+/', ' ', $collection->name);
+        $filename = "ExamenFit uitwerkbijlages {$name}.pdf";
+        return response()->download($tmp, $filename);
     }
 
     public function showCollectionAppendixesHtml(Request $request, Collection $collection)
