@@ -182,12 +182,25 @@ class LicenseController extends Controller
 
       $license = $seat->license;
 
-      $group = Group::firstWhere('name', $data['group']);
+      $group = Group::query()
+        ->where('name', $data['group'])
+        ->where('license_id', $license_id)
+        ->first();
+
       if (!$group) {
+        $docent = $this->getDocent($license);
         $group = Group::create([
           'license_id' => $license->id,
           'name' => $data['group'],
           'is_active' => TRUE,
+        ]);
+        Privilege::create([
+          'actor_seat_id' => $docent->id,
+          'action' => 'groepen beheren',
+          'object_type' => 'group',
+          'object_id' => $group->id,
+          'begin' => $license->begin,
+          'end' => $license->end,
         ]);
       }
       $seat->groups()->sync([ $group->id ]);
@@ -369,16 +382,9 @@ class LicenseController extends Controller
         $this->sendInviteMail($seat);
       }
 
-      return new SeatResource($seat);
+      $seat->load(['user']);
 
-      // $seat->license_id === $license->id
-      // $seat->email
-      // $seat->first_name
-      // $seat->last_name
-      // $seat->is_active
-      // $seat->begin
-      // $seat->end
-      return response()->noContent(501);
+      return new SeatResource($seat);
     }
 
     public function invite(License $license, Seat $seat)
