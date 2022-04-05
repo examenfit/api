@@ -1,4 +1,5 @@
 <!doctype html>
+<p>[TODO]</p>
 <p>
   Beste {{ $registration->first_name }} {{ $registration->last_name }},
 </p>
