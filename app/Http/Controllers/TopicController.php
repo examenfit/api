@@ -62,7 +62,7 @@ class TopicController extends Controller
 
     public function pdf(Topic $topic)
     {
-        $api = url("/api/download-appendixes-html");
+        $api = url("/api/download-topic-appendixes-html");
         $api = str_replace("http://localhost:8000", "https://staging-api.examenfit.nl", $api);
 
         $server = config('app.examenfit_scripts_url');
