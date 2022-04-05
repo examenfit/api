@@ -9,6 +9,7 @@ use Illuminate\Support\Str;
 
 use App\Mail\RegistrationMail;
 use App\Mail\BulkRegistrationMail;
+use App\Mail\BulkLeerlingRegistrationMail;
 use App\Models\Registration;
 use App\Models\License;
 use App\Models\User;
@@ -44,6 +45,12 @@ class RegistrationController extends Controller
         Mail::to($registration->email)->send($mail);
     }
 
+    private function sendBulkLeerlingRegistrationMail($registration)
+    {
+        $mail = new BulkLeerlingRegistrationMail($registration);
+        Mail::to($registration->email)->send($mail);
+    }
+
     private function createRegistration($data)
     {
         $data['activation_code'] = Str::random(32);
@@ -59,6 +66,13 @@ class RegistrationController extends Controller
     {
         $registration = $this->createRegistration($data);
         $this->sendBulkRegistrationMail($registration);
+        return $registration;
+    }
+
+    public function processLeerling($data)
+    {
+        $registration = $this->createRegistration($data);
+        $this->sendBulkLeerlingRegistrationMail($registration);
         return $registration;
     }
 
