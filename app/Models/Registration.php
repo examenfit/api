@@ -15,7 +15,8 @@ class Registration extends Model
         'license',
         'activation_code',
         'activated',
-        'stream_slugs'
+        'stream_slugs',
+        'payment_status'
     ];
 
     public function getActivationUrl()
