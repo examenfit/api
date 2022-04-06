@@ -1,28 +1,38 @@
 <!doctype html>
-<p>[TODO]</p>
 <p>
-  Beste {{ $registration->first_name }} {{ $registration->last_name }},
+  Beste {{ $registration->first_name }},
 </p>
-
-<p>Leuk dat je ExamenFit gaat gerbuiken!</p>
-
 <p>
-  Klik op deze link om je licentie te activeren.<br>
-  <!-- fixme -->
+  Je school heeft iets bijzonders voor je geregeld.
+</p>
+<p>
+  Voor je examens oefenen doe je het beste met oude examenvragen.
+  Dat weet iedereen. Maar wat als je er niet uit komt?
+  Gelukkig heb je docenten die je dan willen helpen.
+  Je docent is echter niet altijd in de buurt.
+  En hoe weet je nou of je een onderwerp goed genoeg beheerst?
+</p>
+<p>
+  Voor wiskunde A en B en natuurkunde biedt je school je daarom kosteloos ExamenFit.
+  Hier oefen je vanuit een totaaloverzicht van de examenstof.
+  Je kijkt je antwoord na, om te zien hoe je ervoor staat.
+</p>
+<p>
+  En loop je vast?
+  Dan krijg je per tussenstap een tip of deelantwoord.
+  Daardoor hoef je niet meteen naar het eindantwoord te kijken.
+  Handig toch?
+</p>
+<p>
+  Wacht niet langer en stel hier je wachtwoord in:<br>
   <a href="{{ $link }}">{{ $link }}</a>
 </p>
-
 <p>
-  Met je licentie kun je:
+  Veel succes met je examens!
 </p>
-<ul>
-  <li>Examenvragen oefenen bij alle examenonderwerpen</li>
-  <li>Examenvragen oefenen bij de hoofdstukken van je lesboek</li>
-  <li>Zien aan welke onderwerpen je nog moet wekren</li>
-</ul>
-
-<p>Veel succes!</p>
-
-<p>Met vriendelijke groet,</p>
-
-<p>Het team van ExamenFit</p>
+<p>
+  Het team van ExamenFit
+</p>
+<p>
+ PS Doe je naast wiskunde ook natuurkunde? Dan kun je bovenaan in ExamenFit wisselen van vak.
+</p>
