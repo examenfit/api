@@ -65,7 +65,7 @@ class BulkLeerlingRegistrations extends Command {
       return;
     }
     if (mb_strtolower($this->getValue(5,1)) !== 'streams') {
-      $this->error("'Last Name' verwacht in D1");
+      $this->error("'Streams' verwacht in D1");
       return;
     }
     return TRUE;
@@ -83,7 +83,7 @@ class BulkLeerlingRegistrations extends Command {
 
   function getLastName($row)
   {
-    return $this->getValue(4, $row);
+    return $this->getValue(4, $row) ?: "";
   }
 
   function getStreamSlugs($row)
