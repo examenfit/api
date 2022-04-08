@@ -197,6 +197,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('/custom/questions/complexity_is_null', [CustomQueries::class, 'questions_complexity_is_null']);
         Route::get('/custom/questions/questions_not_in_oefensets', [CustomQueries::class, 'questions_not_in_oefensets']);
         Route::get('/custom/questions/with_multiple_answers', [CustomQueries::class, 'questions_with_multiple_answers']);
+        Route::get('/custom/leerlinglicenties/csdehoven', [CustomQueries::class, 'leerlinglicenties_csdehoven']);
 
         Route::get('/courses', [AdminCourseController::class, 'index']);
         Route::get('/courses/{stream}', [AdminCourseController::class, 'show']);
