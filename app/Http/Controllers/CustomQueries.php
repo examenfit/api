@@ -184,6 +184,32 @@ class CustomQueries extends Controller
         Vraag
     ";
 
+    const LEERLINGLICENTIES_CSDEHOVEN = "
+      SELECT
+        'CS De Hoven' AS Registraties,
+        COUNT(*) AS Aantal
+      FROM
+        registrations
+      WHERE
+        email LIKE '%csdehoven%'
+      UNION SELECT
+        'CS De Hoven; Geactiveerd',
+        COUNT(*)
+      FROM
+        registrations
+      WHERE
+        email LIKE '%csdehoven%' AND
+        activated IS NOT NULL
+      UNION SELECT
+        'CS De Hoven; Beschikbaar',
+        COUNT(*)
+      FROM
+        registrations
+      WHERE
+        email LIKE '%csdehoven%' AND
+        activated IS NULL
+    ";
+
     public function activities()
     {
       return DB::select(CustomQueries::ACTIVITIES);
@@ -224,5 +250,46 @@ class CustomQueries extends Controller
     public function questions_with_multiple_answers()
     {
       return DB::select(CustomQueries::QUESTIONS_WITH_MULTIPLE_ANSWERS);
+    }
+
+    public function leerlinglicenties_csdehoven()
+    {
+      return DB::select(CustomQueries::LEERLINGLICENTIES_CSDEHOVEN);
+    }
+
+    public function index()
+    {
+      return response()->json([
+        [
+          'title' => 'Vragen met meerdere oplossingsstrategiën',
+          'path' => '/vragen/met-meerdere-antwoorden',
+          'endpoint' => '/api/admin/custom/questions/with_multiple_answers'
+        ],
+        [
+          'title' => 'Vragen zonder waarde voor complexiteit',
+          'path' => '/vragen/zonder-complexiteit',
+          'endpoint' => '/api/admin/custom/questions/complexity_is_null'
+        ],
+        [
+          'title' => 'Aantallen vragen per complexiteit',
+          'path' => '/vragen/aantal-per-complexiteit',
+          'endpoint' => '/api/admin/custom/questions/complexity_count'
+        ],
+        [
+          'title' => 'Vragen niet in oefensets (excl. vragen zonder antwoorden)',
+          'path' => '/vragen/niet-in-oefensets',
+          'endpoint' => '/api/admin/custom/questions/questions_not_in_oefensets'
+        ],
+        [
+          'title' => 'Activiteiten per licentie/groep/leerling',
+          'path' => '/activiteiten/alle',
+          'endpoint' => '/api/admin/custom/activities/all'
+        ],
+        [
+          'title' => 'Leerlinglicenties @csdehoven.nl',
+          'path' => '/leerlinglicenties/csdehoven',
+          'endpoint' => '/api/admin/custom/leerlinglicenties/csdehoven'
+        ]
+      ]);
     }
 }
