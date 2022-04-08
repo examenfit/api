@@ -256,4 +256,40 @@ class CustomQueries extends Controller
     {
       return DB::select(CustomQueries::LEERLINGLICENTIES_CSDEHOVEN);
     }
+
+    public function index()
+    {
+      return response()->json([
+        [
+          'title' => 'Vragen met meerdere oplossingsstrategiën',
+          'path' => '/vragen/met-meerdere-antwoorden',
+          'endpoint' => '/api/admin/custom/questions/with_multiple_answers'
+        ],
+        [
+          'title' => 'Vragen zonder waarde voor complexiteit',
+          'path' => '/vragen/zonder-complexiteit',
+          'endpoint' => '/api/admin/custom/questions/complexity_is_null'
+        ],
+        [
+          'title' => 'Aantallen vragen per complexiteit',
+          'path' => '/vragen/aantal-per-complexiteit',
+          'endpoint' => '/api/admin/custom/questions/complexity_count'
+        ],
+        [
+          'title' => 'Vragen niet in oefensets (excl. vragen zonder antwoorden)',
+          'path' => '/vragen/niet-in-oefensets',
+          'endpoint' => '/api/admin/custom/questions/questions_not_in_oefensets'
+        ],
+        [
+          'title' => 'Activiteiten per licentie/groep/leerling',
+          'path' => '/activiteiten/alle',
+          'endpoint' => '/api/admin/custom/activities/all'
+        ],
+        [
+          'title' => 'Leerlinglicenties @csdehoven.nl',
+          'path' => '/leerlinglicenties/csdehoven',
+          'endpoint' => '/api/admin/custom/leerlinglicenties/csdehoven'
+        ]
+      ]);
+    }
 }
