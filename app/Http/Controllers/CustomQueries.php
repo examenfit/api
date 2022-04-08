@@ -184,6 +184,32 @@ class CustomQueries extends Controller
         Vraag
     ";
 
+    const LEERLINGLICENTIES_CSDEHOVEN = "
+      SELECT
+        'CS De Hoven' AS Registraties,
+        COUNT(*) AS Aantal
+      FROM
+        registrations
+      WHERE
+        email LIKE '%csdehoven%'
+      UNION SELECT
+        'CS De Hoven; Geactiveerd',
+        COUNT(*)
+      FROM
+        registrations
+      WHERE
+        email LIKE '%csdehoven%' AND
+        activated IS NOT NULL
+      UNION SELECT
+        'CS De Hoven; Beschikbaar',
+        COUNT(*)
+      FROM
+        registrations
+      WHERE
+        email LIKE '%csdehoven%' AND
+        activated IS NULL
+    ";
+
     public function activities()
     {
       return DB::select(CustomQueries::ACTIVITIES);
@@ -224,5 +250,10 @@ class CustomQueries extends Controller
     public function questions_with_multiple_answers()
     {
       return DB::select(CustomQueries::QUESTIONS_WITH_MULTIPLE_ANSWERS);
+    }
+
+    public function leerlinglicenties_csdehoven()
+    {
+      return DB::select(CustomQueries::LEERLINGLICENTIES_CSDEHOVEN);
     }
 }
