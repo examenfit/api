@@ -186,28 +186,42 @@ class CustomQueries extends Controller
 
     const LEERLINGLICENTIES_CSDEHOVEN = "
       SELECT
-        'CS De Hoven' AS Registraties,
+        'leerlinglicentie-1' AS Licentie,
+        'Ja' AS Geactiveerd,
         COUNT(*) AS Aantal
       FROM
         registrations
       WHERE
-        email LIKE '%csdehoven%'
-      UNION SELECT
-        'CS De Hoven; Geactiveerd',
-        COUNT(*)
-      FROM
-        registrations
-      WHERE
-        email LIKE '%csdehoven%' AND
+        email LIKE '%@leerling.csdehoven.nl' AND
+        license = 'leerlinglicentie-1' AND
         activated IS NOT NULL
       UNION SELECT
-        'CS De Hoven; Beschikbaar',
+        'leerlinglicentie-2',
+        'Ja',
         COUNT(*)
       FROM
         registrations
       WHERE
-        email LIKE '%csdehoven%' AND
+        email LIKE '%@leerling.csdehoven.nl' AND
+        license = 'leerlinglicentie-2' AND
+        activated IS NOT NULL
+      UNION SELECT
+        '(alle)',
+        'Nee',
+        COUNT(*)
+      FROM
+        registrations
+      WHERE
+        email LIKE '%@leerling.csdehoven.nl' AND
         activated IS NULL
+      UNION SELECT
+        '(alle)',
+        'Ja + Nee',
+        COUNT(*)
+      FROM
+        registrations
+      WHERE
+        email LIKE '%@leerling.csdehoven.nl'
     ";
 
     public function activities()
@@ -286,7 +300,7 @@ class CustomQueries extends Controller
           'endpoint' => '/api/admin/custom/activities/all'
         ],
         [
-          'title' => 'Leerlinglicenties @csdehoven.nl',
+          'title' => 'Activering @leerling.csdehoven.nl',
           'path' => '/leerlinglicenties/csdehoven',
           'endpoint' => '/api/admin/custom/leerlinglicenties/csdehoven'
         ]
