@@ -81,7 +81,7 @@ class Registrations extends Command {
     if ($user->data) {
       $data = json_decode($user->data);
       if (property_exists($data, 'school')) {
-        return fprintf(STDOUT, "\t%s", $data['school']);
+        return fprintf(STDOUT, "\t%s", $data->school);
       }
     }
     return fprintf(STDOUT, "\t%s", $user->email);
