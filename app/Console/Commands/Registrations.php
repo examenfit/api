@@ -53,12 +53,14 @@ class Registrations extends Command {
       $registration->license,
       $registration->email
     );
-    if ($registration->activated && !$isTest) {
+    if ($isTest) {
+      return fprintf(STDOUT, "\t%s", 'TEST');
+    } elseif ($registration->activated) {
       $user = User::firstWhere('email', $registration->email);
       if ($user) {
-        fprintf(STDOUT, "\t%s", $isTest);
+        fprintf(STDOUT, "\t%s", '');
       } else {
-        return fprintf(STDOUT, "\t%s", 'GEEN GEBRUIKER');
+        return fprintf(STDOUT, "\t%s", 'EMAIL MISMATCH');
       }
       foreach($user->seats as $seat) {
         foreach($seat->privileges as $priv) {
