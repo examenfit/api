@@ -80,8 +80,8 @@ class Registrations extends Command {
   function reportUser($user) {
     if ($user->data) {
       $data = json_decode($user->data);
-      if ($data->school) {
-        return fprintf(STDOUT, "\t%s", $data->school);
+      if (array_key_exists('school', $data)) {
+        return fprintf(STDOUT, "\t%s", $data['school']);
       }
     }
     return fprintf(STDOUT, "\t%s", $user->email);
