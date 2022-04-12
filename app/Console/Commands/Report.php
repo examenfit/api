@@ -41,10 +41,16 @@ class Report extends Command {
     $this->reportLicenties();
   }
 
-  function skipEmail($u) {
-    $email = $u->email;
+  function skipUserEmail($user) {
+    $email = $user->email;
+    return $this->skipEmail($email);
+  }
+
+  function skipEmail($email) {
+    //fprintf(STDOUT, "\nskipUserEmail %s?", $email);
     foreach (Report::SKIP_EMAIL as $pattern) {
       if (strpos($email, $pattern) !== FALSE) {
+        //fprintf(STDOUT, "\nSKIP: '%s'", $pattern);
         return TRUE;
       }
     }
@@ -55,7 +61,7 @@ class Report extends Command {
     $source = [];
     foreach(User::all() as $u) {
       if ($u->role != 'docent') continue;
-      if ($this->skipEmail($u)) continue;
+      if ($this->skipUserEmail($u)) continue;
       try {
         $data = json_decode($u->data);
         $school = $data->school;
@@ -78,6 +84,9 @@ class Report extends Command {
     foreach(License::all() as $l) {
       if ($this->skipLicense($l)) continue;
       $k = $l->type;
+      if ($k == 'leerlinglicentie') {
+        fprintf(STDOUT, "\n%s", $l->seats[0]->user->email);
+      }
       if (array_key_exists($k, $counts)) {
         $counts[$k]++;
       } else {
@@ -88,11 +97,13 @@ class Report extends Command {
   }
 
   function skipLicense($l) {
+    if ($l->type === 'leerlinglicentie') {
+      return $this->skipUserEmail($l->seats[0]->user);
+    }
     foreach($l->seats as $seat) {
       $p = $seat->privileges->firstWhere('action', 'licentie beheren');
       if ($p) {
-        if ($this->skipEmail($seat)) return TRUE;
-        if ($this->skipEmail($seat->user)) return TRUE;
+        if ($this->skipUserEmail($seat->user)) return TRUE;
       }
     }
   }
@@ -100,7 +111,7 @@ class Report extends Command {
   function reportRegistraties() {
     $counts = [];
     foreach(Registration::all() as $r) {
-      if ($this->skipEmail($r)) continue;
+      if ($this->skipUserEmail($r)) continue;
       $k = $r->license;
       if (array_key_exists($k, $counts)) {
         $counts[$k]++;
@@ -112,7 +123,7 @@ class Report extends Command {
 
     $counts = [];
     foreach(Registration::all() as $r) {
-      if ($this->skipEmail($r)) continue;
+      if ($this->skipUserEmail($r)) continue;
       if (!$r->activated) continue;
       $k = $r->license;
       if (array_key_exists($k, $counts)) {
