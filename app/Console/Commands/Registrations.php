@@ -37,7 +37,7 @@ class Registrations extends Command {
   }
 
   function process() {
-    fprintf(STDOUT, "Datum\tAanvraag\tEmail\tTest");
+    fprintf(STDOUT, "Datum\tAanvraag\tEmail\tInfo");
     fprintf(STDOUT, "\tSchool");
     fprintf(STDOUT, "\tLicentieu\tVan\tTot\tDocentlicenties\tLeerlingLicenties");
     foreach(Registration::all() as $registration) {
@@ -60,7 +60,7 @@ class Registrations extends Command {
       if ($user) {
         fprintf(STDOUT, "\t%s", '');
       } else {
-        return fprintf(STDOUT, "\t%s", 'EMAIL MISMATCH');
+        return fprintf(STDOUT, "\t%s", 'MISMATCH');
       }
       foreach($user->seats as $seat) {
         foreach($seat->privileges as $priv) {
@@ -90,7 +90,7 @@ class Registrations extends Command {
   }
 
   function reportLicense($license) {
-    fprintf(STDOUT, "\t%s\t%s\t%d\t%d",
+    fprintf(STDOUT, "\t%s\t%s\t%s\t%d\t%d",
       $license->type,
       substr($license->begin, 0, 10),
       substr($license->end, 0, 10),
