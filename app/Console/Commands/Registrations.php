@@ -39,7 +39,7 @@ class Registrations extends Command {
   function process() {
     fprintf(STDOUT, "Datum\tAanvraag\tEmail\tInfo");
     fprintf(STDOUT, "\tSchool");
-    fprintf(STDOUT, "\tLicentieu\tVan\tTot\tDocentlicenties\tLeerlingLicenties");
+    fprintf(STDOUT, "\tLicentie\tVan\tTot\t#Docenten\t#Leerlingen");
     foreach(Registration::all() as $registration) {
       $this->reportRegistration($registration);
     }
