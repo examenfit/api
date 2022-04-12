@@ -16,10 +16,12 @@ class Report extends Command {
   protected $signature = 'ef:report';
 
   const SKIP_EMAIL = [
-    '@examenfit.nl',
+    'examenfit',
     '@example.com',
     '@gielstekelenburg.nl',
     '@wismon.nl',
+    'janaalfs@hotmail.com',
+    'janaalfs2014@gmail.com',
     'marceldol@gmail.com',
     'vwesterlaak@gmail.com',
   ];
@@ -74,8 +76,7 @@ class Report extends Command {
   function reportLicenties() {
     $counts = [];
     foreach(License::all() as $l) {
-      $u = $l->seats->firstWhere('role', 'docent');
-      if ($u && $this->skipEmail($u)) continue;
+      if ($this->skipLicense($l)) continue;
       $k = $l->type;
       if (array_key_exists($k, $counts)) {
         $counts[$k]++;
@@ -84,6 +85,16 @@ class Report extends Command {
       }
     }
     $this->reportCounts($counts, 'Licentie');
+  }
+
+  function skipLicense($l) {
+    foreach($l->seats as $seat) {
+      $p = $seat->privileges->firstWhere('action', 'licentie beheren');
+      if ($p) {
+        if ($this->skipEmail($seat)) return TRUE;
+        if ($this->skipEmail($seat->user)) return TRUE;
+      }
+    }
   }
 
   function reportRegistraties() {
