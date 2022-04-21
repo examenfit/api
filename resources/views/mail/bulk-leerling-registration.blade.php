@@ -13,8 +13,8 @@
   En hoe weet je nou of je een onderwerp goed genoeg beheerst?
 </p>
 <p>
-  Voor wiskunde A en B en natuurkunde biedt je school je daarom kosteloos ExamenFit.
-  Hier oefen je vanuit een totaaloverzicht van de examenstof.
+  Voor wiskunde A en B en natuurkunde biedt je school je daarom kosteloos
+  ExamenFit. Hier oefen je vanuit een totaaloverzicht van de examenstof.
   Je kijkt je antwoord na, om te zien hoe je ervoor staat.
 </p>
 <p>
@@ -34,5 +34,6 @@
   Het team van ExamenFit
 </p>
 <p>
- PS Doe je naast wiskunde ook natuurkunde? Dan kun je bovenaan in ExamenFit wisselen van vak.
+  PS. Doe je naast wiskunde ook natuurkunde? Dan kun je bovenaan in
+  ExamenFit wisselen van vak.
 </p>
