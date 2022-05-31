@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\KPIReport;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -271,6 +273,12 @@ class CustomQueries extends Controller
       return DB::select(CustomQueries::LEERLINGLICENTIES_CSDEHOVEN);
     }
 
+    public function kpis()
+    {
+      $kpis = new KPIReport();
+      return $kpis->report();
+    }
+
     public function index()
     {
       return response()->json([
@@ -303,6 +311,11 @@ class CustomQueries extends Controller
           'title' => 'Activering @leerling.csdehoven.nl',
           'path' => '/leerlinglicenties/csdehoven',
           'endpoint' => '/api/admin/custom/leerlinglicenties/csdehoven'
+        ],
+        [
+          'title' => 'KPI\'s',
+          'path' => '/kpis',
+          'endpoint' => '/api/admin/custom/kpis'
         ]
       ]);
     }
