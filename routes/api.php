@@ -192,6 +192,8 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::group(['prefix' => 'admin', 'middleware' => 'role:admin,author'], function () {
         Route::get('/', [AdminIndexController::class, 'index']);
 
+        Route::get('/custom/kpis', [CustomQueries::class, 'kpis']);
+        Route::get('/custom/clicks+devices', [CustomQueries::class, 'clicks_and_devices']);
         Route::get('/custom/activities/all', [CustomQueries::class, 'activities']);
         Route::get('/custom/questions/complexity_count', [CustomQueries::class, 'questions_complexity_count']);
         Route::get('/custom/questions/complexity_is_null', [CustomQueries::class, 'questions_complexity_is_null']);

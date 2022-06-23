@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\KPIReport;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -224,6 +226,57 @@ class CustomQueries extends Controller
         email LIKE '%@leerling.csdehoven.nl'
     ";
 
+    const CLICKS_AND_DEVICES_TOTAL = "
+      SELECT
+        'Totaal' AS Activiteit,
+        COUNT(*) AS Clicks,
+        COUNT(DISTINCT device_key) AS Devices
+      FROM
+        activity_logs
+    ";
+
+    const CLICKS_AND_DEVICES_PER_ACTIVITY = "
+      SELECT
+        activity AS Activiteit,
+        COUNT(*) AS Clicks,
+        COUNT(DISTINCT device_key) AS Devices
+      FROM
+        activity_logs
+      GROUP BY 1
+      ORDER BY 2 DESC
+    ";
+
+    public function clicks_and_devices()
+    {
+      $rows = [];
+      foreach(DB::select(CustomQueries::CLICKS_AND_DEVICES_PER_ACTIVITY) as $row) {
+        $rows[$row->Activiteit] = $row;
+      }
+      foreach(DB::select(CustomQueries::CLICKS_AND_DEVICES_TOTAL) as $row) {
+        $rows[$row->Activiteit] = $row;
+      }
+      $activiteiten = [
+        "Mijn opgaven",
+        "Opgave",
+        "Tips en antwoorden",
+        "Ontvang een tip",
+        "Kijk antwoord na",
+        "Begin met nakijken",
+        "Heb je dit tussenantwoord goed: Ja",
+        "Heb je dit tussenantwoord goed: Nee",
+        "Bekijk je punten",
+        "Login",
+        "Opgavenset samengesteld (PDF)",
+        "Opgavenset samengesteld (online)",
+        "Opgavenset samengesteld (docx)",
+      ];
+      $results = [];
+      foreach($activiteiten as $activiteit) {
+        $results[] = $rows[$activiteit];
+      }
+      return $results;
+    }
+
     public function activities()
     {
       return DB::select(CustomQueries::ACTIVITIES);
@@ -271,6 +324,12 @@ class CustomQueries extends Controller
       return DB::select(CustomQueries::LEERLINGLICENTIES_CSDEHOVEN);
     }
 
+    public function kpis()
+    {
+      $kpis = new KPIReport();
+      return $kpis->report();
+    }
+
     public function index()
     {
       return response()->json([
@@ -303,6 +362,16 @@ class CustomQueries extends Controller
           'title' => 'Activering @leerling.csdehoven.nl',
           'path' => '/leerlinglicenties/csdehoven',
           'endpoint' => '/api/admin/custom/leerlinglicenties/csdehoven'
+        ],
+        [
+          'title' => 'KPI\'s',
+          'path' => '/kpis',
+          'endpoint' => '/api/admin/custom/kpis'
+        ],
+        [
+          'title' => 'Clicks en Devices',
+          'path' => '/clicks+devices',
+          'endpoint' => '/api/admin/custom/clicks+devices'
         ]
       ]);
     }
