@@ -256,6 +256,8 @@ class CustomQueries extends Controller
         $rows[$row->Activiteit] = $row;
       }
       $activiteiten = [
+        // Page 1
+        "Totaal",
         "Mijn opgaven",
         "Opgave",
         "Tips en antwoorden",
@@ -265,6 +267,7 @@ class CustomQueries extends Controller
         "Heb je dit tussenantwoord goed: Ja",
         "Heb je dit tussenantwoord goed: Nee",
         "Bekijk je punten",
+        // Page 2
         "Login",
         "Opgavenset samengesteld (PDF)",
         "Opgavenset samengesteld (online)",
