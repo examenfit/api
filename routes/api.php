@@ -146,6 +146,8 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     //Route::delete('/licenses/{license}/{seat}/{privilege}', [LicenseController::class, 'deletePrivilege']);
     Route::post('/create-leerlingen', [LicenseController::class, 'postLeerlingen']);
     Route::post('/upload-leerlingen', [LicenseController::class, 'postUpload']);
+    Route::post('/hide-seats', [LicenseController::class, 'hideSeats']);
+    Route::post('/show-seats', [LicenseController::class, 'showSeats']);
 
     Route::get('/owned-groups', [LicenseController::class, 'getOwnedGroups']);
     Route::get('/groups', [LicenseController::class, 'getGroups']);

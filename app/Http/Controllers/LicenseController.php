@@ -19,6 +19,7 @@ use App\Mail\InviteMail;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Vinkla\Hashids\Facades\Hashids;
 
@@ -512,5 +513,31 @@ class LicenseController extends Controller
     public function putGroup()
     {
         return reponse()->noContent(501);
+    }
+
+    public function hideSeats(Request $request)
+    {
+        $seats = [];
+        foreach($request->seats as $hashId) {
+            $seat_id = Hashids::decode($hashId)[0];
+            $seat = Seat::find($seat_id);
+            $seat->is_visible = 0;
+            $seat->save();
+            $seats[] = $seat;
+        }
+        return $seats;
+    }
+
+    public function showSeats(Request $request)
+    {
+        $seats = [];
+        foreach($request->seats as $hashId) {
+            $seat_id = Hashids::decode($hashId)[0];
+            $seat = Seat::find($seat_id);
+            $seat->is_visible = 1;
+            $seat->save();
+            $seats[] = $seat;
+        }
+        return $seats;
     }
 }
