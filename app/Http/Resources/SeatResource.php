@@ -20,6 +20,7 @@ class SeatResource extends JsonResource
             'license_id' => Hashids::encode($this->license_id),
             'role' => $this->role,
             'is_active' => $this->is_active,
+            'is_visible' => $this->is_visible,
             'email' => $this->email,
             'first_name' => $this->first_name,
             'last_name' => $this->last_name,

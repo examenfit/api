@@ -17,6 +17,7 @@ class Seat extends Model
         'last_name',
         'email',
         'token',
+        'visible',
         'role'
     ];
 
