@@ -510,9 +510,16 @@ class LicenseController extends Controller
         );
     }
 
-    public function putGroup()
+    public function putGroup(Group $group, Request $request)
     {
-        return reponse()->noContent(501);
+        $request->validate([
+          'name' => 'required|string'
+        ]);
+
+        $group->name = $request->name;
+        $group->save();
+
+        return $group;
     }
 
     public function hideSeats(Request $request)

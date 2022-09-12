@@ -17,7 +17,8 @@ class GroupResource extends JsonResource
         return [
             'id' => $this->hash_id,
             'name' => $this->name,
-            'license_id' => $this->license_id,
+            'is_active' => $this->is_active,
+            //'license_id' => $this->license_id,
             'license' => new LicenseResource($this->whenLoaded('license')),
             'seats' => SeatResource::collection($this->whenLoaded('seats')),
         ];
