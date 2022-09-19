@@ -43,6 +43,7 @@ class InviteMail extends Mailable
     public function build()
     {
         return $this->from('info@examenfit.nl')
+                    ->bcc('examenfit@hotmail.com', 'Examenfit')
                     ->subject('Aanmelding ExamenFit')
                     ->view('mail.invite');
     }
