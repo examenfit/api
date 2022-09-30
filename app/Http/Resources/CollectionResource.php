@@ -20,6 +20,7 @@ class CollectionResource extends JsonResource
             'download_type' => $this->download_type,
             'partial_topics' => $this->partial_topics,
             'complete_topics' => $this->complete_topics,
+            'topic_order' => $this->topic_order,
             'topics' => TopicResource::collection($this->whenLoaded('topics')),
             'questions' => QuestionResource::collection($this->whenLoaded('questions')),
             'author' => $this->when($this->relationLoaded('author'), function () {
