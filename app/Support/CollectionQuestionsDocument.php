@@ -15,6 +15,8 @@ use PhpOffice\PhpWord\Element\TextRun;
 use PhpOffice\PhpWord\SimpleType\Jc;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
+use Vinkla\Hashids\Facades\Hashids;
+
 
 class CollectionQuestionsDocument
 {
@@ -150,6 +152,14 @@ class CollectionQuestionsDocument
                 $topics[] = $topic;
             }
         }
+
+        $topic_order = $this->collection['topic_order'] ?: '';
+        usort($topics, function ($a, $b) use ($topic_order) {
+          $i = Hashids::encode($a['id']);
+          $j = Hashids::encode($b['id']);
+          return strpos($topic_order, $i) - strpos($topic_order, $j);
+        });
+
         $this->topics = $topics;
 
         $addCollectionTitle = true;
