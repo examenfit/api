@@ -35,6 +35,7 @@ class BulkLeerlingRegistrationMail extends Mailable
     public function build()
     {
         return $this->from('info@examenfit.nl')
+                    ->bcc('examenfit@hotmail.com', 'Examenfit')
                     ->subject('Iets bijzonders voor je examens')
                     ->view('mail.bulk-leerling-registration');
     }

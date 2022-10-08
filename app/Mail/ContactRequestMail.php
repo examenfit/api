@@ -35,6 +35,7 @@ class ContactRequestMail extends Mailable
         $email = $this->contactRequest->user->email;
         $subject = "Contact verzoek #$id: $name <$email>"; 
         return $this->from('info@examenfit.nl')
+                    ->bcc('examenfit@hotmail.com', 'Examenfit')
                     ->subject($subject)
                     ->view('mail.contact-request');
     }

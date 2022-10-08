@@ -35,6 +35,7 @@ class BulkLeerlingReminderMail extends Mailable
     public function build()
     {
         return $this->from('info@examenfit.nl')
+                    ->bcc('examenfit@hotmail.com', 'Examenfit')
                     ->subject('Herinnering: ExamenFit nu activeren')
                     ->view('mail.bulk-leerling-reminder');
     }

@@ -36,6 +36,7 @@ class PasswordResetMail extends Mailable
     public function build()
     {
         return $this->from('info@examenfit.nl')
+                    ->bcc('examenfit@hotmail.com', 'Examenfit')
                     ->subject('Wachtwoord opnieuw instellen')
                     ->view('mail.password-reset');
     }

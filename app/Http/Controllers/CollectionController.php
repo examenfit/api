@@ -311,6 +311,13 @@ class CollectionController extends Controller
         $appendixes = [];
         $appendix_added = [];
 
+        $topic_order = $collection['topic_order'] ?: '';
+        usort($topics, function ($a, $b) use ($topic_order) {
+          $i = Hashids::encode($a['id']);
+          $j = Hashids::encode($b['id']);
+          return strpos($topic_order, $i) - strpos($topic_order, $j);
+        });
+
         foreach ($topics as $topic) {
             $topic['introduction'] = $markup->fix($topic['introduction']);
 
@@ -530,6 +537,7 @@ class CollectionController extends Controller
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'download_type' => 'required|string',
+            'topic_order' => 'string',
             'course_id' => ['required', new HashIdExists('courses')],
             'questions' => 'required|array',
             'questions.*' => new HashIdExists('questions'),
@@ -538,7 +546,8 @@ class CollectionController extends Controller
         $collection = Collection::create([
             'name' => $data['name'],
             'course_id' => Hashids::decode($data['course_id'])[0],
-            'download_type' => $data['download_type']
+            'download_type' => $data['download_type'],
+            'topic_order' => $data['topic_order'],
         ]);
 
         $collection->questions()->sync(
@@ -665,6 +674,7 @@ class CollectionController extends Controller
             'id' => Hashids::encode($collection->id),
             'name' => $collection->name,
             'download_type' => $collection->download_type,
+            'topic_order' => $collection->topic_order,
             'date' => (new DateTime($collection->created_at))->format('c'),
             'topics' => array_map(function($topic) {
                 return [
@@ -723,7 +733,7 @@ class CollectionController extends Controller
           ];
         }, DB::select("
           select
-            id, name, created_at, download_type
+            id, name, created_at, download_type, topic_order
           from
             collections
           where
