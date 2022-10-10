@@ -537,7 +537,7 @@ class CollectionController extends Controller
         $data = $request->validate([
             'name' => 'required|string|max:255',
             'download_type' => 'required|string',
-            'topic_order' => 'string',
+            'topic_order' => 'string|nullable',
             'course_id' => ['required', new HashIdExists('courses')],
             'questions' => 'required|array',
             'questions.*' => new HashIdExists('questions'),
