@@ -152,6 +152,8 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('/groups/{group}', [LicenseController::class, 'getGroup']);
     Route::put('/groups/{group}', [LicenseController::class, 'putGroup']);
 
+    Route::post('/collections/{collection}/hide', [CollectionController::class, 'hideCollection']);
+    Route::post('/collections/{collection}/hide/{group}', [CollectionController::class, 'hideCollectionFromGroup']);
     Route::post('/collections/{collection}/share', [CollectionController::class, 'shareCollection']);
     Route::post('/collections/{collection}/share/{group}', [CollectionController::class, 'shareCollectionWithGroup']);
 

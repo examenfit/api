@@ -589,6 +589,66 @@ class CollectionController extends Controller
         return new CollectionResource($collection);
     }
 
+    function hideCollectionFromSeat($collection, $seat, $until) {
+      $action = 'vraag verbergen';
+      foreach($collection->questions as $question) {
+        $id = $question->id;
+        foreach($seat->privileges as $priv) {
+          $hasAction = $priv->action === $action;
+          $hasObject = $priv->object_id === $id;
+          if ($hasAction && $hasObject) {
+            return 0;
+          }
+        }
+        Privilege::create([
+          'actor_seat_id' => $seat->id,
+          'action' => $action,
+          'object_type' => 'question',
+          'object_id' => $id,
+          'begin' => $seat->license->begin,
+          'end' => $until,
+        ]);
+      }
+      return 1;
+    }
+
+    public function hideCollectionFromGroup(Collection $collection, Group $group, Request $request)
+    {
+        $until = $request->until;
+        $n = 0;
+        foreach($group->seats as $leerling) {
+          $n += $this->hideCollectionFromSeat($collection, $leerling, $until);
+        }
+        return response()->json([
+          'status' => 'ok',
+          'hidden' => $n
+        ]);
+    }
+
+    public function hideCollection(Collection $collection, Request $request)
+    {
+        $until = $request->until;
+        $user_id = $collection->user_id;
+        $seats = Seat::query()
+          ->where('role', 'docent')
+          ->where('user_id', $user_id);
+
+        $n = 0;
+        foreach($seats->get() as $docent) {
+          $docent->load('license.seats');
+          $leerlingen = Seat::query()
+            ->where('role', 'leerling')
+            ->where('license_id', $docent->license_id);
+          foreach($leerlingen->get() as $leerling) {
+            $n += $this->hideCollectionFromSeat($collection, $leerling, $until);
+          }
+        }
+        return response()->json([
+          'status' => 'ok',
+          'hidden' => $n
+        ]);
+    }
+
     function shareCollectionWithSeat($collection, $seat) {
       $id = $collection->id;
       foreach($seat->privileges as $priv) {
