@@ -373,11 +373,16 @@ class CollectionQuestionsDocument
             $section = $this->currentSection();
         }
         foreach ($attachments as $attachment) {
+            $scale = $this->getResizeFactor(
+                $attachment->image_width,
+                $attachment->image_height,
+                320*1.125, 200*1.125
+            );
             $this->addImage(
                 $section,
                 $attachment->url,
-                $attachment->image_width,
-                $attachment->image_height,
+                $attachment->image_width * $scale,
+                $attachment->image_height * $scale,
                 $attachment->name
             );
         }
