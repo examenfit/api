@@ -235,23 +235,15 @@ class CollectionQuestionsDocument
     }
 
     function addAppendix($appendix) {
-        $titleHeight = 20;
-        $id = $appendix->id;
-        if (array_key_exists($id, $this->added)) {
-            /* skip */
-        } else {
-            //$question = $appendix->question;
-            //$this->addQuestionTitle($question);
-
-            $parent = $this->currentSection();
+        $isAdded = array_key_exists($appendix->id, $this->added)
+        if (!$isAdded) {
             $scale = $this->getResizeFactor(
                 $appendix->image_width,
                 $appendix->image_height,
                 400*1.125, 600*1.125
             );
-
             $this->addImage(
-                $parent,
+                $this->currentSection(),
                 $appendix->url,
                 $appendix->image_width * $scale,
                 $appendix->image_height * $scale,
@@ -262,6 +254,9 @@ class CollectionQuestionsDocument
 
     function getResizeFactor($w, $h, $W = 4000, $H = 6000)
     {
+        // Scale up?
+
+        // Scale down
         if ($w > $W) {
           $scaleW = $W / $w;
         } else {
@@ -272,13 +267,13 @@ class CollectionQuestionsDocument
         } else {
           $scaleH = 1;
         }
+
         return min($scaleW, $scaleH);
     }
 
     function addTopic($topic)
     {
         Log::info($topic->name);
-
         $this->addSection();
         $this->addTopicTitle($topic);
 
@@ -340,7 +335,6 @@ class CollectionQuestionsDocument
         $year = $topic->exam->year;
         $term = substr("III", 0, $topic->exam->term);
 
-        //$this->currentSection()->addTitle($title);
         $exam = "{$year}-{$term}";
         $section = $this->currentSection();
         $table = $section->addTable([
@@ -388,21 +382,22 @@ class CollectionQuestionsDocument
         }
     }
 
-    function addImage($section, $url, $width, $height, $title)
+    function addImage($section, $url, $imageWidth, $imageHeight, $title)
     {
+        $titleHeight = 20;
         $textBox = $section->addTextBox([
-            'width' => $width + 20,
-            'height' => $height + 20,
+            // 'width' => $imageWidth + 20,
+            'width' => 4000,
+            'height' => $imageHeight + $titleHeight,
             'borderColor' => '#FFFFFF',
         ]);
 
-        $scale = 1;
         $textRun = $textBox->addTextRun();
         $textRun->addText($title, ['bold' => true]);
         $textRun->addTextBreak();
         $textRun->addImage($url, [
-            'width' => $width * $scale,
-            'height' => $height * $scale,
+            'width' => $imageWidth,
+            'height' => $imageHeight,
         ]);
     }
 
@@ -438,21 +433,7 @@ class CollectionQuestionsDocument
 
     function addQuestionText($question) {
         $section = $this->currentSection();
-/*
-        $table = $section->addTable([
-            'unit' => \PhpOffice\PhpWord\Style\Table::WIDTH_PERCENT,
-            'width' => 100 * 50,
-            'Spacing' => 0,
-            'cellSpacing' => 0,
-            'cellMargin' => 100,
-            'marginBottom' => 100,
-        ]);
-        $row = $table->addRow();
-        $cell = $row->addCell(5000, [
-            'borderSize' => 12
-        ]);
-        $txt = $cell->addTextRun();
-*/
+
         $txt = $section->addTextRun();
         $this->formatText($question->text, $txt);
     }

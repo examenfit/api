@@ -15,6 +15,7 @@ use App\Http\Controllers\PrivilegeController;
 use App\Http\Controllers\AnnotationController;
 use App\Http\Controllers\LicenseController;
 use App\Http\Controllers\MollieController;
+use App\Http\Controllers\FeedbackController;
 
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\CollectionController;
@@ -57,6 +58,12 @@ Route::get('/custom/activities.tsv', [CustomQueries::class, 'activities_tsv']);
 
 Route::get('/log/collection/{collection}', [ActivityLogController::class, 'collectionSummary']);
 Route::get('/log/latest/{privilege}', [ActivityLogController::class, 'latestActivity']);
+
+Route::post('/feedback', [FeedbackController::class, 'post']);
+Route::get('/feedback', [FeedbackController::class, 'streams']);
+Route::get('/feedback/{stream}', [FeedbackController::class, 'exams']);
+Route::get('/feedback/{stream}/{exam}', [FeedbackController::class, 'questions']);
+Route::get('/feedback/{stream}/{exam}/{question}', [FeedbackController::class, 'parts']);
 
 Route::post('/contact-requests', [ContactRequestController::class, 'store']);
 Route::get('/contact-requests', [ContactRequestController::class, 'index']);
