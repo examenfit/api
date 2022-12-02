@@ -83,7 +83,7 @@ class License extends Model
     {
         $begin = new DateTime;
         $end = new DateTime;
-        $end->add(new DateInterval('P21D'));
+        $end->add(new DateInterval('P10D'));
 
         $feb1 = new DateTime('2022-02-01');
         if ($end < $feb1) {

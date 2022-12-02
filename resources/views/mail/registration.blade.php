@@ -9,7 +9,7 @@
 
 <p>Je hebt je aangemeld voor een proeflicentie. Hiermee kun je:</p>
 <ul>
-    <li>3 weken lang ExamenFit gratis uitproberen, zonder verplichtingen</li>
+    <li>10 dagen lang ExamenFit gratis uitproberen, zonder verplichtingen</li>
     <li>Al je leerlingen zonder licentie laten oefenen, met jouw selectie van vragen</li>
     <li>Voor drie leerlingen proeflicenties aanmaken, om zelfstandig te oefenen</li>
 </ul>
