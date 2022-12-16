@@ -264,7 +264,7 @@ class FeedbackController extends Controller
     }
 
     $mail = new FeedbackMail($data);
-    Mail::to('info@examenfit')->send($mail);
+    Mail::to('info@examenfit.nl')->send($mail);
 
     return $data;
   }
