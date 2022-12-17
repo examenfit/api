@@ -6,7 +6,9 @@ use App\Models\Tag;
 use App\Models\Stream;
 use App\Http\Resources\TagResource;
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+
 use Vinkla\Hashids\Facades\Hashids;
 
 class StreamController extends Controller
