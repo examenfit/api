@@ -26,7 +26,29 @@ class UserController extends Controller
           ]);
           return new UserResource($user);
         }
-        return UserResource::collection(User::all());
+        return $this->all();
+        // return UserResource::collection(User::all());
+    }
+
+    private function all()
+    {
+        return DB::select("
+            SELECT
+                u.email,
+                role,
+                first_name,
+                last_name,
+                DATE(u.created_at) AS created,
+                DATE(MAX(l.created_at)) AS last_login
+            FROM
+                users u
+            LEFT JOIN
+                activity_logs l ON l.email = u.email
+            WHERE
+                l.activity = 'Login'
+            GROUP BY
+                u.id
+        ");
     }
 
     public function log(Request $request)
@@ -51,6 +73,27 @@ class UserController extends Controller
           $request->email,
           $request->count ?: 10
         ]);
+    }
+
+    public function save(Request $request)
+    {
+        if ($request->email) {
+          $user = User::firstWhere('email', $request->email);
+          if (!$user) {
+            return response(null, 404);
+          }
+        }
+
+        $data = $request->validate([
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'role' => 'required|in:admin,author,participant,docent,leerling',
+        ]);
+
+        $user->fill($data);
+        $user->save();
+
+        return new UserResource($user);
     }
 
     public function store(Request $request)
