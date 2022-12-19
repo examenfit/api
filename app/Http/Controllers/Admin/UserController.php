@@ -34,7 +34,7 @@ class UserController extends Controller
     {
         return DB::select("
             SELECT
-                u.email,
+                u.email AS email,
                 role,
                 first_name,
                 last_name,
@@ -47,7 +47,11 @@ class UserController extends Controller
             WHERE
                 l.activity = 'Login'
             GROUP BY
-                u.id
+                email,
+                role,
+                first_name,
+                last_name,
+                created
         ");
     }
 
