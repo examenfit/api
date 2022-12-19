@@ -52,6 +52,7 @@ class UserController extends Controller
                 first_name,
                 last_name,
                 created
+            ORDER BY email
         ");
     }
 
