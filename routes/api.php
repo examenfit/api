@@ -280,6 +280,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('/users', [AdminUserController::class, 'index']);
         Route::get('/users/log', [AdminUserController::class, 'log']);
         Route::post('/users', [AdminUserController::class, 'store']);
+        Route::put('/users', [AdminUserController::class, 'save']);
 /*
         Route::get('/invalid_domains/', [StreamController::class, 'invalid_domains']);
         Route::get('/fixable_domains/', [StreamController::class, 'fixable_domains']);

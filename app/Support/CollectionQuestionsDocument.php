@@ -235,7 +235,7 @@ class CollectionQuestionsDocument
     }
 
     function addAppendix($appendix) {
-        $isAdded = array_key_exists($appendix->id, $this->added)
+        $isAdded = array_key_exists($appendix->id, $this->added);
         if (!$isAdded) {
             $scale = $this->getResizeFactor(
                 $appendix->image_width,
