@@ -22,14 +22,16 @@ class FeedbackController extends Controller
         'value' => $row->id ? Hashids::encode($row->id) : NULL
       ],
       DB::select("
-        SELECT 'Kies vak' AS label, NULL AS id UNION
         SELECT
-          CONCAT(courses.name, ' ', levels.name), streams.id
+          CONCAT(courses.name, ' ', levels.name) AS label,
+          streams.id AS id
         FROM
           streams, courses, levels
         WHERE
           streams.course_id = courses.id AND
           streams.level_id = levels.id
+        ORDER BY
+          label
       ")
     );
   }
@@ -43,15 +45,16 @@ class FeedbackController extends Controller
         'value' => $row->id ? Hashids::encode($row->id) : NULL
       ],
       DB::select("
-        SELECT 'Kies examen' AS label, NULL AS id, 0 AS position UNION
         SELECT
-          CONCAT(exams.year, ' ', exams.term, 'e tijdvak'), exams.id, CONCAT(exams.year, exams.term)
+          CONCAT(year, ' ', term, 'e tijdvak') AS label,
+          exams.id AS id
         FROM
           exams
         WHERE
           exams.status = 'published' AND
           exams.stream_id = ?
-        ORDER BY 3
+        ORDER BY
+          label
       ", [ $stream_id ])
     );
   }
@@ -68,11 +71,10 @@ class FeedbackController extends Controller
         'question_id' => $row->id
       ],
       DB::select("
-        SELECT 'Vraag?' AS label, NULL AS id, 0 AS number UNION
         SELECT
-          concat(name, ', vraag ', number),
-          questions.id,
-          questions.number
+          concat(name, ', vraag ', number) AS label,
+          questions.id AS id,
+          questions.number AS number
         FROM
           questions,
           topics
