@@ -22,7 +22,7 @@ class FeedbackController extends Controller
         'value' => $row->id ? Hashids::encode($row->id) : NULL
       ],
       DB::select("
-        SELECT 'Vak?' AS label, NULL AS id UNION
+        SELECT 'Kies vak' AS label, NULL AS id UNION
         SELECT
           CONCAT(courses.name, ' ', levels.name), streams.id
         FROM
@@ -43,7 +43,7 @@ class FeedbackController extends Controller
         'value' => $row->id ? Hashids::encode($row->id) : NULL
       ],
       DB::select("
-        SELECT 'Examen?' AS label, NULL AS id, 0 AS position UNION
+        SELECT 'Kies examen' AS label, NULL AS id, 0 AS position UNION
         SELECT
           CONCAT(exams.year, ' ', exams.term, 'e tijdvak'), exams.id, CONCAT(exams.year, exams.term)
         FROM
