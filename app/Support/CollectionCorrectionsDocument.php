@@ -683,16 +683,21 @@ class CollectionCorrectionsDocument
         // Run KaTeX NodeJS script
         $result = trim(shell_exec(base_path("/node_modules/katex/cli.js --input {$tempFilePath}")));
 
-        //Log::info("result: $result");
+        try {
+          //Log::info("result: $result");
 
-        // Grep MathML XML
-        preg_match('/\<math.+\<\/math\>/', $result, $match);
+          // Grep MathML XML
+          preg_match('/\<math.+\<\/math\>/', $result, $match);
 
-        // Delete file
-        fclose($tempFile);
+          // Delete file
+          fclose($tempFile);
 
-        // Return MathML XML
-        return $match[0];
+          // Return MathML XML
+          return $match[0];
+        } catch (Exception $err) {
+          Log::info($err->getMessage());
+          Log::info($result);
+        }
     }
 
     /**
