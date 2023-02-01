@@ -179,11 +179,17 @@ class CollectionController extends Controller
             'questions.chapters.parent',
         ];
 
-        if ($collection->questions[0]->topic->exam->show_answers) {
-          $load[] = 'questions.answers.sections.tips';
-        }
+//      if ($collection->questions[0]->topic->exam->show_answers) {
+//        $load[] = 'questions.answers.sections.tips';
+//      }
 
         $collection->load($load);
+        foreach ($collection->questions as $question) {
+          if ($question->topic->exam->show_answers) {
+            $question->load(['answers.sections.tips']);
+          }
+        }
+
 
         return new CollectionResource($collection);
     }
@@ -344,8 +350,8 @@ class CollectionController extends Controller
                 $question['text'] = $markup->fix($question['text']);
 
                 $c = $collection->hash_id;
-                $q = $question->hash_id;
                 $t = $topic->hash_id;
+                $q = $question->hash_id;
 
                 $question['url'] = "$app_url/c/{$c}/{$t}/{$q}";
                 
