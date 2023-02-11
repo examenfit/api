@@ -77,6 +77,7 @@ Route::post('/login', [AuthenticatedSessionController::class, 'store'])
 
 Route::get('/topics/{topic}', [TopicController::class, 'show']);
 
+Route::post('/annotations/{stream}', [AnnotationController::class, 'addAnnotation']);
 Route::get('/annotations/{stream}', [AnnotationController::class, 'index']);
 Route::get('/annotations/{stream}/types', [AnnotationController::class, 'types']);
 Route::get('/annotations/{stream}/types/{type}', [AnnotationController::class, 'type']);

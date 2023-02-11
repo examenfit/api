@@ -135,4 +135,24 @@ class AnnotationController extends Controller
       ", [ $annotation_id, $question_id ]);
       return 202;
     }
+
+    public function addAnnotation(Stream $stream, Request $request)
+    {
+      $data = $request->validate([
+        'parent_id' => 'required',
+        'name' => 'required',
+      ]);
+      $stream_id = $stream->id;
+      $parent_id = Hashids::decode($data['parent_id'])[0];
+      $name = $data['name'];
+      DB::select("
+        insert into annotations
+          (stream_id, parent_id, name, type)
+        values
+          (?, ?, ?, 'basisvaardigheid')
+      ", [
+        $stream_id, $parent_id, $name
+      ]);
+      return $data;
+    }
 }
