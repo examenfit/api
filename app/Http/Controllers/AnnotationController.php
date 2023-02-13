@@ -80,4 +80,79 @@ class AnnotationController extends Controller
 
       return AnnotationResource::collection($annotations);
     }
+
+    private function getQuestion($year, $term, $number)
+    {
+      $questions = DB::select("
+        select
+          questions.id,
+          topic_id,
+          exam_id
+        from
+          questions, topics, exams
+        where
+          exams.year = ? and
+          exams.term = ? and
+          exams.id = exam_id and
+          topics.id = topic_id and
+          questions.number = ?
+      ", [ $year, $term, $number ]);
+
+      foreach($questions as $question) {
+        return $question;
+      }
+    }
+
+    public function putQuestion($annotation, $year, $term, $number)
+    {
+      $annotation_id = Hashids::decode($annotation)[0];
+      $question = $this->getQuestion($year, $term, $number);
+      $question_id = $question->id;
+      DB::select("
+        insert into question_annotation
+          (annotation_id, question_id)
+        values
+          (?, ?)
+      ", [ $annotation_id, $question_id ]);
+      return [
+        'id' => Hashids::encode($question->id),
+        'topic_id' => Hashids::encode($question->topic_id),
+        'exam_id' => Hashids::encode($question->exam_id),
+      ];
+    }
+
+    public function deleteQuestion($annotation, $year, $term, $number)
+    {
+      $annotation_id = Hashids::decode($annotation)[0];
+      $question = $this->getQuestion($year, $term, $number);
+      $question_id = $question->id;
+      DB::select("
+        delete from
+          question_annotation
+        where
+          annotation_id = ? and
+          question_id = ?
+      ", [ $annotation_id, $question_id ]);
+      return 202;
+    }
+
+    public function addAnnotation(Stream $stream, Request $request)
+    {
+      $data = $request->validate([
+        'parent_id' => 'required',
+        'name' => 'required',
+      ]);
+      $stream_id = $stream->id;
+      $parent_id = Hashids::decode($data['parent_id'])[0];
+      $name = $data['name'];
+      DB::select("
+        insert into annotations
+          (stream_id, parent_id, name, type)
+        values
+          (?, ?, ?, 'basisvaardigheid')
+      ", [
+        $stream_id, $parent_id, $name
+      ]);
+      return $data;
+    }
 }

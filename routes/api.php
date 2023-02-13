@@ -77,6 +77,7 @@ Route::post('/login', [AuthenticatedSessionController::class, 'store'])
 
 Route::get('/topics/{topic}', [TopicController::class, 'show']);
 
+Route::post('/annotations/{stream}', [AnnotationController::class, 'addAnnotation']);
 Route::get('/annotations/{stream}', [AnnotationController::class, 'index']);
 Route::get('/annotations/{stream}/types', [AnnotationController::class, 'types']);
 Route::get('/annotations/{stream}/types/{type}', [AnnotationController::class, 'type']);
@@ -102,6 +103,11 @@ Route::post('/log', [ActivityLogController::class, 'store']);
 
 Route::get('/streams/', [StreamController::class, 'index']);
 Route::get('/streams/{stream}/formuleblad', [StreamController::class, 'formuleblad']);
+Route::get('/streams/{stream}/all-questions', [StreamController::class, 'allQuestions']);
+
+Route::put('/annotation-question/{annotation}/{year}/{term}/{number}', [AnnotationController::class, 'putQuestion']);
+Route::delete('/annotation-question/{annotation}/{year}/{term}/{number}', [AnnotationController::class, 'deleteQuestion']);
+
 
 Route::get('/score', [ScoreController::class, 'loadAll']);
 Route::put('/score', [ScoreController::class, 'saveAll']);

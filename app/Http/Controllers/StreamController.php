@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Tag;
 use App\Models\Stream;
 use App\Http\Resources\TagResource;
+use App\Http\Resources\StreamResource;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -114,6 +115,24 @@ class StreamController extends Controller
     public function tag(Stream $stream, Tag $tag)
     {
         return new TagResource($tag);
+    }
+
+    public function allQuestions($stream)
+    {
+       $id = Hashids::decode($stream)[0];
+       return DB::select("
+         select
+           year,
+           term,
+           questions.number
+         from
+           exams, topics, questions
+         where
+           topic_id = topics.id and
+           exam_id = exams.id and
+           stream_id = ?
+         order by 1,2,3
+       ", [$id]);
     }
 
     // fixme
