@@ -104,6 +104,7 @@ Route::post('/log', [ActivityLogController::class, 'store']);
 Route::get('/streams/', [StreamController::class, 'index']);
 Route::get('/streams/{stream}/formuleblad', [StreamController::class, 'formuleblad']);
 Route::get('/streams/{stream}/all-questions', [StreamController::class, 'allQuestions']);
+Route::get('/streams/{stream}/exams', [StreamController::class, 'exams']);
 
 Route::put('/annotation-question/{annotation}/{year}/{term}/{number}', [AnnotationController::class, 'putQuestion']);
 Route::delete('/annotation-question/{annotation}/{year}/{term}/{number}', [AnnotationController::class, 'deleteQuestion']);

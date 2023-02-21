@@ -63,6 +63,24 @@ class StreamController extends Controller
         ];
     }
 
+    public function exams(Stream $stream)
+    {
+        return DB::select("
+          SELECT
+            year,
+            term,
+            show_answers
+          FROM
+            exams
+          WHERE
+            stream_id = ? AND
+            status = 'published'
+          ORDER BY
+            year,
+            term
+        ", [ $stream->id ]);
+    }
+
     public function tags(Stream $stream)
     {
         $statuses = "'published'";
