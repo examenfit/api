@@ -240,4 +240,20 @@ class ScoreController extends Controller
 
       return response()->noContent(201);
     }
+
+    public function fix_totalPoints()
+    {
+      DB::update("
+        update
+          scores a,
+          scores b
+        set
+          a.totalPoints = b.totalPoints
+        where
+          a.question_id = b.question_id and
+          a.totalPoints < b.totalPoints and
+          a.totalPoints = 0
+      ");
+      return 'hell-yeah!';
+    }
 }

@@ -81,7 +81,7 @@ class AnnotationController extends Controller
       return AnnotationResource::collection($annotations);
     }
 
-    private function getQuestion($year, $term, $number)
+    private function getQuestion($stream, $year, $term, $number)
     {
       $questions = DB::select("
         select
@@ -91,29 +91,29 @@ class AnnotationController extends Controller
         from
           questions, topics, exams
         where
+          exams.stream_id = ? and
           exams.year = ? and
           exams.term = ? and
           exams.id = exam_id and
           topics.id = topic_id and
           questions.number = ?
-      ", [ $year, $term, $number ]);
+      ", [ $stream, $year, $term, $number ]);
 
       foreach($questions as $question) {
         return $question;
       }
     }
 
-    public function putQuestion($annotation, $year, $term, $number)
+    public function putQuestion(Annotation $annotation, $year, $term, $number)
     {
-      $annotation_id = Hashids::decode($annotation)[0];
-      $question = $this->getQuestion($year, $term, $number);
+      $question = $this->getQuestion($annotation->stream_id, $year, $term, $number);
       $question_id = $question->id;
       DB::select("
         insert into question_annotation
           (annotation_id, question_id)
         values
           (?, ?)
-      ", [ $annotation_id, $question_id ]);
+      ", [ $annotation->id, $question_id ]);
       return [
         'id' => Hashids::encode($question->id),
         'topic_id' => Hashids::encode($question->topic_id),
@@ -121,10 +121,9 @@ class AnnotationController extends Controller
       ];
     }
 
-    public function deleteQuestion($annotation, $year, $term, $number)
+    public function deleteQuestion(Annotation $annotation, $year, $term, $number)
     {
-      $annotation_id = Hashids::decode($annotation)[0];
-      $question = $this->getQuestion($year, $term, $number);
+      $question = $this->getQuestion($annotation->stream_id, $year, $term, $number);
       $question_id = $question->id;
       DB::select("
         delete from
@@ -132,7 +131,7 @@ class AnnotationController extends Controller
         where
           annotation_id = ? and
           question_id = ?
-      ", [ $annotation_id, $question_id ]);
+      ", [ $annotation->id, $question_id ]);
       return 202;
     }
 

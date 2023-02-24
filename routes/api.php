@@ -72,6 +72,9 @@ Route::put('/contact-requests/{contactRequest}', [ContactRequestController::clas
 
 // fixme these routes should probs not be public
 
+
+Route::get('/fix-totalPoints', [ScoreController::class, 'fix_totalPoints']);
+
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])
     ->middleware('guest');
 
@@ -104,6 +107,7 @@ Route::post('/log', [ActivityLogController::class, 'store']);
 Route::get('/streams/', [StreamController::class, 'index']);
 Route::get('/streams/{stream}/formuleblad', [StreamController::class, 'formuleblad']);
 Route::get('/streams/{stream}/all-questions', [StreamController::class, 'allQuestions']);
+Route::get('/streams/{stream}/exams', [StreamController::class, 'exams']);
 
 Route::put('/annotation-question/{annotation}/{year}/{term}/{number}', [AnnotationController::class, 'putQuestion']);
 Route::delete('/annotation-question/{annotation}/{year}/{term}/{number}', [AnnotationController::class, 'deleteQuestion']);
