@@ -72,6 +72,9 @@ Route::put('/contact-requests/{contactRequest}', [ContactRequestController::clas
 
 // fixme these routes should probs not be public
 
+
+Route::get('/fix-totalPoints', [ScoreController::class, 'fix_totalPoints']);
+
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])
     ->middleware('guest');
 
