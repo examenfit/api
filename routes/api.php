@@ -81,10 +81,12 @@ Route::post('/login', [AuthenticatedSessionController::class, 'store'])
 Route::get('/topics/{topic}', [TopicController::class, 'show']);
 
 Route::post('/annotations/{stream}', [AnnotationController::class, 'addAnnotation']);
+Route::get('/annotations-create-exams', [AnnotationController::class, 'createExams']);
 Route::get('/annotations/{stream}', [AnnotationController::class, 'index']);
 Route::get('/annotations/{stream}/types', [AnnotationController::class, 'types']);
 Route::get('/annotations/{stream}/types/{type}', [AnnotationController::class, 'type']);
 Route::get('/annotations/{stream}/oefensets', [AnnotationController::class, 'oefensets']);
+Route::get('/annotations/{stream}/examens', [AnnotationController::class, 'examens']);
 Route::get('/annotations/{stream}/{annotation}', [AnnotationController::class, 'get']);
 
 Route::get('/download-collection/{collection}', [CollectionController::class, 'showCollectionQuestionsDocument']);
