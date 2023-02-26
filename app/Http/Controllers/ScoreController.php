@@ -267,6 +267,7 @@ class ScoreController extends Controller
           question_id in (select question_id from scores where totalPoints = 0)
         group by
           question_id,
+          answers.id,
           answer_id;
       ");
       foreach($rows as $row) {
