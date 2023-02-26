@@ -81,6 +81,26 @@ class AnnotationController extends Controller
       return AnnotationResource::collection($annotations);
     }
 
+    public function examens(Stream $stream)
+    {
+
+      $annotations = Annotation::query()
+        ->where('stream_id', $stream->id)
+        ->where('type', 'examen')
+        ->orderBy('position', 'ASC')
+        ->with([ 'children' => function($query) {
+          $query->orderBy('position', 'ASC');
+        }])
+        ->get();
+
+      $annotations->load([
+        'children.questions.topic.exam',
+        'children.questions.chapters.parent'
+      ]);
+
+      return AnnotationResource::collection($annotations);
+    }
+
     private function getQuestion($stream, $year, $term, $number)
     {
       $questions = DB::select("
@@ -153,5 +173,59 @@ class AnnotationController extends Controller
         $stream_id, $parent_id, $name
       ]);
       return $data;
+    }
+
+    public function createExams() {
+      DB::insert("
+        delete from question_annotation
+        where annotation_id in (select id from annotations where type = 'opgave')
+      ");
+      DB::insert("
+        delete from annotations
+        where type in ('examen', 'opgave')
+      ");
+      $exams = DB::select("
+        select year, term, stream_id, id
+        from exams
+        where status = 'published' and show_answers
+        order by 1
+      ");
+      $position = time();
+      foreach($exams as $exam) {
+        $group = Annotation::create([
+          'stream_id' => $exam->stream_id,
+          'position' => $position++,
+          'name' => $exam->year . ' ' . $exam->term . 'e tijdvak',
+          'type' => 'examen',
+        ]);
+        $topics = DB::select("
+          select position, name, id
+          from topics
+          where exam_id = ?
+          order by 1
+        ", [ $exam->id ]);
+        foreach($topics as $topic) {
+          $annotation = Annotation::create([
+            'stream_id' => $exam->stream_id,
+            'parent_id' => $group->id,
+            'position' => $position++,
+            'name' => $topic->name,
+            'type' => 'opgave',
+          ]);
+          $questions = DB::select("
+            select number, id
+            from questions
+            where topic_id = ?
+            order by 1
+          ", [ $topic->id ]);
+          foreach($questions as $question) {
+            DB::insert("
+              insert into question_annotation
+              set annotation_id = ?, question_id = ?, position = ?
+            ", [ $annotation->id, $question->id, $position++ ]);
+          }
+        }
+      }
+      return 'ok';
     }
 }

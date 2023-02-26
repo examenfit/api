@@ -288,6 +288,16 @@ class SearchController extends Controller
                     );
                 }
             }),
+            AllowedSort::custom('position', new class implements Sort
+            {
+                public function __invoke(Builder $query, bool $descending, string $property)
+                {
+                    $query
+                      ->orderByRaw('json_extract(cache, \'$."year"\') ASC')
+                      ->orderByRaw('json_extract(cache, \'$."term"\') ASC')
+                      ->orderByRaw('position ASC');
+                }
+            }),
         ])
             ->where('cache->stream_id', $stream->id)
             ->whereIn('cache->examStatus', $STATUS);
