@@ -188,7 +188,7 @@ class AnnotationController extends Controller
         select year, term, stream_id, id
         from exams
         where status = 'published' and show_answers
-        order by 1
+        order by year desc, term asc
       ");
       $position = time();
       foreach($exams as $exam) {
@@ -202,7 +202,7 @@ class AnnotationController extends Controller
           select position, name, id
           from topics
           where exam_id = ?
-          order by 1
+          order by position asc
         ", [ $exam->id ]);
         foreach($topics as $topic) {
           $annotation = Annotation::create([
@@ -216,7 +216,7 @@ class AnnotationController extends Controller
             select number, id
             from questions
             where topic_id = ?
-            order by 1
+            order by number asc
           ", [ $topic->id ]);
           foreach($questions as $question) {
             DB::insert("
