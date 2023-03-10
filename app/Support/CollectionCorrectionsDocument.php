@@ -585,6 +585,7 @@ class CollectionCorrectionsDocument
 
     function formatText($text, &$textRun = null, $textStyle = null)
     {
+        $imageWidthMax = 380;
         $boldStyle = array_merge(['bold' => true], $textStyle ?? []);
 
         // Convert individual lines into seperate elements
@@ -611,11 +612,25 @@ class CollectionCorrectionsDocument
                 }
                   
                 elseif (preg_match('/!\[(.+?)\]\((.+?)\)/', $result, $match)) {
+
                     $caption = $match[1];
                     $image = $match[2];
+                    $url = 'https://dxblfrp59esb2.cloudfront.net/'.$image;
+                    $dim = getimagesize($url);
+                    $imageWidth = $dim[0];
+                    $imageHeight = $dim[1];
+                    $scale = 1;
+
+                    if ($imageWidth > $imageWidthMax) {
+                      $scale = $imageWidthMax / $imageWidth;
+                    }
+
                     $textRun->addText($caption);
                     $textRun->addTextBreak(1);
-                    $textRun->addImage('https://dxblfrp59esb2.cloudfront.net/'.$image);
+                    $textRun->addImage($url, [
+                      'width' => $imageWidth * $scale,
+                      'height' => $imageHeight * $scale
+                    ]);
                 }
 
                 // Text has no complex values, just a line of text.
