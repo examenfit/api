@@ -204,7 +204,6 @@ class FeedbackController extends Controller
       'part' => 'string|nullable',
     ]);
 
-    $data['collection'] = NULL;
     $data['creator'] = NULL;
     if ($data['collection']) {
       $collection_id = Hashids::decode($data['collection'])[0];
