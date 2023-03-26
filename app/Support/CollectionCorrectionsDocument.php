@@ -585,67 +585,59 @@ class CollectionCorrectionsDocument
 
     function formatText($text, &$textRun = null, $textStyle = null)
     {
+        $imageWidthMax = 380;
+        $boldStyle = array_merge(['bold' => true], $textStyle ?? []);
+
         // Convert individual lines into seperate elements
         $lines = explode(PHP_EOL, $text);
 
         foreach ($lines as $index => $line) {
 
-            // Match formula (`$$LaTeX$$`) and **bold** tekst.
-            preg_match_all('/(`\$\$(.+?)\$\$`|\*\*(.+?)\*\*)/', $line, $results);
-
-            // Break pieces on tags, but perserve values
-            $arr = preg_split('/(`\$\$.+?\$\$`|\*\*.+?\*\*)/', $line, -1, PREG_SPLIT_DELIM_CAPTURE);
+            $arr = preg_split('/(`\$\$.+?\$\$`|\*\*.+?\*\*|!\[.+?\]\(.+?\))/', $line, -1, PREG_SPLIT_DELIM_CAPTURE);
 
             $chunks = [];
             foreach ($arr as $key => $result) {
-                if (in_array($result, $results[1])) {
 
-                    // Formula
-                    if (preg_match('/`\$\$(.+)?\$\$`/', $result, $match)) {
-                        $chunks[$key] = [
-                            'type' => 'formula',
-                            'result' => $this->latexFormula($match[1]),
-                        ];
+                // Formula
+                if (preg_match('/`\$\$(.+)?\$\$`/', $result, $match)) {
+                    $formula = $match[1];
+                    $formatted = $this->latexFormula($formula);
+                    $textRun->addText($formatted, $textStyle, ['alignment' => 'left']);
+                }
+
+                // Bold text
+                elseif (preg_match('/\*\*(.+)?\*\*/', $result, $match)) {
+                    $bold = $match[1];
+                    $textRun->addText($bold, $boldStyle);
+                }
+                  
+                elseif (preg_match('/!\[(.+?)\]\((.+?)\)/', $result, $match)) {
+
+                    $caption = $match[1];
+                    $image = $match[2];
+                    $url = 'https://dxblfrp59esb2.cloudfront.net/'.$image;
+                    $dim = getimagesize($url);
+                    $imageWidth = $dim[0];
+                    $imageHeight = $dim[1];
+                    $scale = 1;
+
+                    if ($imageWidth > $imageWidthMax) {
+                      $scale = $imageWidthMax / $imageWidth;
                     }
 
-                    // Bold text
-                    elseif (preg_match('/\*\*(.+)?\*\*/', $result, $match)) {
-                        $chunks[$key] = [
-                            'type' => 'boldStyle',
-                            'result' => $match[1],
-                        ];
-                    }
+                    $textRun->addText($caption);
+                    $textRun->addTextBreak(1);
+                    $textRun->addImage($url, [
+                      'width' => $imageWidth * $scale,
+                      'height' => $imageHeight * $scale
+                    ]);
                 }
 
                 // Text has no complex values, just a line of text.
-                else {
-                    $chunks[] = $result;
+                elseif ($result) {
+                    $textRun->addText($result);
                 }
-            }
 
-            // Clear empty values and reset keys.
-            $chunks = array_values(array_filter($chunks));
-
-            foreach ($chunks as $chunk) {
-                if (is_array($chunk)) {
-                    $type = $chunk['type'];
-                    if ($type === 'formula') {
-                        $textRun->addText($chunk['result'], $textStyle, ['alignment' => 'left']);
-                        // Add space if the chunk only has a formula
-                        // Otherwise the formula is shown centered.
-                        // if (count($chunks) === 1) {
-                        //     $textRun->addText(' ');
-                        // }
-                    }
-                    if ($type === 'boldStyle') {
-                        $textRun->addText(
-                            $chunk['result'],
-                            array_merge(['bold' => true], $textStyle ?? [])
-                        );
-                    }
-                } else {
-                    $textRun->addText($chunk, $textStyle);
-                }
             }
 
             // Add line break, except for the last line
