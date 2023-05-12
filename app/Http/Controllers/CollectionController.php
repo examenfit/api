@@ -256,6 +256,8 @@ class CollectionController extends Controller
 
     public function showCollectionQuestionsHtml(Request $request, Collection $collection)
     {
+        Log::info('showCollectionQuestionsHtml');
+
         $app_url = config('app.dashboard_url');
         $markup = new DocumentMarkup();
 
@@ -379,6 +381,8 @@ class CollectionController extends Controller
         $collection['timestamp'] = $timestamp;
 
         //return response()->json($collection);
+
+        Log::info("response");
 
         return view('pdf', $collection);
     }
