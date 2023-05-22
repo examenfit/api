@@ -261,7 +261,7 @@ class CollectionController extends Controller
         $app_url = config('app.dashboard_url');
         $markup = new DocumentMarkup();
 
-        Log::info('showCollectionQuestionsHtml: $collection->load');
+        // Log::info('showCollectionQuestionsHtml: $collection->load');
         $collection->load([
             'author',
             'questions' => fn ($q) => $q->orderBy('topic_id', 'ASC')->orderBy('number', 'ASC'),
@@ -288,7 +288,7 @@ class CollectionController extends Controller
         $use_appendixes = [];
 
         foreach ($collection['questions'] as $question) {
-            Log::info('showCollectionQuestionsHtml: foreach $question');
+            // Log::info('showCollectionQuestionsHtml: foreach $question');
 
             $points += $question['points'];
             $time_in_minutes += $question['time_in_minutes'];
@@ -300,7 +300,7 @@ class CollectionController extends Controller
             $use_appendixes[$id] = true;
 
             foreach ($question['dependencies'] as $dependency) {
-                Log::info('showCollectionQuestionsHtml: foreach $dependency');
+                // Log::info('showCollectionQuestionsHtml: foreach $dependency');
 
                 $pivot = $dependency['pivot'];
                 $id = $pivot['question_id'];
@@ -323,7 +323,7 @@ class CollectionController extends Controller
         $appendixes = [];
         $appendix_added = [];
 
-        Log::info('showCollectionQuestionsHtml: usort $topics');
+        // Log::info('showCollectionQuestionsHtml: usort $topics');
         $topic_order = $collection['topic_order'] ?: '';
         usort($topics, function ($a, $b) use ($topic_order) {
           $i = Hashids::encode($a['id']);
@@ -332,11 +332,11 @@ class CollectionController extends Controller
         });
 
         foreach ($topics as $topic) {
-            Log::info('showCollectionQuestionsHtml: foreach $topic');
+            // Log::info('showCollectionQuestionsHtml: foreach $topic');
             $topic['introduction'] = $topic['introductionHtml'] ?: $markup->fix($topic['introduction']);
 
             foreach ($topic['questions'] as $question) {
-                Log::info('showCollectionQuestionsHtml: foreach $question');
+                // Log::info('showCollectionQuestionsHtml: foreach $question');
                 $id = $question['id'];
 
                 $question['use_text'] = array_key_exists($id, $use_text);
@@ -345,7 +345,7 @@ class CollectionController extends Controller
 
                 if (array_key_exists($id, $use_appendixes)) {
                     foreach ($question['appendixes'] as $appendix) {
-                        Log::info('showCollectionQuestionsHtml: foreach $appendix');
+                        // Log::info('showCollectionQuestionsHtml: foreach $appendix');
                         $id = $appendix->id;
                         if (array_key_exists($id, $appendix_added)) {
                             /* skip */
@@ -356,7 +356,7 @@ class CollectionController extends Controller
                     }
                 }
 
-                Log::info('showCollectionQuestionsHtml: $markup-fix');
+                // Log::info('showCollectionQuestionsHtml: $markup-fix');
                 $question['introduction'] = $question['introductionHtml'] ?: $markup->fix($question['introduction']);
                 $question['text'] = $question['textHtml'] ?: $markup->fix($question['text']);
 
@@ -367,10 +367,10 @@ class CollectionController extends Controller
                 $question['url'] = "$app_url/c/{$c}/{$t}/{$q}";
                 /*
                 foreach ($question['answers'] as $answer) {
-                  Log::info('showCollectionQuestionsHtml: foreach $answer');
+                  // Log::info('showCollectionQuestionsHtml: foreach $answer');
                   foreach ($answer['sections']  as $section) {
-                    Log::info('showCollectionQuestionsHtml: foreach $section');
-                    Log::info('showCollectionQuestionsHtml: $markup-fix');
+                    // Log::info('showCollectionQuestionsHtml: foreach $section');
+                    // Log::info('showCollectionQuestionsHtml: $markup-fix');
                     $section['correction'] = $markup->fix($section['correction']);
                   }
                 }
@@ -380,7 +380,7 @@ class CollectionController extends Controller
 
         $formuleblad = $topics[0]->exam->stream->formuleblad;
 
-        Log::info('showCollectionQuestionsHtml: $markup-fix');
+        // Log::info('showCollectionQuestionsHtml: $markup-fix');
         $collection['formuleblad'] = $formuleblad ?: $markup->fix($formuleblad);
         $collection['topics'] = $topics;
         $collection['questions'] = $questions;
