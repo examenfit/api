@@ -8,7 +8,7 @@ use Illuminate\Support\Str;
 
 use App\Support\DocumentMarkup;
 
-class FixAdminAccounts extends Command
+class GenerateMarkup extends Command
 {
     /**
      * The name and signature of the console command.
