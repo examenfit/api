@@ -381,7 +381,7 @@ class CollectionController extends Controller
         $formuleblad = $topics[0]->exam->stream->formuleblad;
 
         // Log::info('showCollectionQuestionsHtml: $markup-fix');
-        $collection['formuleblad'] = $formuleblad ?: $markup->fix($formuleblad);
+        $collection['formuleblad'] = $markup->fix($formuleblad);
         $collection['topics'] = $topics;
         $collection['questions'] = $questions;
         $collection['points'] = $points;
