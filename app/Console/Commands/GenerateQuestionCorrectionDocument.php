@@ -61,28 +61,22 @@ class GenerateQuestionCorrectionDocument extends Command
     }
 
     private function askChoice($question, $options)
-    {
-        $count = count($options);
-
-        if ($count < 1) {
-            $this->info($question);
-            die('FOUT: Geen opties');
-        }
-
+    {   
         $n = 0;
-        foreach($options as $option) {
-            $choices[++$n] = $option;
+        foreach($options as $option => $choice) {
+            $choices[++$n] = $choice;
         }
 
-        if ($count === 1) {
-            $this->info("$question -> $option");
-            return $choices[1];
+	if ($n > 1) {
+            $choice = $this->choice($question, $choices);
+            $option = array_search($choice, $options);
         }
 
-        $choice = $this->choice($question, $choices);
-        $option = array_search($choice, $options);
-
-        return $option;
+        if ($n > 0) {
+            return $option;
+        }
+        
+        die("askChoice: no options for '{$question}'");
     }
 
     private function selectLevel()
