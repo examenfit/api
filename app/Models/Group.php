@@ -16,6 +16,7 @@ class Group extends Model
     public $fillable = [
         'name',
         'license_id',
+        'stream_id',
         'is_active',
         'settings'
     ];
