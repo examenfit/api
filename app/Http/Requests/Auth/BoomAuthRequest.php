@@ -40,9 +40,9 @@ class BoomAuthRequest extends FormRequest
     private function getOpenIDClient()
     {
         $oidc = new OpenIDConnectClient(
-          config('boom.oidc_provider'),
-          config('boom.oidc_client_id'),
-          config('boom.oidc_client_secret')
+          config('boom.oidc.provider'),
+          config('boom.oidc.client.id'),
+          config('boom.oidc.client.secret')
         );
 
         return $oidc;
@@ -92,6 +92,32 @@ Log::info('userInfo='.json_encode($data, JSON_PRETTY_PRINT));
 
         $data = $this->requestUserInfo();
 
+
+        // collect role + streams
+        $role = 'leerling';
+        $streams = [];
+
+        $licenses = json_decode($data->licenses);
+        $LICENSES = config('boom.licenses');
+
+        foreach ($licenses as $EAN) {
+          if (array_key_exists($EAN, $LICENSES)) {
+            foreach($LICENSES[$EAN] as $option) {
+              if ($option === 'docent') {
+                $role = $option;
+Log::info('role='.$option);
+              }
+              else {
+                $streams[] = $option;
+Log::info('stream='.$option);
+              }
+            }
+          }
+          else {
+Log::info('EAN not found; EAN='.$EAN);
+          }
+        }
+
         $user = User::firstOrCreate([
           'email' => $data->email,
         ], [
@@ -123,90 +149,77 @@ Log::info('license='.json_encode($license, JSON_PRETTY_PRINT));
 
 Log::info('seat='.json_encode($seat, JSON_PRETTY_PRINT));
 
-        $eans = json_decode($data->licenses);
-
-        $LICENSES = config('boom.licenses');
-        // is docent
-        // is leerling
-
-        foreach ($eans as $ean) {
-          if (array_key_exists($ean, $LICENSES)) {;
-            foreach($LICENSES[$ean] as $privilege) {
-
-              $role = $privilege['role'];
-              $stream = Stream::firstWhere('id', $privilege['stream']);
-
-              $stream_name = $stream->course->name . ' ' . $stream->level->name;
+        foreach ($streams as $slug) {
+          $stream = Stream::firstWhere('slug', $slug);
+          $stream_name = $stream->course->name . ' ' . $stream->level->name;
 Log::info('stream_name='.$stream_name);
 
-              $group = Group::firstOrCreate([
-                'license_id' => $license->id,
-                'stream_id' => $stream->id,
-                'name' => $stream_name,
-              ], [
-                'is_active' => TRUE,
-              ]);
+          $group = Group::firstOrCreate([
+            'license_id' => $license->id,
+            'stream_id' => $stream->id,
+            'name' => $stream_name,
+          ], [
+            'is_active' => TRUE,
+          ]);
 
 Log::info('group='.json_encode($group, JSON_PRETTY_PRINT));
 
-              if ($role === 'leerling') {
+          if ($role === 'leerling') {
 
-                $seat_in_group = $group->seats()->firstWhere(['seat_id' => $seat->id]);
-                if (!$seat_in_group) {
+            $seat_in_group = $group->seats()->firstWhere(['seat_id' => $seat->id]);
+            if (!$seat_in_group) {
 Log::info('attach seat_id='.$seat->id);
-                  $group->seats()->attach([ $seat->id ]);
-                }
+              $group->seats()->attach([ $seat->id ]);
+            }
 
-                $oefensets_uitvoeren = Privilege::firstOrCreate([
-                  'actor_seat_id' => $seat->id,
-                  'action' => 'oefensets uitvoeren',
-                  'object_type' => 'stream',
-                  'object_id' => $stream->id,
-                ], [
-                  'begin' => new DateTime(),
-                  'end' => $license->end,
-                ]);
+            $oefensets_uitvoeren = Privilege::firstOrCreate([
+              'actor_seat_id' => $seat->id,
+              'action' => 'oefensets uitvoeren',
+              'object_type' => 'stream',
+              'object_id' => $stream->id,
+            ], [
+              'begin' => new DateTime(),
+              'end' => $license->end,
+            ]);
                 
 Log::info('privilege='.json_encode($oefensets_uitvoeren, JSON_PRETTY_PRINT));
-              }
+          }
 
-              if ($role === 'docent') {
+          if ($role === 'docent') {
 
-                $opgavensets_samenstellen = Privilege::firstOrCreate([
-                  'actor_seat_id' => $seat->id,
-                  'action' => 'opgavensets samenstellen',
-                  'object_type' => 'stream',
-                  'object_id' => $stream->id,
-                ], [
-                  'begin' => new DateTime(),
-                  'end' => $license->end,
-                ]);
+            $opgavensets_samenstellen = Privilege::firstOrCreate([
+              'actor_seat_id' => $seat->id,
+              'action' => 'opgavensets samenstellen',
+              'object_type' => 'stream',
+              'object_id' => $stream->id,
+            ], [
+              'begin' => new DateTime(),
+              'end' => $license->end,
+            ]);
                 
 Log::info('privilege='.json_encode($opgavensets_samenstellen, JSON_PRETTY_PRINT));
 
-                $groepen_beheren = Privilege::firstOrCreate([
-                  'actor_seat_id' => $seat->id,
-                  'action' => 'groepen beheren',
-                  'object_type' => 'group',
-                  'object_id' => $group->id,
-                ], [
-                  'begin' => new DateTime(),
-                  'end' => $license->end,
-                ]);
+            $groepen_beheren = Privilege::firstOrCreate([
+              'actor_seat_id' => $seat->id,
+              'action' => 'groepen beheren',
+              'object_type' => 'group',
+              'object_id' => $group->id,
+            ], [
+              'begin' => new DateTime(),
+              'end' => $license->end,
+            ]);
 
 Log::info('privilege='.json_encode($groepen_beheren, JSON_PRETTY_PRINT));
 
-                $seat->role = 'docent';
-                $seat->save();
+            $seat->role = 'docent';
+            $seat->save();
 
-                $user->role = 'docent';
-                $user->save();
+            $user->role = 'docent';
+            $user->save();
 
-              }
-
-              // add to group
-            }
           }
+
+          // add to group
         }
 
         Auth::login($user);
