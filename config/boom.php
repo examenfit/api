@@ -25,7 +25,12 @@ return [
         '9789464421132' => [ 'scheikunde-havo', 'scheikunde-vwo', ],
         '9789464421170' => [ 'scheikunde-havo', 'scheikunde-vwo', ],
 
-        '9789493113183' => [ 'docent', ],
+        '9789493113183' => [
+		'docent',
+        	'nask1-vmbo', 'nask2-vmbo',
+        	'natuurkunde-havo', 'natuurkunde-vwo',
+        	'scheikunde-havo', 'scheikunde-vwo',
+        ],
 
         // test
         '9789492862815' => [
