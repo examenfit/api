@@ -93,28 +93,28 @@ Log::info('userInfo='.json_encode($data, JSON_PRETTY_PRINT));
         $data = $this->requestUserInfo();
 
 
-        // collect role + streams
+        // collect role, until & streams
         $role = 'leerling';
         $streams = [];
+        $until = new DateTime('2025-08-01');
 
         $licenses = json_decode($data->licenses);
         $LICENSES = config('boom.licenses');
 
-        foreach ($licenses as $EAN) {
-          if (array_key_exists($EAN, $LICENSES)) {
-            foreach($LICENSES[$EAN] as $option) {
-              if ($option === 'docent') {
-                $role = $option;
-Log::info('role='.$option);
+        foreach ($LICENSES as $EAN => $options) {
+          if (in_array($EAN, $licenses)) {
+            $until = '2025-08-01';
+            foreach($options as $option => $value) {
+              if ($option === 'role') {
+                $role = $value;
+              }
+              else if ($option === 'until') {
+                $until = $value;
               }
               else {
-                $streams[] = $option;
-Log::info('stream='.$option);
+                $streams[$value] = $until;
               }
             }
-          }
-          else {
-Log::info('EAN not found; EAN='.$EAN);
           }
         }
 
@@ -134,9 +134,14 @@ Log::info('user='.json_encode($user, JSON_PRETTY_PRINT));
         ], [
           'type' => 'boom',
           'begin' => new DateTime(),
-          'end' => new DateTime('2025-08-01'),
+          'end' => $until,
           'description' => 'Boom, '.$data->brin_id
         ]);
+
+        if ($license->end < $until) {
+          $license->end = $until;
+          $license->save();
+        }
 
 Log::info('license='.json_encode($license, JSON_PRETTY_PRINT));
 
@@ -149,7 +154,7 @@ Log::info('license='.json_encode($license, JSON_PRETTY_PRINT));
 
 Log::info('seat='.json_encode($seat, JSON_PRETTY_PRINT));
 
-        foreach ($streams as $slug) {
+        foreach ($streams as $slug => $until) {
           $stream = Stream::firstWhere('slug', $slug);
           $stream_name = $stream->course->name . ' ' . $stream->level->name;
 Log::info('stream_name='.$stream_name);
@@ -182,6 +187,11 @@ Log::info('attach seat_id='.$seat->id);
               'end' => $license->end,
             ]);
                 
+            if ($oefensets_uitvoeren->end < $until) {
+              $oefensets_uitvoeren->end = $until;
+              $oefensets_uitvoeren->save();
+            }
+
 Log::info('privilege='.json_encode($oefensets_uitvoeren, JSON_PRETTY_PRINT));
           }
 
@@ -197,6 +207,11 @@ Log::info('privilege='.json_encode($oefensets_uitvoeren, JSON_PRETTY_PRINT));
               'end' => $license->end,
             ]);
                 
+            if ($opgavensets_samenstellen->end < $until) {
+              $opgavensets_samenstellen->end = $until;
+              $opgavensets_samenstellen->save();
+            }
+
 Log::info('privilege='.json_encode($opgavensets_samenstellen, JSON_PRETTY_PRINT));
 
             $groepen_beheren = Privilege::firstOrCreate([
@@ -209,6 +224,11 @@ Log::info('privilege='.json_encode($opgavensets_samenstellen, JSON_PRETTY_PRINT)
               'end' => $license->end,
             ]);
 
+            if ($groepen_beheren->end < $until) {
+              $groepen_beheren->end = $until;
+              $groepen_beheren->save();
+            }
+
 Log::info('privilege='.json_encode($groepen_beheren, JSON_PRETTY_PRINT));
 
             $seat->role = 'docent';
@@ -219,7 +239,6 @@ Log::info('privilege='.json_encode($groepen_beheren, JSON_PRETTY_PRINT));
 
           }
 
-          // add to group
         }
 
         Auth::login($user);
