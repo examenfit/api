@@ -239,8 +239,4 @@ return [
     //'mollie_api_key' => env('MOLLIE_API_KEY', 'test_vWbmdhrtRQvyVB5TSzvhGBSCU2Pw2f'),
     'mollie_api_key' => env('MOLLIE_API_KEY'),
 
-    'boom_oidc_provider' => env('BOOM_OIDC_PROVIDER', '123'),
-    'boom_oidc_client_id' => env('BOOM_OIDC_CLIENT_ID', '123'),
-    'boom_oidc_client_secret' => env('BOOM_OIDC_CLIENT_SECRET', '123'),
-
 ];
