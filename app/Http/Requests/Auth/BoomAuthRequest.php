@@ -57,33 +57,40 @@ Log::info('token='.$token);
         $oidc->addScope(['licenties', 'BRIN-openid']);
         $oidc->setAccessToken($token);
 
-        $data = $oidc->requestUserInfo();
-Log::info('userInfo='.json_encode($data, JSON_PRETTY_PRINT));
+        $userInfo = $oidc->requestUserInfo();
+Log::info('userInfo='.json_encode($userInfo, JSON_PRETTY_PRINT));
 
-        $this->validateUserInfo($data);
+        $this->validateUserInfo($userInfo);
 
-        return $data;
+        return $userInfo;
     }
     
-    private function validateUserInfo($data)
+    private function validateUserInfo($userInfo)
     {
-        $hasRequiredProperties =
-          property_exists($data, 'email') &&
-          property_exists($data, 'brin_id') &&
-          property_exists($data, 'licenses');
+        $REQUIRED_PROPERTIES = [
+          'email',
+          'brin_id',
+          'licenses',
+        ];
 
-        $isValidUserInfo = 
-          $hasRequiredProperties;
+        $messages = [];
+        $hasError = false;
 
-        if ($isValidUserInfo) {
-          $this->clearRateLimit();
+        foreach ($REQUIRED_PROPERTIES as $property) {
+
+            if (!property_exists($userInfo, $property)) {
+Log::info('Invalid userInfo; missing property='.$property);
+                $hasError = true;
+                $messages[$property] = __('Required');
+            }
         }
-        else {
-          $this->triggerRateLimit();
-          throw ValidationException::withMessages([
-            'token' => __('Cannot resolve email'),
-          ]);
+
+        if ($hasError) {
+            $this->triggerRateLimit();
+            throw ValidationException::withMessages($messages);
         }
+
+        $this->clearRateLimit();
     }
 
     public function authenticate()
