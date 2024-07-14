@@ -238,4 +238,5 @@ return [
     // Mollie
     //'mollie_api_key' => env('MOLLIE_API_KEY', 'test_vWbmdhrtRQvyVB5TSzvhGBSCU2Pw2f'),
     'mollie_api_key' => env('MOLLIE_API_KEY'),
+
 ];

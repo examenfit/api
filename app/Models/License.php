@@ -21,7 +21,8 @@ class License extends Model
         'begin',
         'end',
         'is_active',
-        'description'
+        'description',
+        'brin_id'
     ];
 
     public function owner()

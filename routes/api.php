@@ -26,6 +26,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\UserSwitchController;
+use App\Http\Controllers\Auth\BoomAuthController;
 
 use App\Http\Controllers\Admin\TipController;
 use App\Http\Controllers\Admin\ExamController;
@@ -53,6 +54,9 @@ use App\Http\Controllers\Admin\ChapterController as AdminChapterController;
 |
 */
 
+Route::group(['middleware' => ['web']], function () {
+
+
 Route::get('/mollie/test', [MollieController::class, 'test']);
 Route::get('/custom/activities.tsv', [CustomQueries::class, 'activities_tsv']);
 
@@ -76,6 +80,9 @@ Route::put('/contact-requests/{contactRequest}', [ContactRequestController::clas
 Route::get('/fix-totalPoints', [ScoreController::class, 'fix_totalPoints']);
 
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])
+    ->middleware('guest');
+
+Route::post('/token', [BoomAuthController::class, 'store'])
     ->middleware('guest');
 
 Route::get('/topics/{topic}', [TopicController::class, 'show']);
@@ -311,4 +318,6 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
         Route::get('/registrations', [RegistrationController::class, 'all']);
 
     });
+});
+
 });
