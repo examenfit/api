@@ -128,10 +128,10 @@ Log::info('Invalid userInfo; missing property='.$property);
         $user = User::firstOrCreate([
           'email' => $data->email,
         ], [
-          'password' => Str::random(6),
+          'role' => $role,
           'first_name' => $data->given_name,
           'last_name' => $data->family_name,
-          'role' => 'leerling',
+          'password' => Str::random(6),
         ]);
 
 Log::info('user='.json_encode($user, JSON_PRETTY_PRINT));
@@ -156,7 +156,7 @@ Log::info('license='.json_encode($license, JSON_PRETTY_PRINT));
           'user_id' => $user->id,
           'license_id' => $license->id,
         ], [
-          'role' => 'leerling',
+          'role' => $role,
         ]);
 
 Log::info('seat='.json_encode($seat, JSON_PRETTY_PRINT));
@@ -237,12 +237,6 @@ Log::info('privilege='.json_encode($opgavensets_samenstellen, JSON_PRETTY_PRINT)
             }
 
 Log::info('privilege='.json_encode($groepen_beheren, JSON_PRETTY_PRINT));
-
-            $seat->role = 'docent';
-            $seat->save();
-
-            $user->role = 'docent';
-            $user->save();
 
           }
 
