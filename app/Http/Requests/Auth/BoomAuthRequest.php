@@ -105,6 +105,7 @@ Log::info('Invalid userInfo; missing property='.$property);
         $streams = [];
         $until = new DateTime('2025-08-01');
 
+        $valid = FALSE;
         $licenses = json_decode($data->licenses);
         $LICENSES = config('boom.licenses');
 
@@ -120,9 +121,18 @@ Log::info('Invalid userInfo; missing property='.$property);
               }
               else {
                 $streams[$value] = $until;
+                $valid = TRUE;
               }
             }
           }
+        }
+
+        if (!$valid) {
+Log::info('No valid license(s) found');
+          $this->triggerRateLimit();
+          throw ValidationException::withMessages([
+            'licenses' => __('No valid license(s) found')
+          ]);
         }
 
         $user = User::firstOrCreate([
