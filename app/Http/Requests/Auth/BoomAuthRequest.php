@@ -51,14 +51,14 @@ class BoomAuthRequest extends FormRequest
     private function requestUserInfo()
     {
         $token = $this->input('token');
-Log::info('token='.$token);
+// Log::info('token='.$token);
 
         $oidc = $this->getOpenIDClient();
         $oidc->addScope(['licenties', 'BRIN-openid']);
         $oidc->setAccessToken($token);
 
         $userInfo = $oidc->requestUserInfo();
-Log::info('userInfo='.json_encode($userInfo, JSON_PRETTY_PRINT));
+// Log::info('userInfo='.json_encode($userInfo, JSON_PRETTY_PRINT));
 
         $this->validateUserInfo($userInfo);
 
@@ -79,7 +79,7 @@ Log::info('userInfo='.json_encode($userInfo, JSON_PRETTY_PRINT));
         foreach ($REQUIRED_PROPERTIES as $property) {
 
             if (!property_exists($userInfo, $property)) {
-Log::info('Invalid userInfo; missing property='.$property);
+// Log::info('Invalid userInfo; missing property='.$property);
                 $hasError = true;
                 $messages[$property] = __('Required');
             }
@@ -102,7 +102,7 @@ Log::info('Invalid userInfo; missing property='.$property);
 
         // collect role, until & streams
         $role = 'leerling';
-        $streams = [];
+        $privileges = [];
         $until = new DateTime('2025-08-01');
 
         $valid = FALSE;
@@ -120,7 +120,10 @@ Log::info('Invalid userInfo; missing property='.$property);
                 $until = $value;
               }
               else {
-                $streams[$value] = $until;
+                $privileges[$value] = [
+                  'EAN' => $EAN,
+                  'until' => $until,
+                ];
                 $valid = TRUE;
               }
             }
@@ -128,7 +131,7 @@ Log::info('Invalid userInfo; missing property='.$property);
         }
 
         if (!$valid) {
-Log::info('No valid license(s) found');
+// Log::info('No valid license(s) found');
           $this->triggerRateLimit();
           throw ValidationException::withMessages([
             'licenses' => __('No valid license(s) found')
@@ -144,7 +147,7 @@ Log::info('No valid license(s) found');
           'password' => Str::random(6),
         ]);
 
-Log::info('user='.json_encode($user, JSON_PRETTY_PRINT));
+// Log::info('user='.json_encode($user, JSON_PRETTY_PRINT));
 
         $license = License::firstOrCreate([
           'brin_id' => $data->brin_id
@@ -160,7 +163,7 @@ Log::info('user='.json_encode($user, JSON_PRETTY_PRINT));
           $license->save();
         }
 
-Log::info('license='.json_encode($license, JSON_PRETTY_PRINT));
+// Log::info('license='.json_encode($license, JSON_PRETTY_PRINT));
 
         $seat = Seat::firstOrCreate([
           'user_id' => $user->id,
@@ -169,36 +172,39 @@ Log::info('license='.json_encode($license, JSON_PRETTY_PRINT));
           'role' => $role,
         ]);
 
-Log::info('seat='.json_encode($seat, JSON_PRETTY_PRINT));
+// Log::info('seat='.json_encode($seat, JSON_PRETTY_PRINT));
 
-        foreach ($streams as $slug => $until) {
+        foreach ($privileges as $slug => $privilege) {
+          $EAN = $privilege['EAN'];
+          $until = $privilege['until'];
           $stream = Stream::firstWhere('slug', $slug);
           $stream_name = $stream->course->name . ' ' . $stream->level->name;
-Log::info('stream_name='.$stream_name);
+// Log::info('stream_name='.$stream_name);
 
-          $group = Group::firstOrCreate([
-            'license_id' => $license->id,
-            'stream_id' => $stream->id,
-            'name' => $stream_name,
-          ], [
-            'is_active' => TRUE,
-          ]);
+          if ($stream->level->name === 'Vmbo GT') $grades = [3, 4];
+          if ($stream->level->name === 'Havo') $grades = [4, 5];
+          if ($stream->level->name === 'Vwo') $grades = [5, 6];
 
-Log::info('group='.json_encode($group, JSON_PRETTY_PRINT));
+          foreach ($grades as $grade) {
+            $group = Group::firstOrCreate([
+              'license_id' => $license->id,
+              'stream_id' => $stream->id,
+              'brin_id' => $data->brin_id,
+              'name' => "$stream_name $grade",
+            ], [
+              'is_active' => TRUE,
+            ]);
+          }
+
+// Log::info('group='.json_encode($group, JSON_PRETTY_PRINT));
 
           if ($role === 'leerling') {
-
-            $seat_in_group = $group->seats()->firstWhere(['seat_id' => $seat->id]);
-            if (!$seat_in_group) {
-Log::info('attach seat_id='.$seat->id);
-              $group->seats()->attach([ $seat->id ]);
-            }
-
             $oefensets_uitvoeren = Privilege::firstOrCreate([
               'actor_seat_id' => $seat->id,
               'action' => 'oefensets uitvoeren',
               'object_type' => 'stream',
               'object_id' => $stream->id,
+              'ean' => $EAN,
             ], [
               'begin' => new DateTime(),
               'end' => $license->end,
@@ -209,7 +215,7 @@ Log::info('attach seat_id='.$seat->id);
               $oefensets_uitvoeren->save();
             }
 
-Log::info('privilege='.json_encode($oefensets_uitvoeren, JSON_PRETTY_PRINT));
+// Log::info('privilege='.json_encode($oefensets_uitvoeren, JSON_PRETTY_PRINT));
           }
 
           if ($role === 'docent') {
@@ -219,6 +225,7 @@ Log::info('privilege='.json_encode($oefensets_uitvoeren, JSON_PRETTY_PRINT));
               'action' => 'opgavensets samenstellen',
               'object_type' => 'stream',
               'object_id' => $stream->id,
+              'ean' => $EAN,
             ], [
               'begin' => new DateTime(),
               'end' => $license->end,
@@ -229,8 +236,8 @@ Log::info('privilege='.json_encode($oefensets_uitvoeren, JSON_PRETTY_PRINT));
               $opgavensets_samenstellen->save();
             }
 
-Log::info('privilege='.json_encode($opgavensets_samenstellen, JSON_PRETTY_PRINT));
-
+// Log::info('privilege='.json_encode($opgavensets_samenstellen, JSON_PRETTY_PRINT));
+/*
             $groepen_beheren = Privilege::firstOrCreate([
               'actor_seat_id' => $seat->id,
               'action' => 'groepen beheren',
@@ -245,8 +252,8 @@ Log::info('privilege='.json_encode($opgavensets_samenstellen, JSON_PRETTY_PRINT)
               $groepen_beheren->end = $until;
               $groepen_beheren->save();
             }
-
-Log::info('privilege='.json_encode($groepen_beheren, JSON_PRETTY_PRINT));
+// Log::info('privilege='.json_encode($groepen_beheren, JSON_PRETTY_PRINT));
+*/
 
           }
 

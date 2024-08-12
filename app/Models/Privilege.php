@@ -16,6 +16,8 @@ class Privilege extends Model
         'action',
         'object_type',
         'object_id',
+        'ean',
+        'use_group',
         'begin',
         'end'
     ];

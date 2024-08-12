@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Seat;
+use App\Models\Collection;
 
 use App\Support\HashID;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -18,12 +19,18 @@ class Group extends Model
         'license_id',
         'stream_id',
         'is_active',
-        'settings'
+        'settings',
+        'brin_id',
     ];
 
     public function license()
     {
         return $this->belongsTo(License::class);
+    }
+
+    public function collections()
+    {
+        return $this->belongsToMany(Collection::class, 'group_collection');
     }
 
     public function seats()

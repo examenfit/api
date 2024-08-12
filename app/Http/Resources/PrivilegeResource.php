@@ -26,6 +26,8 @@ class PrivilegeResource extends JsonResource
             'object_type' => $this->object_type,
             'user' => new UserResource($this->whenLoaded('user')),
             'privileges' => PrivilegeResource::collection($this->whenLoaded('privileges')),
+            'ean' => $this->ean,
+            'use_group' => $this->use_group,
         ];
     }
 }
