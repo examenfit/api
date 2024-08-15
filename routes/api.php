@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\ContactRequestController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\TestController;
 use App\Http\Controllers\TopicController;
 use App\Http\Controllers\ScoreController;
 use App\Http\Controllers\StreamController;
@@ -57,7 +58,7 @@ use App\Http\Controllers\Admin\ChapterController as AdminChapterController;
 Route::group(['middleware' => ['web']], function () {
 
 
-Route::get('/mollie/test', [MollieController::class, 'test']);
+// Route::get('/mollie/test', [MollieController::class, 'test']);
 Route::get('/custom/activities.tsv', [CustomQueries::class, 'activities_tsv']);
 
 Route::get('/log/collection/{collection}', [ActivityLogController::class, 'collectionSummary']);
@@ -85,6 +86,7 @@ Route::post('/login', [AuthenticatedSessionController::class, 'store'])
 Route::post('/token', [BoomAuthController::class, 'store'])
     ->middleware('guest');
 
+Route::get('/test', [TestController::class, 'show']);
 Route::get('/topics/{topic}', [TopicController::class, 'show']);
 
 Route::post('/annotations/{stream}', [AnnotationController::class, 'addAnnotation']);
