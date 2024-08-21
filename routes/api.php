@@ -57,6 +57,7 @@ use App\Http\Controllers\Admin\ChapterController as AdminChapterController;
 
 Route::group(['middleware' => ['web']], function () {
 
+        Route::get('/fix_marcel', [BoomAuthController::class, 'fix_marcel']);
 
 // Route::get('/mollie/test', [MollieController::class, 'test']);
 Route::get('/custom/activities.tsv', [CustomQueries::class, 'activities_tsv']);
