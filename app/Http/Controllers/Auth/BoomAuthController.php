@@ -9,6 +9,7 @@ use App\Models\User;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class BoomAuthController extends Controller
 {
@@ -44,5 +45,21 @@ class BoomAuthController extends Controller
       'message' => 'The given data was invalid.',
       'errors' => ['token' => ['Failed to resolve user.']]
     ], 422);
+  }
+
+  public function fix_marcel(Request $request) {
+    DB::update("
+      UPDATE users SET email = id WHERE email LIKE 'marcel+%'
+    ");
+    DB::update("
+      UPDATE licenses SET brin_id = null, type = 'deleted' WHERE brin_id LIKE 'EX%'
+    ");
+    return [
+      'status' => 'ok',
+      'detached' => [
+        'users' => "email=marcel+%",
+        'licenses' => "brin_id=EX%",
+      ],
+    ];
   }
 }
