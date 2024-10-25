@@ -274,6 +274,7 @@ DB::transaction(function() use ($data, $privileges, $role, $until, $user) {
 
 Log:info("Auth::login {$user->email}");
         Auth::login($user);
+Log:info("Logged in {$user->email}");
 
         return $user;
     }
