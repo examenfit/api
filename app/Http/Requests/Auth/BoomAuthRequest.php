@@ -14,6 +14,7 @@ use DateTime;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -79,7 +80,7 @@ class BoomAuthRequest extends FormRequest
         foreach ($REQUIRED_PROPERTIES as $property) {
 
             if (!property_exists($userInfo, $property)) {
-// Log::info('Invalid userInfo; missing property='.$property);
+Log::info('Invalid userInfo; missing property='.$property);
                 $hasError = true;
                 $messages[$property] = __('Required');
             }
@@ -131,7 +132,7 @@ class BoomAuthRequest extends FormRequest
         }
 
         if (!$valid) {
-// Log::info('No valid license(s) found');
+Log::info('No valid license(s) found');
           $this->triggerRateLimit();
           throw ValidationException::withMessages([
             'licenses' => __('No valid license(s) found')
@@ -149,13 +150,19 @@ class BoomAuthRequest extends FormRequest
 
 // Log::info('user='.json_encode($user, JSON_PRETTY_PRINT));
 
+// 
+// 
+DB::transaction(function() use ($data, $privileges, $role, $until, $user) {
+// 
+// 
         $license = License::firstOrCreate([
           'brin_id' => $data->brin_id
         ], [
           'type' => 'boom',
           'begin' => new DateTime(),
           'end' => $until,
-          'description' => 'Boom, '.$data->brin_id
+          'description' => 'Boom, '.$data->brin_id,
+          'slug' => 'brin-'.strtolower($data->brin_id)
         ]);
 
         if ($license->end < $until) {
@@ -237,6 +244,9 @@ class BoomAuthRequest extends FormRequest
             }
 
 // Log::info('privilege='.json_encode($opgavensets_samenstellen, JSON_PRETTY_PRINT));
+
+// Disabled omdat de docent zelf groepen moet kiezen tijdens de onboarding
+// Gaat het kiezen wel goed als er al een licentie is?
 /*
             $groepen_beheren = Privilege::firstOrCreate([
               'actor_seat_id' => $seat->id,
@@ -259,7 +269,15 @@ class BoomAuthRequest extends FormRequest
 
         }
 
+//
+// 
+}); /* transaction */
+// 
+//
+
+Log::info("Auth::login {$user->email}");
         Auth::login($user);
+Log::info("Logged in {$user->email}");
 
         return $user;
     }
