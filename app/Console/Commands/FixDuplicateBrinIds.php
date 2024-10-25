@@ -16,7 +16,7 @@ use App\Models\Group;
 
 class FixDuplicateBrinIds extends Command
 {
-  protected $signature = 'ef:fix:brin-ids';
+  protected $signature = 'ef:fix:duplicate-brin-ids';
   protected $description = 'Clean up licenses with duplicate brin_id values';
 
   public function __construct()

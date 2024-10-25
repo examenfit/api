@@ -162,7 +162,7 @@ DB::transaction(function() use ($data, $privileges, $role, $until, $user) {
           'begin' => new DateTime(),
           'end' => $until,
           'description' => 'Boom, '.$data->brin_id,
-          'slug' => strtolower($data->brin_id)
+          'slug' => 'brin-'.strtolower($data->brin_id)
         ]);
 
         if ($license->end < $until) {
