@@ -152,7 +152,7 @@ Log::info('No valid license(s) found');
 
 // 
 // 
-DB::transaction(function() use ($data, $role, $privileges, $user) {
+DB::transaction(function() use ($data, $privileges, $role, $until, $user) {
 // 
 // 
         $license = License::firstOrCreate([
