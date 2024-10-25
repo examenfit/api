@@ -80,7 +80,7 @@ class BoomAuthRequest extends FormRequest
         foreach ($REQUIRED_PROPERTIES as $property) {
 
             if (!property_exists($userInfo, $property)) {
-// Log::info('Invalid userInfo; missing property='.$property);
+Log::info('Invalid userInfo; missing property='.$property);
                 $hasError = true;
                 $messages[$property] = __('Required');
             }
@@ -132,7 +132,7 @@ class BoomAuthRequest extends FormRequest
         }
 
         if (!$valid) {
-// Log::info('No valid license(s) found');
+Log::info('No valid license(s) found');
           $this->triggerRateLimit();
           throw ValidationException::withMessages([
             'licenses' => __('No valid license(s) found')
@@ -152,7 +152,7 @@ class BoomAuthRequest extends FormRequest
 
 // 
 // 
-// DB::transaction(function() use ($data, $role, $privileges, $user) {
+DB::transaction(function() use ($data, $role, $privileges, $user) {
 // 
 // 
         $license = License::firstOrCreate([
@@ -268,7 +268,7 @@ class BoomAuthRequest extends FormRequest
 
 //
 // 
-// }); /* transaction */
+}); /* transaction */
 // 
 //
 
