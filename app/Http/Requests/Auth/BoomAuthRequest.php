@@ -244,6 +244,9 @@ DB::transaction(function() use ($data, $privileges, $role, $until, $user) {
             }
 
 // Log::info('privilege='.json_encode($opgavensets_samenstellen, JSON_PRETTY_PRINT));
+
+// Disabled omdat de docent zelf groepen moet kiezen tijdens de onboarding
+// Gaat het kiezen wel goed als er al een licentie is?
 /*
             $groepen_beheren = Privilege::firstOrCreate([
               'actor_seat_id' => $seat->id,
