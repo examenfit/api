@@ -24,6 +24,11 @@ class FixLicenseSlugs extends Command
       set slug = concat('brin-', brin_id)
       where brin_id > ''
     ");
-    echo "ok\n";
+    if ($count === 1) {
+      echo "updated slug for 1 license\n";
+    }
+    else {
+      echo "updated slugs for {$count} licenses\n";
+    }
   }
 }
