@@ -21,7 +21,7 @@ class FixLicenseSlugs extends Command
   {
     $count = DB::update("
       update licenses
-      set slug = concat('brin-', brin_id)
+      set slug = lower(concat('brin-', brin_id))
       where brin_id > ''
     ");
     if ($count === 1) {
