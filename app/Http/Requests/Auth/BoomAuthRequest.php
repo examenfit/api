@@ -14,6 +14,7 @@ use DateTime;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -149,13 +150,19 @@ class BoomAuthRequest extends FormRequest
 
 // Log::info('user='.json_encode($user, JSON_PRETTY_PRINT));
 
+// 
+// 
+// DB::transaction(function() use ($data, $role, $privileges, $user) {
+// 
+// 
         $license = License::firstOrCreate([
           'brin_id' => $data->brin_id
         ], [
           'type' => 'boom',
           'begin' => new DateTime(),
           'end' => $until,
-          'description' => 'Boom, '.$data->brin_id
+          'description' => 'Boom, '.$data->brin_id,
+          'slug' => strtolower($data->brin_id)
         ]);
 
         if ($license->end < $until) {
@@ -258,6 +265,12 @@ class BoomAuthRequest extends FormRequest
           }
 
         }
+
+//
+// 
+// }); /* transaction */
+// 
+//
 
         Auth::login($user);
 
