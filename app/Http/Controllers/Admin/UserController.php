@@ -26,8 +26,8 @@ class UserController extends Controller
           ]);
           return new UserResource($user);
         }
-        return $this->all();
-        // return UserResource::collection(User::all());
+        //return $this->all();
+        return UserResource::collection(User::all());
     }
 
     private function all()
