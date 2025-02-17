@@ -45,7 +45,6 @@ class UpdateMetaData extends Command
   public function handle()
   {
     $exams = Exam::query()
-      ->where('year', 2023)
       ->get();
     foreach($exams as $exam) {
       $exam->load([ 'stream', 'topics.questions' ]);
@@ -53,23 +52,28 @@ class UpdateMetaData extends Command
       foreach ($exam->topics as $topic) {
         if ($this->skipTopic($exam, $topic)) continue;
         foreach ($topic->questions as $question) {
-          $this->info("processing {$exam->stream->slug} {$exam->year}-{$exam->term} {$topic->name} {$question->number}");
-          $exam_annotation = Annotation::firstOrCreate([
-            'name' => "{$exam->year} {$exam->term}e tijdvak",
-            'stream_id' => $exam->stream_id,
-            'type' => 'examen',
-          ], [
-            'position' => 999999 - 150*$exam->year + 50*$exam->term,
-          ]);
-          $topic_annotation = Annotation::firstOrCreate([
-            'name' => $topic->name,
-            'parent_id' => $exam_annotation->id,
-            'stream_id' => $exam->stream_id,
-            'type' => 'opgave',
-          ], [
-            'position' => 999999 - 150*$exam->year + 50*$exam->term + $question->number,
-          ]);
-          $topic_annotation->questions()->attach([ $question->id ]);
+          try {
+            $this->info("processing {$exam->stream->slug} {$exam->year}-{$exam->term} {$topic->name} {$question->number}");
+            $exam_annotation = Annotation::firstOrCreate([
+              'name' => "{$exam->year} {$exam->term}e tijdvak",
+              'stream_id' => $exam->stream_id,
+              'type' => 'examen',
+            ], [
+              'position' => 999999 - 150*$exam->year + 50*$exam->term,
+            ]);
+            $topic_annotation = Annotation::firstOrCreate([
+              'name' => $topic->name,
+              'parent_id' => $exam_annotation->id,
+              'stream_id' => $exam->stream_id,
+              'type' => 'opgave',
+            ], [
+              'position' => 999999 - 150*$exam->year + 50*$exam->term + $question->number,
+            ]);
+            $topic_annotation->questions()->syncWithoutDetaching([ $question->id ]);
+          }
+          catch (\Exception $error) {
+            $this->info("ingored: {$error->getMessage()}");
+          }
         }
       }
     }
