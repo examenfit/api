@@ -104,7 +104,7 @@ Log::info('Invalid userInfo; missing property='.$property);
         // collect role, until & streams
         $role = 'leerling';
         $privileges = [];
-        $until = new DateTime('2025-08-01');
+        $until = new DateTime('2026-08-01');
 
         $valid = FALSE;
         $licenses = json_decode($data->licenses);
@@ -112,7 +112,7 @@ Log::info('Invalid userInfo; missing property='.$property);
 
         foreach ($LICENSES as $EAN => $options) {
           if (in_array($EAN, $licenses)) {
-            $until = '2025-08-01';
+            $until = '2026-08-01';
             foreach($options as $option => $value) {
               if ($option === 'role') {
                 $role = $value;
