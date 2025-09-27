@@ -171,6 +171,7 @@ DB::transaction(function() use ($data, $privileges, $role, $until, $user) {
 
         $license_end = License::getEndDate();
         if ($license->end < $license_end) {
+Log::info('Extend license to '.$license_end->format('Y-m-d'));
           $license->end = $license_end;
           $license->save();
         }
@@ -224,6 +225,7 @@ DB::transaction(function() use ($data, $privileges, $role, $until, $user) {
             ]);
                 
             if ($oefensets_uitvoeren->end < $license_end) {
+Log::info('Extend oefensets_uitvoeren to '.$license_end->format('Y-m-d'));
               $oefensets_uitvoeren->end = $license_end;
               $oefensets_uitvoeren->save();
             }
@@ -245,6 +247,7 @@ DB::transaction(function() use ($data, $privileges, $role, $until, $user) {
             ]);
                 
             if ($opgavensets_samenstellen->end < $license_end) {
+Log::info('Extend opgavensets_samenstellen to '.$license_end->format('Y-m-d'));
               $opgavensets_samenstellen->end = $license_end;
               $opgavensets_samenstellen->save();
             }
