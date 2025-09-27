@@ -59,7 +59,7 @@ class BoomAuthRequest extends FormRequest
         $oidc->setAccessToken($token);
 
         $userInfo = $oidc->requestUserInfo();
-// Log::info('userInfo='.json_encode($userInfo, JSON_PRETTY_PRINT));
+Log::info('userInfo='.json_encode($userInfo, JSON_PRETTY_PRINT));
 
         $this->validateUserInfo($userInfo);
 
@@ -99,12 +99,16 @@ Log::info('Invalid userInfo; missing property='.$property);
         $this->ensureIsNotRateLimited();
 
         $data = $this->requestUserInfo();
+Log::info("Auth::authenticate {$data->email}");
 
 
         // collect role, until & streams
         $role = 'leerling';
         $privileges = [];
-        $until = new DateTime('2026-08-01');
+
+        $now = new DateTime();
+        $begin = License::getBeginDate();
+        $until = License::getEndDate();
 
         $valid = FALSE;
         $licenses = json_decode($data->licenses);
@@ -112,7 +116,7 @@ Log::info('Invalid userInfo; missing property='.$property);
 
         foreach ($LICENSES as $EAN => $options) {
           if (in_array($EAN, $licenses)) {
-            $until = '2026-08-01';
+            $until = License::getEndDate();
             foreach($options as $option => $value) {
               if ($option === 'role') {
                 $role = $value;
@@ -159,7 +163,7 @@ DB::transaction(function() use ($data, $privileges, $role, $until, $user) {
           'brin_id' => $data->brin_id
         ], [
           'type' => 'boom',
-          'begin' => new DateTime(),
+          'begin' => $begin,
           'end' => $until,
           'description' => 'Boom, '.$data->brin_id,
           'slug' => 'brin-'.strtolower($data->brin_id)
@@ -188,6 +192,7 @@ DB::transaction(function() use ($data, $privileges, $role, $until, $user) {
           $stream_name = $stream->course->name . ' ' . $stream->level->name;
 // Log::info('stream_name='.$stream_name);
 
+          $grades = [];
           if ($stream->level->name === 'Vmbo GT') $grades = [3, 4];
           if ($stream->level->name === 'Havo') $grades = [4, 5];
           if ($stream->level->name === 'Vwo') $grades = [5, 6];
@@ -213,7 +218,7 @@ DB::transaction(function() use ($data, $privileges, $role, $until, $user) {
               'object_id' => $stream->id,
               'ean' => $EAN,
             ], [
-              'begin' => new DateTime(),
+              'begin' => $begin,
               'end' => $license->end,
             ]);
                 
@@ -234,7 +239,7 @@ DB::transaction(function() use ($data, $privileges, $role, $until, $user) {
               'object_id' => $stream->id,
               'ean' => $EAN,
             ], [
-              'begin' => new DateTime(),
+              'begin' => $begin,
               'end' => $license->end,
             ]);
                 
