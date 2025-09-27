@@ -169,8 +169,9 @@ DB::transaction(function() use ($data, $privileges, $role, $until, $user) {
           'slug' => 'brin-'.strtolower($data->brin_id)
         ]);
 
-        if ($license->end < $until) {
-          $license->end = $until;
+        $license_end = License::getEndDate();
+        if ($license->end < $license_end) {
+          $license->end = $license_end;
           $license->save();
         }
 
@@ -222,8 +223,8 @@ DB::transaction(function() use ($data, $privileges, $role, $until, $user) {
               'end' => $license->end,
             ]);
                 
-            if ($oefensets_uitvoeren->end < $until) {
-              $oefensets_uitvoeren->end = $until;
+            if ($oefensets_uitvoeren->end < $license_end) {
+              $oefensets_uitvoeren->end = $license_end;
               $oefensets_uitvoeren->save();
             }
 
@@ -243,8 +244,8 @@ DB::transaction(function() use ($data, $privileges, $role, $until, $user) {
               'end' => $license->end,
             ]);
                 
-            if ($opgavensets_samenstellen->end < $until) {
-              $opgavensets_samenstellen->end = $until;
+            if ($opgavensets_samenstellen->end < $license_end) {
+              $opgavensets_samenstellen->end = $license_end;
               $opgavensets_samenstellen->save();
             }
 
