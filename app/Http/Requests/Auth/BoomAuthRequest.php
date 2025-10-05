@@ -99,7 +99,7 @@ Log::info('Invalid userInfo; missing property='.$property);
         $this->ensureIsNotRateLimited();
 
         $data = $this->requestUserInfo();
-Log::info("Auth::authenticate {$data->email}");
+Log::info("BoomAuthRequest::authenticate {$data->email}");
 
 
         // collect role, until & streams
@@ -323,4 +323,8 @@ Log::info("Logged in {$user->email}");
         return $this->ip();
     }
 
+    static public function test()
+    {
+Log::info("BoomAuthRequest::test");
+    }
 }
