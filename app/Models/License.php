@@ -41,10 +41,33 @@ class License extends Model
         return $this->hasMany(Group::class);
     }
 
+    public static function getBeginDate()
+    {
+	$date = new DateTime();
+	return $date->format('Y-m-d');
+    }
+
+    public static function getEndDate()
+    {
+        // return upcoming 1st of August
+        // date is 2023-07-31 => return 2023-08-01
+        // date is 2023-08-01 => return 2024-08-01
+        $date = new DateTime();
+        $month = $date->format('m');
+        $year = $date->format('Y') + ($month > '07');
+        return "$year-08-01";
+    }
+
+    public static function getRelativeEndDate($period) {
+        $date = new DateTime();
+        $date->add(new DateInterval($period));
+        return $date->format('Y-m-d');
+    }
+
     public static function createLeerlinglicentie($user, $streams, $descr = 'leerlinglicentie')
     {
-        $begin = new DateTime();
-        $end = new DateTime('2022-08-01');
+        $begin = License::getBeginDate();
+        $end = License::getEndDate();
 
         $license = License::create([
             'type' => 'leerlinglicentie',
@@ -83,14 +106,8 @@ class License extends Model
 
     public static function createProeflicentie($user, $streams = [ 1, 2 ], $descr = 'proeflicentie')
     {
-        $begin = new DateTime;
-        $end = new DateTime;
-        $end->add(new DateInterval('P10D'));
-
-        $feb1 = new DateTime('2022-02-01');
-        if ($end < $feb1) {
-            $end = $feb1;
-        }
+        $begin = License::getBeginDate();
+        $end = License::getRelativeEndDate('P10D'); // 10 day period
 
         $license = License::create([
             'type' => 'proeflicentie',

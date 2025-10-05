@@ -59,7 +59,7 @@ class BoomAuthRequest extends FormRequest
         $oidc->setAccessToken($token);
 
         $userInfo = $oidc->requestUserInfo();
-// Log::info('userInfo='.json_encode($userInfo, JSON_PRETTY_PRINT));
+Log::info('userInfo='.json_encode($userInfo, JSON_PRETTY_PRINT));
 
         $this->validateUserInfo($userInfo);
 
@@ -99,12 +99,16 @@ Log::info('Invalid userInfo; missing property='.$property);
         $this->ensureIsNotRateLimited();
 
         $data = $this->requestUserInfo();
+Log::info("BoomAuthRequest::authenticate {$data->email}");
 
 
         // collect role, until & streams
         $role = 'leerling';
         $privileges = [];
-        $until = new DateTime('2025-08-01');
+
+        $now = new DateTime();
+        $begin = License::getBeginDate();
+        $until = License::getEndDate();
 
         $valid = FALSE;
         $licenses = json_decode($data->licenses);
@@ -112,7 +116,7 @@ Log::info('Invalid userInfo; missing property='.$property);
 
         foreach ($LICENSES as $EAN => $options) {
           if (in_array($EAN, $licenses)) {
-            $until = '2025-08-01';
+            $until = License::getEndDate();
             foreach($options as $option => $value) {
               if ($option === 'role') {
                 $role = $value;
@@ -159,14 +163,16 @@ DB::transaction(function() use ($data, $privileges, $role, $until, $user) {
           'brin_id' => $data->brin_id
         ], [
           'type' => 'boom',
-          'begin' => new DateTime(),
+          'begin' => $begin,
           'end' => $until,
           'description' => 'Boom, '.$data->brin_id,
           'slug' => 'brin-'.strtolower($data->brin_id)
         ]);
 
-        if ($license->end < $until) {
-          $license->end = $until;
+        $license_end = License::getEndDate();
+        if ($license->end < $license_end) {
+Log::info('Extend license to '.$license_end->format('Y-m-d'));
+          $license->end = $license_end;
           $license->save();
         }
 
@@ -188,6 +194,7 @@ DB::transaction(function() use ($data, $privileges, $role, $until, $user) {
           $stream_name = $stream->course->name . ' ' . $stream->level->name;
 // Log::info('stream_name='.$stream_name);
 
+          $grades = [];
           if ($stream->level->name === 'Vmbo GT') $grades = [3, 4];
           if ($stream->level->name === 'Havo') $grades = [4, 5];
           if ($stream->level->name === 'Vwo') $grades = [5, 6];
@@ -213,12 +220,13 @@ DB::transaction(function() use ($data, $privileges, $role, $until, $user) {
               'object_id' => $stream->id,
               'ean' => $EAN,
             ], [
-              'begin' => new DateTime(),
+              'begin' => $begin,
               'end' => $license->end,
             ]);
                 
-            if ($oefensets_uitvoeren->end < $until) {
-              $oefensets_uitvoeren->end = $until;
+            if ($oefensets_uitvoeren->end < $license_end) {
+Log::info('Extend oefensets_uitvoeren to '.$license_end->format('Y-m-d'));
+              $oefensets_uitvoeren->end = $license_end;
               $oefensets_uitvoeren->save();
             }
 
@@ -234,12 +242,13 @@ DB::transaction(function() use ($data, $privileges, $role, $until, $user) {
               'object_id' => $stream->id,
               'ean' => $EAN,
             ], [
-              'begin' => new DateTime(),
+              'begin' => $begin,
               'end' => $license->end,
             ]);
                 
-            if ($opgavensets_samenstellen->end < $until) {
-              $opgavensets_samenstellen->end = $until;
+            if ($opgavensets_samenstellen->end < $license_end) {
+Log::info('Extend opgavensets_samenstellen to '.$license_end->format('Y-m-d'));
+              $opgavensets_samenstellen->end = $license_end;
               $opgavensets_samenstellen->save();
             }
 
@@ -314,4 +323,8 @@ Log::info("Logged in {$user->email}");
         return $this->ip();
     }
 
+    static public function test()
+    {
+Log::info("BoomAuthRequest::test");
+    }
 }
