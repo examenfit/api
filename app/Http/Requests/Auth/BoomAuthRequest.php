@@ -156,7 +156,7 @@ Log::info('No valid license(s) found');
 
 // 
 // 
-DB::transaction(function() use ($data, $privileges, $role, $until, $user) {
+DB::transaction(function() use ($data, $privileges, $role, $until, $begin, $user) {
 // 
 // 
         $license = License::firstOrCreate([
@@ -171,7 +171,7 @@ DB::transaction(function() use ($data, $privileges, $role, $until, $user) {
 
         $license_end = License::getEndDate();
         if ($license->end < $license_end) {
-Log::info('Extend license to '.$license_end->format('Y-m-d'));
+Log::info('Extend license to '.$license_end);
           $license->end = $license_end;
           $license->save();
         }
@@ -225,7 +225,7 @@ Log::info('Extend license to '.$license_end->format('Y-m-d'));
             ]);
                 
             if ($oefensets_uitvoeren->end < $license_end) {
-Log::info('Extend oefensets_uitvoeren to '.$license_end->format('Y-m-d'));
+Log::info('Extend oefensets_uitvoeren to '.$license_end);
               $oefensets_uitvoeren->end = $license_end;
               $oefensets_uitvoeren->save();
             }
@@ -247,7 +247,7 @@ Log::info('Extend oefensets_uitvoeren to '.$license_end->format('Y-m-d'));
             ]);
                 
             if ($opgavensets_samenstellen->end < $license_end) {
-Log::info('Extend opgavensets_samenstellen to '.$license_end->format('Y-m-d'));
+Log::info('Extend opgavensets_samenstellen to '.$license_end);
               $opgavensets_samenstellen->end = $license_end;
               $opgavensets_samenstellen->save();
             }
