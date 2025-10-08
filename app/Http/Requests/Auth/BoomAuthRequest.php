@@ -205,7 +205,8 @@ Log::info('Extend license to '.$license_end);
               'license_id' => $license->id,
               'stream_id' => $stream->id,
               'brin_id' => $data->brin_id,
-              'name' => "$stream_name $grade ($period)",
+              //'name' => "$stream_name $grade ($period)",
+              'name' => "$stream_name $grade",
             ], [
               'is_active' => TRUE,
             ]);
