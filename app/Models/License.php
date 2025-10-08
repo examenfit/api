@@ -47,6 +47,15 @@ class License extends Model
 	return $date->format('Y-m-d');
     }
 
+    public static function getPeriod()
+    {
+        $date = new DateTime();
+        $month = $date->format('m');
+        $last_year = $date->format('Y') + ($month > '07');
+        $first_year = $last_year - 1;
+        return "$first_year-$last_year";
+    }
+
     public static function getEndDate()
     {
         // return upcoming 1st of August

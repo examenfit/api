@@ -199,12 +199,13 @@ Log::info('Extend license to '.$license_end);
           if ($stream->level->name === 'Havo') $grades = [4, 5];
           if ($stream->level->name === 'Vwo') $grades = [5, 6];
 
+          $period = License::getPeriod();
           foreach ($grades as $grade) {
             $group = Group::firstOrCreate([
               'license_id' => $license->id,
               'stream_id' => $stream->id,
               'brin_id' => $data->brin_id,
-              'name' => "$stream_name $grade",
+              'name' => "$stream_name $grade ($period)",
             ], [
               'is_active' => TRUE,
             ]);
