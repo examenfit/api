@@ -171,7 +171,7 @@ DB::transaction(function() use ($data, $privileges, $role, $until, $begin, $user
 
         $license_end = License::getEndDate();
         if ($license->end < $license_end) {
-Log::info('Extend license to '.$license_end);
+// Log::info('Extend license to '.$license_end);
           $license->end = $license_end;
           $license->save();
         }
@@ -205,8 +205,8 @@ Log::info('Extend license to '.$license_end);
               'license_id' => $license->id,
               'stream_id' => $stream->id,
               'brin_id' => $data->brin_id,
-              //'name' => "$stream_name $grade ($period)",
               'name' => "$stream_name $grade",
+              //'name' => "$stream_name $grade ($period)",
             ], [
               'is_active' => TRUE,
             ]);
@@ -227,7 +227,7 @@ Log::info('Extend license to '.$license_end);
             ]);
                 
             if ($oefensets_uitvoeren->end < $license_end) {
-Log::info('Extend oefensets_uitvoeren to '.$license_end);
+// Log::info('Extend oefensets_uitvoeren to '.$license_end);
               $oefensets_uitvoeren->end = $license_end;
               $oefensets_uitvoeren->save();
             }
@@ -249,7 +249,7 @@ Log::info('Extend oefensets_uitvoeren to '.$license_end);
             ]);
                 
             if ($opgavensets_samenstellen->end < $license_end) {
-Log::info('Extend opgavensets_samenstellen to '.$license_end);
+// Log::info('Extend opgavensets_samenstellen to '.$license_end);
               $opgavensets_samenstellen->end = $license_end;
               $opgavensets_samenstellen->save();
             }
