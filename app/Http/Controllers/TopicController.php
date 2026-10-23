@@ -51,8 +51,8 @@ class TopicController extends Controller
             }
         }
 
-        date_default_timezone_set('CET');
-        $timestamp = date('Y-m-d H:i');
+        // Dutch local time; 'CET' is no longer a valid timezone id on current PHP/tzdata
+        $timestamp = now('Europe/Amsterdam')->format('Y-m-d H:i');
 
         $topic['appendixes'] = $appendixes;
         $topic['timestamp'] = $timestamp;
