@@ -14,7 +14,8 @@ use App\Models\License;
 use App\Models\Seat;
 
 mb_internal_encoding('UTF-8');
-date_default_timezone_set('CET');
+// 'CET' is no longer a valid timezone id on current PHP/tzdata
+date_default_timezone_set('Europe/Amsterdam');
 
 class KPIs {
 
