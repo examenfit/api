@@ -68,9 +68,9 @@ class QuestionTypeImport extends Command
         $this->info("LET OP: $message");
     }
 
-    private function fail($message)
+    private function failure($message)
     {
-        $this->fail("LET OP: $message");
+        throw new \RuntimeException("LET OP: $message");
     }
 
     private function processRow($row)
@@ -90,7 +90,7 @@ class QuestionTypeImport extends Command
         if ($this->course) {
             $this->info("Vak \"$name\"");
         } else {
-            $this->fail("Vak \"$name\" bestaat niet");
+            $this->failure("Vak \"$name\" bestaat niet");
         }
         $this->stream = null;
     }
@@ -105,7 +105,7 @@ class QuestionTypeImport extends Command
         if ($this->level) {
             $this->info("Niveau \"$name\"");
         } else {
-            $this->fail("Niveau \"$name\" bestaat niet");
+            $this->failure("Niveau \"$name\" bestaat niet");
         }
         $this->stream = null;
     }
@@ -126,7 +126,7 @@ class QuestionTypeImport extends Command
             if ($this->stream) {
                 $this->info("  Stroom \"$course $level\"");
             } else {
-                $this->fail("  Stroom \"$course $level\" bestaat niet");
+                $this->failure("  Stroom \"$course $level\" bestaat niet");
             }
         }
         $chapter = QuestionType::query()
