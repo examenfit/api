@@ -18,13 +18,13 @@ class AddRelationshipsToQuestionsTable extends Migration
                 ->nullable()
                 ->after('topic_id')
                 ->constrained('domains')
-                ->onDelete(\DB::raw('set null'));
+                ->onDelete('set null');
 
             $table->foreignId('type_id')
                 ->nullable()
                 ->after('domain_id')
                 ->constrained('question_types')
-                ->onDelete(\DB::raw('set null'));
+                ->onDelete('set null');
         });
     }
 
