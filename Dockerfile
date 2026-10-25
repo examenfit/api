@@ -1,6 +1,5 @@
-# composer.lock needs >= 8.2 (symfony 7); Laravel 8 officially supports <= 8.1, so expect deprecations.
-# 8.3.36 matches production (Forge) and is patched for PHP2Shell.
-FROM php:8.3.36-cli-bookworm
+# 8.5.12 is the Forge php of staging/production sites that run 8.5 (composer.json allows ~8.3.36 || ~8.5.12).
+FROM php:8.5.12-cli-bookworm
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
       git unzip poppler-utils imagemagick nodejs npm \

@@ -15,10 +15,9 @@ class QuestionTypeImport implements ToCollection, WithHeadingRow, WithCalculated
     /**
      * @param Collection $collection
      */
-    public function collection(Collection $rows)
+    // Excel 4 requires `: void` and ignores the return value (it was ignored in Excel 3 too);
+    // the commands only use Excel::toCollection(), which returns the sheets' rows.
+    public function collection(Collection $collection): void
     {
-        foreach ($rows as $row) {
-            return $row;
-        }
     }
 }
