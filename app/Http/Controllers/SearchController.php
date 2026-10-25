@@ -157,7 +157,7 @@ class SearchController extends Controller
             $STATUS = [ 'published' ];
         }
         $topics = QueryBuilder::for(Topic::class)
-        ->allowedFilters([
+        ->allowedFilters(
             AllowedFilter::callback('domain', function (Builder $query, $value) {
                 $query->whereHas('questions.domains', function (Builder $subQuery) use ($value) {
                     $ids = collect($value)->map(
@@ -222,12 +222,12 @@ class SearchController extends Controller
                   }
                 });
             }),
-        ])->allowedSorts([
+        )->allowedSorts(
             'name',
             'popularity',
             AllowedSort::custom('complexity', new class implements Sort
             {
-                public function __invoke(Builder $query, bool $descending, string $property)
+                public function __invoke(Builder $query, bool $descending, string $property): void
                 {
                     $query->orderByRaw(
                         "FIELD(`complexity`, 'low', 'average', 'high') " .
@@ -240,7 +240,7 @@ class SearchController extends Controller
             }),
             AllowedSort::custom('proportion_value', new class implements Sort
             {
-                public function __invoke(Builder $query, bool $descending, string $property)
+                public function __invoke(Builder $query, bool $descending, string $property): void
                 {
                     $query->orderByRaw(
                         "cast(json_unquote(json_extract(`cache`, '$.\"averageProportionValue\"')) as unsigned)" .
@@ -250,7 +250,7 @@ class SearchController extends Controller
             }),
             AllowedSort::custom('year', new class implements Sort
             {
-                public function __invoke(Builder $query, bool $descending, string $property)
+                public function __invoke(Builder $query, bool $descending, string $property): void
                 {
                     $query->orderByRaw(
                         "cast(json_unquote(json_extract(`cache`, '$.\"year\"')) as unsigned)" .
@@ -260,7 +260,7 @@ class SearchController extends Controller
             }),
             AllowedSort::custom('question_count', new class implements Sort
             {
-                public function __invoke(Builder $query, bool $descending, string $property)
+                public function __invoke(Builder $query, bool $descending, string $property): void
                 {
                     $query->orderByRaw(
                         "cast(json_unquote(json_extract(`cache`, '$.\"questionCount\"')) as unsigned)" .
@@ -270,7 +270,7 @@ class SearchController extends Controller
             }),
             AllowedSort::custom('time_in_minutes', new class implements Sort
             {
-                public function __invoke(Builder $query, bool $descending, string $property)
+                public function __invoke(Builder $query, bool $descending, string $property): void
                 {
                     $query->orderByRaw(
                         "cast(json_unquote(json_extract(`cache`, '$.\"totalTimeInMinutes\"')) as unsigned)" .
@@ -280,7 +280,7 @@ class SearchController extends Controller
             }),
             AllowedSort::custom('points', new class implements Sort
             {
-                public function __invoke(Builder $query, bool $descending, string $property)
+                public function __invoke(Builder $query, bool $descending, string $property): void
                 {
                     $query->orderByRaw(
                         "cast(json_unquote(json_extract(`cache`, '$.\"totalPoints\"')) as unsigned)" .
@@ -290,7 +290,7 @@ class SearchController extends Controller
             }),
             AllowedSort::custom('position', new class implements Sort
             {
-                public function __invoke(Builder $query, bool $descending, string $property)
+                public function __invoke(Builder $query, bool $descending, string $property): void
                 {
                     $query
                       ->orderByRaw('json_extract(cache, \'$."year"\') ASC')
@@ -298,7 +298,7 @@ class SearchController extends Controller
                       ->orderByRaw('position ASC');
                 }
             }),
-        ])
+        )
             ->where('cache->stream_id', $stream->id)
             ->whereIn('cache->examStatus', $STATUS);
 
