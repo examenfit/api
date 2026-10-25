@@ -7,13 +7,6 @@
         "laravel"
     ],
     "license": "MIT",
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/verwer/PHPWord.git",
-            "no-api": true
-        }
-    ],
     "require": {
         "php": "~8.3.36 || ~8.5.12",
         "guzzlehttp/guzzle": "^7.0.1",
@@ -25,7 +18,7 @@
         "maatwebsite/excel": "^4.0",
         "mollie/mollie-api-php": "^2.0",
         "owen-it/laravel-auditing": "^14.0",
-        "phpoffice/phpword": "dev-develop",
+        "phpoffice/phpword": "^1.4",
         "predis/predis": "^3.0",
         "simplesoftwareio/simple-qrcode": "~4",
         "spatie/laravel-query-builder": "^6.3",

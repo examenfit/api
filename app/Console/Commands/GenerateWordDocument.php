@@ -66,6 +66,7 @@ class GenerateWordDocument extends Command
         $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($this->processor, 'Word2007');
         $time = time();
         $objWriter->save("helloWorld-{$time}.docx");
+        \App\Support\DocxSettings::alignFormulasLeft("helloWorld-{$time}.docx");
     }
 
     public function getCollection($id)
@@ -221,7 +222,7 @@ class GenerateWordDocument extends Command
         $table->addRow();
 
         // QR Code
-        $cell = $table->addCell(1050, ['gridSpan' => 2, 'valign' => 'bottom']);
+        $cell = $table->addCell(1050, ['gridSpan' => 2, 'valign' => 'bottom', 'noWrap' => false]);
 
         $textRun = $cell->addTextRun();
         $textRun->addImage($this->getQRCode($question), [
@@ -231,7 +232,7 @@ class GenerateWordDocument extends Command
         ]);
 
         // Introduction
-        $cell = $table->addCell();
+        $cell = $table->addCell(null, ['noWrap' => false]);
         $this->addAttachments($question->attachments, $cell);
 
         $textRun = $cell->addTextRun();
@@ -241,17 +242,17 @@ class GenerateWordDocument extends Command
         $table->addRow();
 
         // Points and number
-        $cell = $table->addCell(525);
+        $cell = $table->addCell(525, ['noWrap' => false]);
         $cell->addText(
             $question->points.'p',
             ['size' => 8],
             ['spaceBefore' => \PhpOffice\PhpWord\Shared\Converter::pointToTwip(2)]
         );
 
-        $table->addCell(525)->addText($this->questionNumber, ['bold' => true]);
+        $table->addCell(525, ['noWrap' => false])->addText($this->questionNumber, ['bold' => true]);
 
         // Question itself
-        $cell = $table->addCell();
+        $cell = $table->addCell(null, ['noWrap' => false]);
         $textRun = $cell->addTextRun(['indent' => 0]);
         $this->formatText($question->text, $textRun);
 

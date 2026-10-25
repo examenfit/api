@@ -228,7 +228,7 @@ class CollectionCorrectionsDocument
     function addAppendixesTitle() {
         $section = $this->currentSection();
         $table = $section->addTable([
-            'unit' => \PhpOffice\PhpWord\Style\Table::WIDTH_PERCENT,
+            'unit' => \PhpOffice\PhpWord\SimpleType\TblWidth::PERCENT,
             'width' => 100 * 50,
             'Spacing' => 0,
             'cellSpacing' => 0,
@@ -236,7 +236,7 @@ class CollectionCorrectionsDocument
         ]);
         $row = $table->addRow();
 
-        $left = $row->addCell();
+        $left = $row->addCell(null, ['noWrap' => false]);
         $left->addText('Uitwerkbijlage', ['size' => 14, 'bold' => true]);
     }
 
@@ -300,14 +300,14 @@ class CollectionCorrectionsDocument
     {
         $section = $this->currentSection();
         $table = $section->addTable([
-            'unit' => \PhpOffice\PhpWord\Style\Table::WIDTH_PERCENT,
+            'unit' => \PhpOffice\PhpWord\SimpleType\TblWidth::PERCENT,
             'width' => 100 * 50,
             'Spacing' => 0,
             'cellSpacing' => 0,
             'borderBottomSize' => 32
         ]);
         $row = $table->addRow();
-        $cell = $row->addCell();
+        $cell = $row->addCell(null, ['noWrap' => false]);
 
         $topics = count($this->collection->topics);
         $questions = 0;
@@ -348,7 +348,7 @@ class CollectionCorrectionsDocument
         $exam = "{$year}-{$term}";
         $section = $this->currentSection();
         $table = $section->addTable([
-            'unit' => \PhpOffice\PhpWord\Style\Table::WIDTH_PERCENT,
+            'unit' => \PhpOffice\PhpWord\SimpleType\TblWidth::PERCENT,
             'width' => 100 * 50,
             'Spacing' => 0,
             'cellSpacing' => 0,
@@ -356,10 +356,10 @@ class CollectionCorrectionsDocument
         ]);
         $row = $table->addRow();
 
-        $left = $row->addCell();
+        $left = $row->addCell(null, ['noWrap' => false]);
         $left->addText($title, ['size' => 14, 'bold' => true]);
 
-        $right = $row->addCell();
+        $right = $row->addCell(null, ['noWrap' => false]);
         $txt = $right->addTextRun(['align' => 'right']);
         $txt->addText($course, ['bold' => true]);
         $txt->addText(' | ');
@@ -472,7 +472,7 @@ class CollectionCorrectionsDocument
     function addCorrection($points, $correction) {
         $section = $this->currentSection();
         $table = $section->addTable([
-            'unit' => \PhpOffice\PhpWord\Style\Table::WIDTH_PERCENT,
+            'unit' => \PhpOffice\PhpWord\SimpleType\TblWidth::PERCENT,
             'width' => 100 * 50,
             'Spacing' => 0,
             'cellSpacing' => 0,
@@ -481,10 +481,10 @@ class CollectionCorrectionsDocument
         ]);
         $row = $table->addRow();
 
-        $left = $row->addCell(600);
+        $left = $row->addCell(600, ['noWrap' => false]);
         $left->addText("{$points}pt", ['bold' => true]);
 
-        $right = $row->addCell(4000);
+        $right = $row->addCell(4000, ['noWrap' => false]);
         $txt = $right->addTextRun();
         $this->formatText($correction, $txt);
     }
@@ -492,7 +492,7 @@ class CollectionCorrectionsDocument
     function addQuestionText($question) {
         $section = $this->currentSection();
         $table = $section->addTable([
-            'unit' => \PhpOffice\PhpWord\Style\Table::WIDTH_PERCENT,
+            'unit' => \PhpOffice\PhpWord\SimpleType\TblWidth::PERCENT,
             'width' => 100 * 50,
             'Spacing' => 0,
             'cellSpacing' => 0,
@@ -501,6 +501,7 @@ class CollectionCorrectionsDocument
         ]);
         $row = $table->addRow();
         $cell = $row->addCell(5000, [
+            'noWrap' => false,
             'borderSize' => 12
         ]);
         $txt = $cell->addTextRun();
@@ -517,7 +518,7 @@ class CollectionCorrectionsDocument
         ];
         $section = $this->currentSection();
         $table = $section->addTable([
-            'unit' => \PhpOffice\PhpWord\Style\Table::WIDTH_PERCENT,
+            'unit' => \PhpOffice\PhpWord\SimpleType\TblWidth::PERCENT,
             'width' => 100 * 50,
             'Spacing' => 0,
             'cellSpacing' => 0,
@@ -525,12 +526,12 @@ class CollectionCorrectionsDocument
         ]);
         $row = $table->addRow();
 
-        $left = $row->addCell(2500);
+        $left = $row->addCell(2500, ['noWrap' => false]);
         $txt = $left->addTextRun(['align' => 'left']);
         $txt->addText("Vraag {$question->number} ", ['size' => 11, 'bold' => true]);
         $txt->addText(" {$question->points} punten", ['size' => 11]);
 /*
-        $right = $row->addCell(2500);
+        $right = $row->addCell(2500, ['noWrap' => false]);
         $txt = $right->addTextRun(['align' => 'right']);
         $txt->addText("{$question->time_in_minutes} min.", ['size' => 11]);
         if ($question->complexiteit) {
@@ -574,12 +575,12 @@ class CollectionCorrectionsDocument
         ]);
         $row = $table->addRow();
 
-        $left = $row->addCell(1500);
+        $left = $row->addCell(1500, ['noWrap' => false]);
         $left->addImage($tmpfile, [
             'width' => 54,
             'height' => 54
         ]);
-        $right = $row->addCell(4000, ['valign' => 'center']);
+        $right = $row->addCell(4000, ['valign' => 'center', 'noWrap' => false]);
         $right->addText('Gebruik de QR-code om na te kijken of om tips te krijgen', ['bold' => true]);
     }
 
@@ -732,6 +733,7 @@ class CollectionCorrectionsDocument
         Log::info($file);
         $writer = \PhpOffice\PhpWord\IOFactory::createWriter($this->document, 'Word2007');
         $writer->save($file);
+        \App\Support\DocxSettings::alignFormulasLeft($file);
     }
 
     function savePDF($file)

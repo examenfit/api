@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "32a155982dc7f6b11f9f3c948d270a3c",
+    "content-hash": "deb971a449b1f9ffd60e61e560c33a18",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -1716,67 +1716,6 @@
                 "source": "https://github.com/jumbojett/OpenID-Connect-PHP/tree/v1.0.2"
             },
             "time": "2024-09-13T07:08:11+00:00"
-        },
-        {
-            "name": "laminas/laminas-escaper",
-            "version": "2.18.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/laminas/laminas-escaper.git",
-                "reference": "06f211dfffff18d91844c1f55250d5d13c007e18"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/laminas/laminas-escaper/zipball/06f211dfffff18d91844c1f55250d5d13c007e18",
-                "reference": "06f211dfffff18d91844c1f55250d5d13c007e18",
-                "shasum": ""
-            },
-            "require": {
-                "ext-ctype": "*",
-                "ext-mbstring": "*",
-                "php": "~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0"
-            },
-            "conflict": {
-                "zendframework/zend-escaper": "*"
-            },
-            "require-dev": {
-                "infection/infection": "^0.31.0",
-                "laminas/laminas-coding-standard": "~3.1.0",
-                "phpunit/phpunit": "^11.5.42",
-                "psalm/plugin-phpunit": "^0.19.5",
-                "vimeo/psalm": "^6.13.1"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Laminas\\Escaper\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "BSD-3-Clause"
-            ],
-            "description": "Securely and safely escape HTML, HTML attributes, JavaScript, CSS, and URLs",
-            "homepage": "https://laminas.dev",
-            "keywords": [
-                "escaper",
-                "laminas"
-            ],
-            "support": {
-                "chat": "https://laminas.dev/chat",
-                "docs": "https://docs.laminas.dev/laminas-escaper/",
-                "forum": "https://discourse.laminas.dev",
-                "issues": "https://github.com/laminas/laminas-escaper/issues",
-                "rss": "https://github.com/laminas/laminas-escaper/releases.atom",
-                "source": "https://github.com/laminas/laminas-escaper"
-            },
-            "funding": [
-                {
-                    "url": "https://funding.communitybridge.org/projects/laminas-project",
-                    "type": "community_bridge"
-                }
-            ],
-            "time": "2025-10-14T18:31:13+00:00"
         },
         {
             "name": "laravel/framework",
@@ -4024,6 +3963,58 @@
             "time": "2020-10-15T08:29:30+00:00"
         },
         {
+            "name": "phpoffice/math",
+            "version": "0.3.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/PHPOffice/Math.git",
+                "reference": "fc31c8f57a7a81f962cbf389fd89f4d9d06fc99a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/PHPOffice/Math/zipball/fc31c8f57a7a81f962cbf389fd89f4d9d06fc99a",
+                "reference": "fc31c8f57a7a81f962cbf389fd89f4d9d06fc99a",
+                "shasum": ""
+            },
+            "require": {
+                "ext-dom": "*",
+                "ext-xml": "*",
+                "php": "^7.1|^8.0"
+            },
+            "require-dev": {
+                "phpstan/phpstan": "^0.12.88 || ^1.0.0",
+                "phpunit/phpunit": "^7.0 || ^9.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "PhpOffice\\Math\\": "src/Math/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Progi1984",
+                    "homepage": "https://lefevre.dev"
+                }
+            ],
+            "description": "Math - Manipulate Math Formula",
+            "homepage": "https://phpoffice.github.io/Math/",
+            "keywords": [
+                "MathML",
+                "officemathml",
+                "php"
+            ],
+            "support": {
+                "issues": "https://github.com/PHPOffice/Math/issues",
+                "source": "https://github.com/PHPOffice/Math/tree/0.3.0"
+            },
+            "time": "2025-05-29T08:31:49+00:00"
+        },
+        {
             "name": "phpoffice/phpspreadsheet",
             "version": "5.10.0",
             "source": {
@@ -4136,77 +4127,53 @@
         },
         {
             "name": "phpoffice/phpword",
-            "version": "dev-develop",
+            "version": "1.4.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/verwer/PHPWord.git",
-                "reference": "9437de01ccce828687c79cb28ac7f3f35cfa45d4"
+                "url": "https://github.com/PHPOffice/PHPWord.git",
+                "reference": "6d75328229bc93790b37e93741adf70646cea958"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/verwer/PHPWord/zipball/9437de01ccce828687c79cb28ac7f3f35cfa45d4",
-                "reference": "9437de01ccce828687c79cb28ac7f3f35cfa45d4",
+                "url": "https://api.github.com/repos/PHPOffice/PHPWord/zipball/6d75328229bc93790b37e93741adf70646cea958",
+                "reference": "6d75328229bc93790b37e93741adf70646cea958",
                 "shasum": ""
             },
             "require": {
+                "ext-dom": "*",
+                "ext-gd": "*",
+                "ext-json": "*",
                 "ext-xml": "*",
-                "laminas/laminas-escaper": "^2.2",
-                "php": "^5.3.3 || ^7.0 || ^8.0"
-            },
-            "replace": {
-                "laminas/laminas-zendframework-bridge": "*"
+                "ext-zip": "*",
+                "php": "^7.1|^8.0",
+                "phpoffice/math": "^0.3"
             },
             "require-dev": {
-                "dompdf/dompdf": "0.8.* || 1.0.*",
-                "ext-gd": "*",
-                "ext-zip": "*",
-                "friendsofphp/php-cs-fixer": "^2.2",
-                "mpdf/mpdf": "5.7.4 || 6.* || 7.* || 8.*",
-                "php-coveralls/php-coveralls": "1.1.0 || ^2.0",
-                "phploc/phploc": "2.* || 3.* || 4.* || 5.* || 6.* || 7.*",
-                "phpmd/phpmd": "2.*",
-                "phpunit/phpunit": "^4.8.36 || ^7.0",
-                "squizlabs/php_codesniffer": "^2.9 || ^3.5",
-                "tecnickcom/tcpdf": "6.*"
+                "dompdf/dompdf": "^2.0 || ^3.0",
+                "ext-libxml": "*",
+                "friendsofphp/php-cs-fixer": "^3.3",
+                "mpdf/mpdf": "^7.0 || ^8.0",
+                "phpmd/phpmd": "^2.13",
+                "phpstan/phpstan": "^0.12.88 || ^1.0.0",
+                "phpstan/phpstan-phpunit": "^1.0 || ^2.0",
+                "phpunit/phpunit": ">=7.0",
+                "symfony/process": "^4.4 || ^5.0",
+                "tecnickcom/tcpdf": "^6.5"
             },
             "suggest": {
                 "dompdf/dompdf": "Allows writing PDF",
-                "ext-gd2": "Allows adding images",
                 "ext-xmlwriter": "Allows writing OOXML and ODF",
-                "ext-xsl": "Allows applying XSL style sheet to headers, to main document part, and to footers of an OOXML template",
-                "ext-zip": "Allows writing OOXML and ODF"
+                "ext-xsl": "Allows applying XSL style sheet to headers, to main document part, and to footers of an OOXML template"
             },
-            "default-branch": true,
             "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-develop": "0.18-dev"
-                }
-            },
             "autoload": {
                 "psr-4": {
                     "PhpOffice\\PhpWord\\": "src/PhpWord"
                 }
             },
-            "scripts": {
-                "test": [
-                    "phpunit --color=always"
-                ],
-                "test-no-coverage": [
-                    "phpunit --color=always --no-coverage"
-                ],
-                "check": [
-                    "php-cs-fixer fix --ansi --dry-run --diff",
-                    "phpcs --report-width=200 --report-summary  --report-full samples/ src/ tests/ --ignore=src/PhpWord/Shared/PCLZip --standard=PSR2 -n",
-                    "phpmd src/,tests/ text ./phpmd.xml.dist --exclude pclzip.lib.php",
-                    "@test-no-coverage"
-                ],
-                "fix": [
-                    "php-cs-fixer fix --ansi"
-                ]
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
-                "LGPL-3.0"
+                "LGPL-3.0-only"
             ],
             "authors": [
                 {
@@ -4234,33 +4201,37 @@
                 }
             ],
             "description": "PHPWord - A pure PHP library for reading and writing word processing documents (OOXML, ODF, RTF, HTML, PDF)",
-            "homepage": "http://phpoffice.github.io",
+            "homepage": "https://phpoffice.github.io/PHPWord/",
             "keywords": [
-                "HTML",
                 "ISO IEC 29500",
-                "ODF",
                 "OOXML",
                 "Office Open XML",
                 "OpenDocument",
                 "OpenXML",
-                "PDF",
-                "PHP",
-                "PHPOffice",
-                "PHPWord",
-                "RTF",
+                "PhpOffice",
+                "PhpWord",
                 "Rich Text Format",
                 "WordprocessingML",
                 "doc",
                 "docx",
+                "html",
+                "odf",
                 "odt",
                 "office",
+                "pdf",
+                "php",
                 "reader",
+                "rtf",
                 "template",
                 "template processor",
                 "word",
                 "writer"
             ],
-            "time": "2021-01-15T10:13:24+00:00"
+            "support": {
+                "issues": "https://github.com/PHPOffice/PHPWord/issues",
+                "source": "https://github.com/PHPOffice/PHPWord/tree/1.4.0"
+            },
+            "time": "2025-06-05T10:32:36+00:00"
         },
         {
             "name": "phpoption/phpoption",
@@ -11067,9 +11038,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "phpoffice/phpword": 20
-    },
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

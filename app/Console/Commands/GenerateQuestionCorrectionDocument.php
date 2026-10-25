@@ -209,6 +209,7 @@ class GenerateQuestionCorrectionDocument extends Command
 
         $objWriter = \PhpOffice\PhpWord\IOFactory::createWriter($this->processor, 'Word2007');
         $objWriter->save(storage_path("app/public/question-correction/{$this->exam->hash_id}.docx"));
+        \App\Support\DocxSettings::alignFormulasLeft(storage_path("app/public/question-correction/{$this->exam->hash_id}.docx"));
         $this->info(storage_path("app/public/question-correction/{$this->exam->hash_id}.docx"));
     }
 
