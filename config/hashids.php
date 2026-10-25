@@ -39,7 +39,7 @@ return [
 
         'main' => [
             'salt' => '#L"pvnV*ZR.Emq58',
-            'length' => '5',
+            'length' => 5,
             // 'alphabet' => 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890'
         ],
 
