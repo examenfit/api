@@ -106,6 +106,12 @@ class RegistrationController extends Controller
         }
     }
 
+    /*
+     * FROZEN (2026-10-25): leerling registration with a Mollie payment is not used. MOLLIE_API_KEY is not set on production and
+     * POST /api/register-leerling is disabled in routes/api.php. The code below is kept as is, for reference; do not extend it.
+     * See work/done/rfc-remove-mollie-leerling-registration.txt and work/todo/rfc-app-remove-leerling-registration-route.txt.
+     * (activationStatus/activateAccount/activateLicense below are NOT frozen: the teacher trial licence uses them too.)
+     */
     function getMollieApiClient() {
         $mollie_api_key = config('app.mollie_api_key');
 
@@ -198,6 +204,7 @@ class RegistrationController extends Controller
         return $user;
     }
 
+    // FROZEN: only used for registrations created by registerLeerling (see the note above getMollieApiClient)
     function refreshPayment($payment, $registration)
     {
         $description = $payment->description;
@@ -222,6 +229,7 @@ class RegistrationController extends Controller
             return response()->json(['info' => 'registration activated already', 'activated' => $registration->activated ]);
         }
 
+        // FROZEN: only registrations created by registerLeerling have a payment_id, so this branch is not reached for new registrations
         if ($registration->payment_id && $registration->payment_status !== 'paid') {
           $payment = $this->getPaymentById($registration->payment_id);
 

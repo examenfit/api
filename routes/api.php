@@ -133,7 +133,8 @@ Route::get('/streams/{stream}', [ScoreController::class, 'getStreamScores']);
 Route::post('/streams/{stream}/{question}', [ScoreController::class, 'postStreamScore']);
 
 Route::post('/register', [RegistrationController::class, 'register']);
-Route::post('/register-leerling', [RegistrationController::class, 'registerLeerling']);
+// FROZEN (2026-10-25): leerling registration with a Mollie payment is not used (no MOLLIE_API_KEY on production); see RegistrationController
+// Route::post('/register-leerling', [RegistrationController::class, 'registerLeerling']);
 Route::get('/activation-status', [RegistrationController::class, 'activationStatus']);
 Route::post('/activate-account', [RegistrationController::class, 'activateAccount']);
 Route::post('/activate-license', [RegistrationController::class, 'activateLicense']);
