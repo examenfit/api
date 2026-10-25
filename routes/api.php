@@ -15,7 +15,6 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\PrivilegeController;
 use App\Http\Controllers\AnnotationController;
 use App\Http\Controllers\LicenseController;
-use App\Http\Controllers\MollieController;
 use App\Http\Controllers\FeedbackController;
 
 use App\Http\Controllers\ActivityLogController;
@@ -59,7 +58,6 @@ Route::group(['middleware' => ['web']], function () {
 
         Route::get('/fix_marcel', [BoomAuthController::class, 'fix_marcel']);
 
-// Route::get('/mollie/test', [MollieController::class, 'test']);
 Route::get('/custom/activities.tsv', [CustomQueries::class, 'activities_tsv']);
 
 Route::get('/log/collection/{collection}', [ActivityLogController::class, 'collectionSummary']);

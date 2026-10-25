@@ -16,10 +16,8 @@
     ],
     "require": {
         "php": "~8.3.36 || ~8.5.12",
-        "doctrine/dbal": "^3.0",
         "guzzlehttp/guzzle": "^7.0.1",
         "jumbojett/openid-connect-php": "^1.0",
-        "laravel/breeze": "^2.0",
         "laravel/framework": "^13.0",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^3.0",
