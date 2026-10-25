@@ -26,7 +26,7 @@
         "mollie/mollie-api-php": "^2.0",
         "owen-it/laravel-auditing": "^14.0",
         "phpoffice/phpword": "dev-develop",
-        "predis/predis": "^1.1",
+        "predis/predis": "^3.0",
         "simplesoftwareio/simple-qrcode": "~4",
         "spatie/laravel-query-builder": "^6.3",
         "spatie/pdf-to-text": "^1.3",
