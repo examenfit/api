@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use Illuminate\Support\Facades\Log;
+
 class DocumentMarkup {
 
   const BOLD = '/\*\*(.+?)\*\*/m';
@@ -34,8 +36,15 @@ class DocumentMarkup {
     $cmd = str_replace(array('\\', '%'), array('\\\\', '%%'), $formula);
     $cmd = escapeshellarg($cmd);
 
-    $output = shell_exec("printf $cmd | $katex");
-    return trim($output);
+    $output = trim((string) shell_exec("printf $cmd | $katex"));
+
+    if ($output === '') {
+      // katex rejected the formula: show the TeX source instead of nothing (and do not fail the page)
+      Log::warning("DocumentMarkup: katex rejected the formula: " . mb_substr($formula, 0, 200));
+      return '<span class="formula-error">' . htmlspecialchars($formula, ENT_QUOTES, 'UTF-8') . '</span>';
+    }
+
+    return $output;
   }
 
   public function fixLatex($text) {

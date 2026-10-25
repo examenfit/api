@@ -534,7 +534,7 @@ class CollectionQuestionsDocument
                     if (preg_match('/`\$\$(.+)?\$\$`/', $result, $match)) {
                         $chunks[$key] = [
                             'type' => 'formula',
-                            'result' => $this->latexFormula($match[1]),
+                            'result' => $this->latexFormula($match[1]) ?? \App\Support\Latex::fallbackText($match[1]),
                         ];
                     }
 
@@ -585,44 +585,10 @@ class CollectionQuestionsDocument
         }
     }
 
+    // OMML for a formula; null when katex cannot convert it (see App\Support\Latex): the caller falls back to the TeX source as text
     function latexFormula($formula)
     {
-        $xml = new \DOMDocument;
-        $xml->loadXML($this->latexToMathML($formula));
-
-        $omml = $this->XSLTProcessor->transformToXML($xml);
-
-        $t_omml = new \DOMDocument;
-        $t_omml->loadXML($omml);
-
-        return $t_omml->saveXML($t_omml->documentElement);
-    }
-
-    function latexToMathML($formula)
-    {
-        //Log::info("latexToMathML: $formula");
-
-        // Write formula to file
-        $tempFile = tmpfile();
-        fwrite($tempFile, $formula);
-        $tempFilePath = stream_get_meta_data($tempFile)['uri'];
-
-        //Log::info("KaTeX...");
-        //Log::info("tempFilePath: $tempFilePath");
-
-        // Run KaTeX NodeJS script
-        $result = trim(shell_exec(base_path("/node_modules/katex/cli.js --input {$tempFilePath}")));
-
-        //Log::info("result: $result");
-
-        // Grep MathML XML
-        preg_match('/\<math.+\<\/math\>/', $result, $match);
-
-        // Delete file
-        fclose($tempFile);
-
-        // Return MathML XML
-        return $match[0];
+        return \App\Support\Latex::toOmml($formula, $this->XSLTProcessor);
     }
 
     /**
