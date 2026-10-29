@@ -14,6 +14,12 @@ trait HashID
 
     public function hashToId($hashid)
     {
+        // relations (create(), associate()) hand over the numeric id, and hashids 14 only decodes strings;
+        // a number is not a hashid, callers fall back to the value itself
+        if (!is_string($hashid)) {
+            return false;
+        }
+
         $decodedValue = Arr::first(Hashids::decode($hashid));
 
         if (!is_int($decodedValue)) {
