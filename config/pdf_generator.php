@@ -1,0 +1,15 @@
+<?php
+
+return [
+    // The pdf server posts its disk usage with this token (header X-Disk-Usage-Token). Empty: the endpoint refuses everything.
+    'disk_usage_token' => env('PDF_DISK_USAGE_TOKEN'),
+
+    // From this percentage on the disk is critical: a mail goes to the addresses below.
+    'disk_usage_critical_percentage' => (int) env('PDF_DISK_USAGE_CRITICAL', 80),
+
+    // Comma separated addresses. Empty: no mail (the overview still shows the status).
+    'disk_usage_alert_to' => env('PDF_DISK_USAGE_ALERT_TO'),
+
+    // The pdf server reports every hour or so: at most one mail per this many hours while the disk stays critical.
+    'disk_usage_alert_interval_hours' => (int) env('PDF_DISK_USAGE_ALERT_INTERVAL_HOURS', 24),
+];

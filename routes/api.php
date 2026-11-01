@@ -20,6 +20,7 @@ use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\CollectionController;
 use App\Http\Controllers\CustomQueries;
+use App\Http\Controllers\PdfDiskUsageController;
 use App\Http\Controllers\RegistrationController;
 
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -53,6 +54,9 @@ use App\Http\Controllers\Admin\ChapterController as AdminChapterController;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+
+// the pdf server posts its disk usage from cron; no session, no csrf: a token in the header (config/pdf_generator.php)
+Route::post('/pdf-generator/disk-usage', [PdfDiskUsageController::class, 'store'])->middleware('throttle:60,1');
 
 Route::group(['middleware' => ['web']], function () {
 
@@ -222,6 +226,7 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::group(['prefix' => 'admin', 'middleware' => 'role:admin,author'], function () {
         Route::get('/', [AdminIndexController::class, 'index']);
 
+        Route::get('/custom/pdf-generator/disk-usage', [CustomQueries::class, 'pdf_generator_disk_usage']);
         Route::get('/custom/kpis', [CustomQueries::class, 'kpis']);
         Route::get('/custom/clicks+devices', [CustomQueries::class, 'clicks_and_devices']);
         Route::get('/custom/activities/all', [CustomQueries::class, 'activities']);

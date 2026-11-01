@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Support\KPIReport;
+use App\Support\PdfDiskUsageReport;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -333,9 +334,19 @@ class CustomQueries extends Controller
       return $kpis->report();
     }
 
+    public function pdf_generator_disk_usage(PdfDiskUsageReport $report)
+    {
+      return response()->json($report->rows());
+    }
+
     public function index()
     {
       return response()->json([
+        [
+          'title' => 'Schijfruimte PDF-generator',
+          'path' => '/pdf-generator/schijfruimte',
+          'endpoint' => '/api/admin/custom/pdf-generator/disk-usage'
+        ],
         [
           'title' => 'Vragen met meerdere oplossingsstrategiën',
           'path' => '/vragen/met-meerdere-antwoorden',
