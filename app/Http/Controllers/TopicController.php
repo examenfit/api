@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Topic;
+use App\Support\RemoteScripts;
 use Illuminate\Http\Request;
 use App\Http\Resources\TopicResource;
 
@@ -65,19 +66,10 @@ class TopicController extends Controller
         $api = url("/api/download-topic-appendixes-html");
         $api = str_replace("http://localhost:8000", "https://staging-api.examenfit.nl", $api);
 
-        $server = config('app.examenfit_scripts_url');
-
         $hash = $topic->hash_id;
         $pdf = "uitwerkbijlage-${hash}.pdf";
-        $tmp = "/tmp/${pdf}";
 
-        // currently ssh authentication goes with public key authentication
-        // in the future this may need to become ssh -i id_rsa or something alike
-        $generate = "ssh examenfit@$server make/appendixes-pdf $hash $api";
-        $retrieve = "scp examenfit@$server:pdf/$pdf $tmp";
-
-        shell_exec($generate);
-        shell_exec($retrieve);
+        $tmp = RemoteScripts::fromConfig()->makePdf('appendixes-pdf', $hash, $api, $pdf);
 
         return response()->download($tmp);
     }

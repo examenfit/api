@@ -28,6 +28,7 @@ use App\Http\Resources\CollectionResource;
 use App\Support\CollectionQuestionsDocument;
 use App\Support\CollectionCorrectionsDocument;
 use App\Support\DocumentMarkup;
+use App\Support\RemoteScripts;
 
 class CollectionController extends Controller
 {
@@ -228,25 +229,10 @@ class CollectionController extends Controller
 
         Log::info("api=$api");
 
-        $server = config('app.examenfit_scripts_url');
+        $hash = $collection->hash_id; // note: the collections and the appendixes pdf share this name, but
+        $pdf = $hash.".pdf";          //       they are not downloaded at the same time, so there should be no problem
 
-        $hash = $collection->hash_id; // note: this name conflicts with the appendixes pdf
-        $pdf = $hash.".pdf";          //       but as they are not downloaded at the same time
-        $tmp = "/tmp/".$pdf;          //       there _should_ be no problem
-
-        Log::info("pdf=$pdf");
-        Log::info("tmp=$tmp");
-
-        // currently ssh authentication goes with public key authentication
-        // in the future this may need to become ssh -i id_rsa or something alike
-        $generate = "ssh examenfit@$server make/pdf $hash $api";
-        $retrieve = "scp examenfit@$server:pdf/$pdf $tmp";
-
-        Log::info($generate);
-        shell_exec($generate);
-
-        Log::info($retrieve);
-        shell_exec($retrieve);
+        $tmp = RemoteScripts::fromConfig()->makePdf('pdf', $hash, $api, $pdf);
 
         Log::info("response");
         $name = preg_replace('/[\/\\\\]+/', ' ', $collection->name);
@@ -410,25 +396,10 @@ class CollectionController extends Controller
 
         Log::info("api=$api");
 
-        $server = config('app.examenfit_scripts_url');
+        $hash = $collection->hash_id; // note: the collections and the appendixes pdf share this name, but
+        $pdf = $hash.".pdf";          //       they are not downloaded at the same time, so there should be no problem
 
-        $hash = $collection->hash_id; // note: this name conflicts with the collections pdf
-        $pdf = $hash.".pdf";          //       but as they are not downloaded at the same time
-        $tmp = "/tmp/".$pdf;          //       there _should_ be no problem
-
-        Log::info("pdf=$pdf");
-        Log::info("tmp=$tmp");
-
-        // currently ssh authentication goes with public key authentication
-        // in the future this may need to become ssh -i id_rsa or something alike
-        $generate = "ssh examenfit@$server make/pdf $hash $api";
-        $retrieve = "scp examenfit@$server:pdf/$pdf $tmp";
-
-        Log::info($generate);
-        shell_exec($generate);
-
-        Log::info($retrieve);
-        shell_exec($retrieve);
+        $tmp = RemoteScripts::fromConfig()->makePdf('pdf', $hash, $api, $pdf);
 
         Log::info("response");
         $name = preg_replace('/[\/\\\\]+/', ' ', $collection->name);
