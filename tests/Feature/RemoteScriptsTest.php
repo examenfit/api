@@ -2,9 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Mail\PdfServerFailureMail;
 use App\Support\RemoteScriptException;
 use App\Support\RemoteScripts;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 // ssh and scp are replaced by small shell scripts, so no pdf server is needed.
@@ -82,6 +84,20 @@ class RemoteScriptsTest extends TestCase
         Log::shouldHaveReceived('error')->withArgs(fn ($message, $context) => $context['exit'] === 255
             && str_contains($context['output'], 'Permission denied')
             && str_contains($context['command'], 'pdf.example'))->once();
+    }
+
+    public function test_a_failure_mails_the_owners()
+    {
+        Mail::fake();
+        config(['pdf_generator.disk_usage_alert_to' => 'owner@example.com']);
+        $ssh = $this->writeCommand('ssh', 'echo "Host key verification failed." >&2; exit 255');
+
+        try {
+            $this->remoteScripts($ssh, 'true')->makePdf('pdf', 'abc', 'https://api.test/x', 'remote-scripts-test.pdf');
+        } catch (RemoteScriptException $e) {
+        }
+
+        Mail::assertSent(PdfServerFailureMail::class, fn ($mail) => $mail->hasTo('owner@example.com'));
     }
 
     public function test_a_failing_scp_throws()

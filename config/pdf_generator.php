@@ -12,4 +12,7 @@ return [
 
     // The pdf server reports every hour or so: at most one mail per this many hours while the disk stays critical.
     'disk_usage_alert_interval_hours' => (int) env('PDF_DISK_USAGE_ALERT_INTERVAL_HOURS', 24),
+
+    // A script on the pdf server that fails (ssh/scp, see RemoteScripts) mails the same addresses, at most once per this many hours.
+    'failure_alert_interval_hours' => (int) env('PDF_SERVER_FAILURE_ALERT_INTERVAL_HOURS', 6),
 ];

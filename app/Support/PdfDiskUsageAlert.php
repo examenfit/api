@@ -17,7 +17,7 @@ class PdfDiskUsageAlert
         }
 
         try {
-            Mail::to($this->recipients())->send(new PdfDiskUsageMail($usage));
+            Mail::to(PdfAlertRecipients::addresses())->send(new PdfDiskUsageMail($usage));
         } catch (Throwable $error) {
             // the measurement is stored; a broken mail server must not make the pdf server's report fail
             report($error);
@@ -31,7 +31,7 @@ class PdfDiskUsageAlert
 
     private function isAlertDue(PdfDiskUsage $usage): bool
     {
-        return $usage->isCritical() && $this->recipients() !== [] && !$this->wasAlertedRecently();
+        return $usage->isCritical() && PdfAlertRecipients::addresses() !== [] && !$this->wasAlertedRecently();
     }
 
     private function wasAlertedRecently(): bool
@@ -39,12 +39,5 @@ class PdfDiskUsageAlert
         $hours = config('pdf_generator.disk_usage_alert_interval_hours');
 
         return PdfDiskUsage::where('alerted_at', '>', now()->subHours($hours))->exists();
-    }
-
-    private function recipients(): array
-    {
-        $addresses = explode(',', (string) config('pdf_generator.disk_usage_alert_to'));
-
-        return array_values(array_filter(array_map('trim', $addresses)));
     }
 }

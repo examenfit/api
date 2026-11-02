@@ -67,7 +67,9 @@ class RemoteScripts
 
     private function fail(array $command, ?int $status, string $output): never
     {
-        Log::error('RemoteScripts: command failed', ['command' => implode(' ', $command), 'exit' => $status, 'output' => trim($output)]);
+        $line = implode(' ', $command);
+        Log::error('RemoteScripts: command failed', ['command' => $line, 'exit' => $status, 'output' => trim($output)]);
+        (new RemoteScriptFailureAlert)->send($line, $status, trim($output));
 
         throw new RemoteScriptException('remote script failed: ' . $command[0]);
     }
