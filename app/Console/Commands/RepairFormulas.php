@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Support\FormulaChecker;
 use App\Support\FormulaRepair;
+use App\Support\KnownTextFixes;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -18,9 +19,9 @@ class RepairFormulas extends Command
 
     private const FORMULA = '/`\$\$(.+?)\$\$`/';
 
-    public function handle(FormulaRepair $repair, FormulaChecker $checker): int
+    public function handle(FormulaRepair $repair, KnownTextFixes $knownFixes, FormulaChecker $checker): int
     {
-        $changes = $this->findChanges($repair);
+        $changes = $this->findChanges($repair, $knownFixes);
         $this->info(count($changes) . ' texts change');
         $this->showChanges($changes);
 
@@ -40,13 +41,13 @@ class RepairFormulas extends Command
     }
 
     // [['table', 'column', 'id', 'old', 'new'], ...]
-    private function findChanges(FormulaRepair $repair): array
+    private function findChanges(FormulaRepair $repair, KnownTextFixes $knownFixes): array
     {
         $changes = [];
 
         foreach ($this->textColumns() as $column) {
             foreach ($this->rowsWithFormulas($column->t, $column->c) as $row) {
-                $new = $repair->repairText((string) $row->text);
+                $new = $repair->repairText($knownFixes->apply($column->t, $column->c, $row->id, (string) $row->text));
 
                 if ($new !== (string) $row->text) {
                     $changes[] = ['table' => $column->t, 'column' => $column->c, 'id' => $row->id, 'old' => (string) $row->text, 'new' => $new];
@@ -81,23 +82,35 @@ class RepairFormulas extends Command
 
         foreach ($changes as $change) {
             foreach ($this->changedFormulas($change) as [$old, $new]) {
-                $rows[] = ["{$change['table']}.{$change['column']} #{$change['id']}", mb_substr($old, 0, 70), mb_substr($new, 0, 70)];
+                $rows[] = ["{$change['table']}.{$change['column']} #{$change['id']}", mb_substr((string) $old, 0, 70), mb_substr((string) $new, 0, 70)];
             }
         }
 
         $this->table(['where', 'old', 'new'], $rows);
     }
 
-    // [[old formula, new formula], ...]: only the formulas of the text that differ
+    // [[old formula, new formula], ...]: the formulas that left the text next to the ones that came in
+    // (compared by content: a fix of a stray delimiter changes the number of formulas in a text)
     private function changedFormulas(array $change): array
     {
-        preg_match_all(self::FORMULA, $change['old'], $old);
-        preg_match_all(self::FORMULA, $change['new'], $new);
+        return array_map(null, $this->removedFormulas($change), $this->addedFormulas($change));
+    }
 
-        return array_values(array_filter(
-            array_map(null, $old[1], $new[1]),
-            fn (array $pair) => $pair[0] !== $pair[1]
-        ));
+    private function removedFormulas(array $change): array
+    {
+        return array_values(array_diff($this->formulasIn($change['old']), $this->formulasIn($change['new'])));
+    }
+
+    private function addedFormulas(array $change): array
+    {
+        return array_values(array_diff($this->formulasIn($change['new']), $this->formulasIn($change['old'])));
+    }
+
+    private function formulasIn(string $text): array
+    {
+        preg_match_all(self::FORMULA, $text, $matches);
+
+        return $matches[1];
     }
 
     private function stillFailing(array $changes, FormulaChecker $checker): bool
@@ -105,7 +118,7 @@ class RepairFormulas extends Command
         $repaired = [];
 
         foreach ($changes as $change) {
-            $repaired = array_merge($repaired, array_column($this->changedFormulas($change), 1));
+            $repaired = array_merge($repaired, $this->addedFormulas($change));
         }
 
         return $repaired !== [] && $checker->failures($repaired) !== [];

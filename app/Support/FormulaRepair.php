@@ -2,7 +2,7 @@
 
 namespace App\Support;
 
-// Repairs stored `$$formulas$$` that katex 0.19 rejects but katex 0.9 (the old app) accepted.
+// Repairs stored `$$formulas$$` that katex 0.19 rejects but katex 0.9 (the old app) accepted, and plain typos.
 class FormulaRepair
 {
     private const FORMULA = '/`\$\$(.+?)\$\$`/';
@@ -19,8 +19,23 @@ class FormulaRepair
         );
     }
 
-    // \sqrt[4]\frac{a}{b} -> \sqrt[4]{\frac{a}{b}}: katex 0.19 wants the radicand in braces
     public function repairFormula(string $formula): string
+    {
+        return $this->repairTypos($this->bracedRadicands($formula));
+    }
+
+    // K^' -> K^{\prime}: katex wants a group after ^ (katex 0.9 let it pass); \texitt is a typo for \textit
+    private function repairTypos(string $formula): string
+    {
+        return preg_replace(
+            ["/\^\s*'/", '/\\\\texitt(?![a-zA-Z])/'],
+            ['^{\\\\prime}', '\\\\textit'],
+            $formula
+        );
+    }
+
+    // \sqrt[4]\frac{a}{b} -> \sqrt[4]{\frac{a}{b}}: katex 0.19 wants the radicand in braces
+    private function bracedRadicands(string $formula): string
     {
         $result = '';
         $position = 0;

@@ -27,6 +27,12 @@ class FormulaRepairTest extends TestCase
                 '\sqrt[3]\frac{a\}}{b}x',
                 '\sqrt[3]{\frac{a\}}{b}}x',
             ],
+            'a prime after a superscript caret' => [
+                "K^' = 133,49 \cdot 0,07 \cdot d^{0,07-1}",
+                'K^{\prime} = 133,49 \cdot 0,07 \cdot d^{0,07-1}',
+            ],
+            'a prime with a space after the caret' => ["x^ ' + 1", 'x^{\prime} + 1'],
+            'the texitt typo' => ['\texitt{Indien een antwoord}', '\textit{Indien een antwoord}'],
             'two in one formula' => [
                 '\sqrt[3]\frac{a}{b} + \sqrt[4]\frac{c}{d}',
                 '\sqrt[3]{\frac{a}{b}} + \sqrt[4]{\frac{c}{d}}',
@@ -47,6 +53,8 @@ class FormulaRepairTest extends TestCase
             'a plain root' => ['\sqrt{x}+\sqrt[3]{y}'],
             'a shorthand fraction katex also rejects' => ['\sqrt[3]\frac43'],
             'a group that never closes' => ['\sqrt[4]\frac{0,5^2}{0,5^2+2\cdot 9,81'],
+            'a prime that already has braces' => ["K^{\prime} + f'(x)"],
+            'a derivative prime' => ["f'(x) = 2x"],
             'a longer command' => ['\sqrt[3]\fraction{a}{b}'],
         ];
     }
