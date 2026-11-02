@@ -15,26 +15,54 @@ class DocxSettings
 
     public static function alignFormulasLeft(string $file): void
     {
-        $zip = new \ZipArchive();
+        $zip = self::openDocx($file);
 
-        if ($zip->open($file) !== true) {
-            Log::warning("DocxSettings: cannot open $file");
+        if ($zip === null) {
             return;
         }
 
-        $settings = $zip->getFromName('word/settings.xml');
-        $count = 0;
-
-        if ($settings !== false) {
-            $settings = str_replace(array_keys(self::MATH_SETTINGS), array_values(self::MATH_SETTINGS), $settings, $count);
-            $zip->addFromString('word/settings.xml', $settings);
-        }
-
+        $count = self::replaceMathSettings($zip);
         $zip->close();
 
-        // a cosmetic fix must not break an export, but a changed library output should be noticed
-        if ($count !== count(self::MATH_SETTINGS)) {
-            Log::warning("DocxSettings: expected " . count(self::MATH_SETTINGS) . " math settings in $file, replaced $count");
+        self::warnWhenNotReplaced($file, $count);
+    }
+
+    private static function openDocx(string $file): ?\ZipArchive
+    {
+        $zip = new \ZipArchive();
+
+        if ($zip->open($file) === true) {
+            return $zip;
+        }
+
+        Log::warning("DocxSettings: cannot open $file");
+
+        return null;
+    }
+
+    // how many of the settings were found and replaced
+    private static function replaceMathSettings(\ZipArchive $zip): int
+    {
+        $settings = $zip->getFromName('word/settings.xml');
+
+        if ($settings === false) {
+            return 0;
+        }
+
+        $count = 0;
+        $settings = str_replace(array_keys(self::MATH_SETTINGS), array_values(self::MATH_SETTINGS), $settings, $count);
+        $zip->addFromString('word/settings.xml', $settings);
+
+        return $count;
+    }
+
+    // a cosmetic fix must not break an export, but a changed library output should be noticed
+    private static function warnWhenNotReplaced(string $file, int $count): void
+    {
+        $expected = count(self::MATH_SETTINGS);
+
+        if ($count !== $expected) {
+            Log::warning("DocxSettings: expected $expected math settings in $file, replaced $count");
         }
     }
 }

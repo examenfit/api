@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Support\DocxSettings;
+use Illuminate\Support\Facades\Log;
 use PhpOffice\PhpWord\IOFactory;
 use PhpOffice\PhpWord\PhpWord;
 use Tests\TestCase;
@@ -42,6 +43,33 @@ class DocxSettingsTest extends TestCase
         // the file is still a valid docx that PHPWord can read
         $this->assertNotNull(IOFactory::load($file));
 
+        unlink($file);
+    }
+
+    public function test_a_file_that_is_not_a_docx_is_logged_and_does_not_throw()
+    {
+        Log::spy();
+        $file = tempnam(sys_get_temp_dir(), 'docx');
+        file_put_contents($file, 'geen zip');
+
+        DocxSettings::alignFormulasLeft($file);
+
+        Log::shouldHaveReceived('warning')->withArgs(fn ($message) => str_contains($message, 'cannot open'))->once();
+        unlink($file);
+    }
+
+    public function test_a_docx_without_the_math_settings_is_logged_with_the_count()
+    {
+        Log::spy();
+        $file = tempnam(sys_get_temp_dir(), 'docx');
+        $zip = new \ZipArchive();
+        $zip->open($file, \ZipArchive::OVERWRITE);
+        $zip->addFromString('word/settings.xml', '<w:settings/>');
+        $zip->close();
+
+        DocxSettings::alignFormulasLeft($file);
+
+        Log::shouldHaveReceived('warning')->withArgs(fn ($message) => str_contains($message, 'expected 2 math settings') && str_contains($message, 'replaced 0'))->once();
         unlink($file);
     }
 

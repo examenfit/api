@@ -2,10 +2,11 @@
 
 namespace App\Console\Commands;
 
+use App\Support\FormulaChecker;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use Symfony\Component\Process\Process;
+use RuntimeException;
 
 // Finds the `$$formulas$$` that katex cannot convert, before an export (or a student) runs into them.
 class CheckFormulas extends Command
@@ -14,43 +15,30 @@ class CheckFormulas extends Command
 
     protected $description = 'List the stored formulas that katex cannot convert (exit code 1 when there are any)';
 
-    public function handle()
+    private const FORMULA = '/(`\$\$(.+?)\$\$`)/m';
+
+    // how many rows of a formula's places are listed before "..."
+    private const PLACES_SHOWN = 4;
+
+    public function handle(FormulaChecker $checker): int
     {
         $found = $this->collectFormulas();
         $formulas = array_map('strval', array_keys($found));
         $this->info(count($formulas) . ' unique formulas');
 
-        $process = new Process(['node', base_path('scripts/check-formulas.js')]);
-        $process->setInput(json_encode($formulas));
-        $process->setTimeout(600);
-        $process->run();
-
-        if (!$process->isSuccessful()) {
-            $this->error('node failed: ' . trim($process->getErrorOutput()));
+        try {
+            $failures = $checker->failures($formulas);
+        } catch (RuntimeException $error) {
+            $this->error($error->getMessage());
             return 2;
         }
 
-        $failures = json_decode($process->getOutput(), true);
-
-        if (!$failures) {
+        if ($failures === []) {
             $this->info('all formulas can be converted');
             return 0;
         }
 
-        $rows = [];
-
-        foreach ($failures as $failure) {
-            $formula = $formulas[$failure['index']];
-            $where = array_map(fn ($w) => "{$w[0]}.{$w[1]} #{$w[2]}", array_slice($found[$formula], 0, 4));
-            $rows[] = [
-                implode(', ', $where) . (count($found[$formula]) > 4 ? ', ...' : ''),
-                mb_substr($failure['message'], 0, 70),
-                mb_substr($formula, 0, 60),
-            ];
-        }
-
-        $this->table(['where', 'katex says', 'formula'], $rows);
-        $this->error(count($failures) . ' formulas cannot be converted');
+        $this->showFailures($failures, $formulas, $found);
 
         return 1;
     }
@@ -58,30 +46,68 @@ class CheckFormulas extends Command
     // formula => [[table, column, id], ...]
     private function collectFormulas(): array
     {
-        $db = config('database.connections.' . config('database.default') . '.database');
-        $columns = DB::select(
-            "select table_name t, column_name c from information_schema.columns where table_schema = ? and data_type in ('text', 'mediumtext', 'longtext', 'varchar')",
-            [$db]
-        );
         $found = [];
 
-        foreach ($columns as $column) {
-            if ($column->t === 'audits' && !$this->option('audits')) {
-                continue;
-            }
-
-            $hasId = Schema::hasColumn($column->t, 'id');
-            $rows = DB::table($column->t)->where($column->c, 'like', '%$$%')->get($hasId ? ['id', $column->c] : [$column->c]);
-
-            foreach ($rows as $row) {
-                if (preg_match_all('/(`\$\$(.+?)\$\$`)/m', (string) $row->{$column->c}, $matches)) {
-                    foreach ($matches[2] as $formula) {
-                        $found[(string) $formula][] = [$column->t, $column->c, $hasId ? $row->id : '-'];
-                    }
-                }
+        foreach ($this->searchableColumns() as $column) {
+            foreach ($this->rowsWithFormulas($column) as $row) {
+                $this->recordFormulas($found, $column, $row);
             }
         }
 
         return $found;
+    }
+
+    private function searchableColumns(): array
+    {
+        $database = config('database.connections.' . config('database.default') . '.database');
+        $columns = DB::select(
+            "select table_name t, column_name c from information_schema.columns where table_schema = ? and data_type in ('text', 'mediumtext', 'longtext', 'varchar')",
+            [$database]
+        );
+
+        return array_values(array_filter($columns, fn ($column) => $this->isSearched($column->t)));
+    }
+
+    private function isSearched(string $table): bool
+    {
+        $isAuditsTable = $table === 'audits';
+
+        return !$isAuditsTable || $this->option('audits');
+    }
+
+    private function rowsWithFormulas(object $column)
+    {
+        $columns = Schema::hasColumn($column->t, 'id') ? ['id', $column->c] : [$column->c];
+
+        return DB::table($column->t)->where($column->c, 'like', '%$$%')->get($columns);
+    }
+
+    private function recordFormulas(array &$found, object $column, object $row): void
+    {
+        foreach ($this->extractFormulas((string) $row->{$column->c}) as $formula) {
+            $found[(string) $formula][] = [$column->t, $column->c, $row->id ?? '-'];
+        }
+    }
+
+    private function extractFormulas(string $text): array
+    {
+        return preg_match_all(self::FORMULA, $text, $matches) ? $matches[2] : [];
+    }
+
+    private function showFailures(array $failures, array $formulas, array $found): void
+    {
+        $rows = array_map(fn ($failure) => $this->describeFailure($failure, $formulas[$failure['index']], $found), $failures);
+
+        $this->table(['where', 'katex says', 'formula'], $rows);
+        $this->error(count($failures) . ' formulas cannot be converted');
+    }
+
+    private function describeFailure(array $failure, string $formula, array $found): array
+    {
+        $places = $found[$formula];
+        $shown = array_map(fn ($place) => "{$place[0]}.{$place[1]} #{$place[2]}", array_slice($places, 0, self::PLACES_SHOWN));
+        $hasMore = count($places) > self::PLACES_SHOWN;
+
+        return [implode(', ', $shown) . ($hasMore ? ', ...' : ''), mb_substr($failure['message'], 0, 70), mb_substr($formula, 0, 60)];
     }
 }
