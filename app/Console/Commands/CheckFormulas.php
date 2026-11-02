@@ -33,6 +33,11 @@ class CheckFormulas extends Command
             return 2;
         }
 
+        return $this->report($failures, $formulas, $found);
+    }
+
+    private function report(array $failures, array $formulas, array $found): int
+    {
         if ($failures === []) {
             $this->info('all formulas can be converted');
             return 0;
