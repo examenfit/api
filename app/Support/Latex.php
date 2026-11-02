@@ -14,30 +14,19 @@ class Latex
     // MathML (<math>..</math>) for a TeX formula, or null when katex cannot convert it
     public static function toMathML(string $formula): ?string
     {
-        $file = tempnam(sys_get_temp_dir(), 'tex');
-        file_put_contents($file, $formula);
+        $process = self::runKatex($formula);
 
-        try {
-            $process = new Process([base_path('node_modules/katex/cli.js'), '--input', $file]);
-            $process->setTimeout(self::TIMEOUT);
-            $process->run();
-        } catch (\Throwable $e) {
-            self::warn("katex could not be run: " . $e->getMessage(), $formula);
+        if ($process === null) {
             return null;
-        } finally {
-            @unlink($file);
         }
 
-        $output = trim($process->getOutput());
+        $mathMl = self::readMathMl($process);
 
-        if ($process->isSuccessful() && preg_match('/\<math.+\<\/math\>/', $output, $match)) {
-            return $match[0];
+        if ($mathMl === null) {
+            self::logRejection($process, $formula);
         }
 
-        $reason = self::reason($process->getErrorOutput());
-        self::warn("katex rejected the formula (exit {$process->getExitCode()}): $reason", $formula);
-
-        return null;
+        return $mathMl;
     }
 
     // Word OMML for a TeX formula, or null when it cannot be converted
@@ -50,22 +39,61 @@ class Latex
         }
 
         try {
-            $xml = new \DOMDocument;
-            $omml = @$xml->loadXML($mathml) ? $mathMlToOmml->transformToXML($xml) : false;
-
-            $result = new \DOMDocument;
-
-            if ($omml && @$result->loadXML($omml)) {
-                return $result->saveXML($result->documentElement);
-            }
+            $omml = self::convertToOmml($mathml, $mathMlToOmml);
         } catch (\Throwable $e) {
             self::warn("MathML to OMML failed: " . $e->getMessage(), $formula);
             return null;
         }
 
-        self::warn("MathML to OMML gave no result", $formula);
+        if ($omml === null) {
+            self::warn("MathML to OMML gave no result", $formula);
+        }
 
-        return null;
+        return $omml;
+    }
+
+    // the finished process, or null when node could not even be started (the cause is logged)
+    private static function runKatex(string $formula): ?Process
+    {
+        $file = tempnam(sys_get_temp_dir(), 'tex');
+        file_put_contents($file, $formula);
+
+        try {
+            $process = new Process([base_path('node_modules/katex/cli.js'), '--input', $file]);
+            $process->setTimeout(self::TIMEOUT);
+            $process->run();
+
+            return $process;
+        } catch (\Throwable $e) {
+            self::warn("katex could not be run: " . $e->getMessage(), $formula);
+            return null;
+        } finally {
+            @unlink($file);
+        }
+    }
+
+    private static function readMathMl(Process $process): ?string
+    {
+        $isConverted = $process->isSuccessful()
+            && preg_match('/\<math.+\<\/math\>/', trim($process->getOutput()), $match);
+
+        return $isConverted ? $match[0] : null;
+    }
+
+    private static function logRejection(Process $process, string $formula): void
+    {
+        $reason = self::reason($process->getErrorOutput());
+        self::warn("katex rejected the formula (exit {$process->getExitCode()}): $reason", $formula);
+    }
+
+    // null when the MathML or the stylesheet output is not well-formed XML
+    private static function convertToOmml(string $mathml, \XSLTProcessor $mathMlToOmml): ?string
+    {
+        $xml = new \DOMDocument;
+        $omml = @$xml->loadXML($mathml) ? $mathMlToOmml->transformToXML($xml) : false;
+        $result = new \DOMDocument;
+
+        return ($omml && @$result->loadXML($omml)) ? $result->saveXML($result->documentElement) : null;
     }
 
     // The TeX source as text for a Word run. PHPWord output escaping is off in this app, so escape it here.
