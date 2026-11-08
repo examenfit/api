@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Collection;
 use App\Support\CollectionCorrectionsDocument;
 use App\Support\CollectionQuestionsDocument;
+use App\Support\DocumentMarkup;
 use App\Support\Latex;
 use PhpOffice\PhpWord\IOFactory;
 use Tests\TestCase;
@@ -64,6 +65,28 @@ class LatexTest extends TestCase
         $this->assertNull(Latex::toMathML('\frac{1'));
         $this->assertNull(Latex::toOmml('\frac{1', $this->mathMlToOmml()));
         $this->assertNull(Latex::toMathML('\nonexistentcommand{x}'));
+    }
+
+    public function test_a_valid_formula_becomes_html_with_mathml_for_the_pdf_pages()
+    {
+        $html = Latex::toHtml('x^2');
+
+        $this->assertStringContainsString('class="katex"', $html);
+        $this->assertStringContainsString('<math', $html);
+    }
+
+    public function test_html_for_a_formula_katex_rejects_is_null()
+    {
+        $this->assertNull(Latex::toHtml('\\frac{1'));
+        $this->assertNull(Latex::toHtml('a$b'));
+    }
+
+    public function test_the_pdf_markup_shows_a_rejected_formula_as_escaped_tex_in_an_error_span()
+    {
+        $html = (new DocumentMarkup)->fix('a `$$x < \\frac{1$$` b `$$x^2$$`');
+
+        $this->assertStringContainsString('<span class="formula-error">x &lt; \\frac{1</span>', $html);
+        $this->assertStringContainsString('class="katex"', $html);
     }
 
     public function test_fallback_text_is_xml_escaped()

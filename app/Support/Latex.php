@@ -29,6 +29,20 @@ class Latex
         return $mathMl;
     }
 
+    // The katex CLI's own output (html with the MathML inside) for the pdf pages, or null when katex cannot convert it
+    public static function toHtml(string $formula): ?string
+    {
+        $process = self::runKatex($formula);
+        $html = $process === null ? '' : trim($process->getOutput());
+        $isConverted = $html !== '' && $process->isSuccessful();
+
+        if ($process !== null && !$isConverted) {
+            self::logRejection($process, $formula);
+        }
+
+        return $isConverted ? $html : null;
+    }
+
     // Word OMML for a TeX formula, or null when it cannot be converted
     public static function toOmml(string $formula, \XSLTProcessor $mathMlToOmml): ?string
     {

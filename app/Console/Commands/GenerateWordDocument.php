@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Support\Latex;
 use App\Models\Collection;
 use Illuminate\Console\Command;
 use PhpOffice\PhpWord\Element\TextRun;
@@ -294,7 +295,7 @@ class GenerateWordDocument extends Command
                     if (preg_match('/`\$\$(.+)?\$\$`/', $result, $match)) {
                         $chunks[$key] = [
                             'type' => 'formula',
-                            'result' => $this->latexFormula($match[1]),
+                            'result' => $this->latexFormula($match[1]) ?? Latex::fallbackText($match[1]),
                         ];
                     }
 
@@ -344,37 +345,10 @@ class GenerateWordDocument extends Command
         }
     }
 
+    // OMML for a formula; null when katex cannot convert it (see App\Support\Latex): the caller falls back to the TeX source as text
     public function latexFormula($formula)
     {
-        $xml = new \DOMDocument;
-        $xml->loadXML($this->latexToMathML($formula));
-
-        $omml = $this->XSLTProcessor->transformToXML($xml);
-
-        $t_omml = new \DOMDocument;
-        $t_omml->loadXML($omml);
-
-        return $t_omml->saveXML($t_omml->documentElement);
-    }
-
-    public function latexToMathML($formula)
-    {
-        // Write formula to file
-        $tempFile = tmpfile();
-        fwrite($tempFile, $formula);
-        $tempFilePath = stream_get_meta_data($tempFile)['uri'];
-
-        // Run KaTeX NodeJS script
-        $result = trim(shell_exec(base_path("/node_modules/katex/cli.js --input {$tempFilePath}")));
-
-        // Grep MathML XML
-        preg_match('/\<math.+\<\/math\>/', $result, $match);
-
-        // Delete file
-        fclose($tempFile);
-
-        // Return MathML XML
-        return $match[0];
+        return Latex::toOmml($formula, $this->XSLTProcessor);
     }
 
     /**

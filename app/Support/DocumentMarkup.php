@@ -2,8 +2,6 @@
 
 namespace App\Support;
 
-use Illuminate\Support\Facades\Log;
-
 class DocumentMarkup {
 
   const BOLD = '/\*\*(.+?)\*\*/m';
@@ -28,23 +26,12 @@ class DocumentMarkup {
     return $text;
   }
 
-  // @see https://www.php.net/manual/en/function.escapeshellcmd.php
-  function latexToMathML($formula)
+  public function latexToMathML($formula)
   {
-    $katex = base_path('/node_modules/katex/cli.js');
+    $html = Latex::toHtml($formula);
 
-    $cmd = str_replace(array('\\', '%'), array('\\\\', '%%'), $formula);
-    $cmd = escapeshellarg($cmd);
-
-    $output = trim((string) shell_exec("printf $cmd | $katex"));
-
-    if ($output === '') {
-      // katex rejected the formula: show the TeX source instead of nothing (and do not fail the page)
-      Log::warning("DocumentMarkup: katex rejected the formula: " . mb_substr($formula, 0, 200));
-      return '<span class="formula-error">' . htmlspecialchars($formula, ENT_QUOTES, 'UTF-8') . '</span>';
-    }
-
-    return $output;
+    // katex rejected the formula: show the TeX source instead of nothing (and do not fail the page)
+    return $html ?? '<span class="formula-error">' . htmlspecialchars($formula, ENT_QUOTES, 'UTF-8') . '</span>';
   }
 
   public function fixLatex($text) {
