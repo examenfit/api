@@ -286,23 +286,6 @@ class CustomQueries extends Controller
       return DB::select(CustomQueries::ACTIVITIES);
     }
 
-    public function activities_tsv()
-    {
-      $type = 'text/tab-separated-values';
-      $content = implode("\n", array_map(
-        fn($row) =>
-          $row->Licentie."\t".
-          $row->Groep."\t".
-          $row->Leerling."\t".
-          $row->Tijdstip."\t".
-          $row->Activiteit,
-        DB::select(CustomQueries::ACTIVITIES)
-      ));
-
-      return response($content)
-        ->header('Content-Type', $type);
-    }
-
     public function questions_complexity_count()
     {
       return DB::select(CustomQueries::QUESTION_COMPLEXITY_COUNT);

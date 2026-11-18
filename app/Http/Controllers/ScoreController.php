@@ -240,43 +240,4 @@ class ScoreController extends Controller
 
       return response()->noContent(201);
     }
-
-    public function fix_totalPoints()
-    {
-      DB::update("
-        update
-          scores a,
-          scores b
-        set
-          a.totalPoints = b.totalPoints
-        where
-          a.question_id = b.question_id and
-          a.totalPoints < b.totalPoints and
-          a.totalPoints = 0
-      ");
-      $rows = DB::select("
-        select
-          question_id,
-          answers.id,
-          sum(points) as totalPoints
-        from
-          answers,
-          answer_sections
-        where
-          answer_id=answers.id and
-          question_id in (select question_id from scores where totalPoints = 0)
-        group by
-          question_id,
-          answers.id,
-          answer_id;
-      ");
-      foreach($rows as $row) {
-        DB::update("
-          update scores
-          set totalPoints = ?
-          where question_id = ?
-        ", [ $row->totalPoints, $row->question_id ]);
-      }
-      return 'hell-yeah!';
-    }
 }

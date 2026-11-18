@@ -46,20 +46,4 @@ class BoomAuthController extends Controller
       'errors' => ['token' => ['Failed to resolve user.']]
     ], 422);
   }
-
-  public function fix_marcel(Request $request) {
-    DB::update("
-      UPDATE users SET email = id WHERE email LIKE 'marcel+%'
-    ");
-    DB::update("
-      UPDATE licenses SET brin_id = null, type = 'deleted' WHERE brin_id LIKE 'EX%'
-    ");
-    return [
-      'status' => 'ok',
-      'detached' => [
-        'users' => "email=marcel+%",
-        'licenses' => "brin_id=EX%",
-      ],
-    ];
-  }
 }

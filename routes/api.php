@@ -4,7 +4,6 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\ContactRequestController;
 use App\Http\Controllers\CartController;
-use App\Http\Controllers\TestController;
 use App\Http\Controllers\TopicController;
 use App\Http\Controllers\ScoreController;
 use App\Http\Controllers\StreamController;
@@ -58,30 +57,11 @@ use App\Http\Controllers\Admin\ChapterController as AdminChapterController;
 // the pdf server posts its disk usage from cron; no session, no csrf: a token in the header (config/pdf_generator.php)
 Route::post('/pdf-generator/disk-usage', [PdfDiskUsageController::class, 'store'])->middleware('throttle:60,1');
 
-Route::group(['middleware' => ['web']], function () {
-
-        Route::get('/fix_marcel', [BoomAuthController::class, 'fix_marcel']);
-
-Route::get('/custom/activities.tsv', [CustomQueries::class, 'activities_tsv']);
-
-Route::get('/log/collection/{collection}', [ActivityLogController::class, 'collectionSummary']);
-Route::get('/log/latest/{privilege}', [ActivityLogController::class, 'latestActivity']);
-
-Route::post('/feedback', [FeedbackController::class, 'post']);
-Route::get('/feedback', [FeedbackController::class, 'streams']);
-Route::get('/feedback/{stream}', [FeedbackController::class, 'exams']);
-Route::get('/feedback/{stream}/{exam}', [FeedbackController::class, 'questions']);
-Route::get('/feedback/{stream}/{exam}/{question}', [FeedbackController::class, 'parts']);
-
-Route::post('/contact-requests', [ContactRequestController::class, 'store']);
-Route::get('/contact-requests', [ContactRequestController::class, 'index']);
-Route::get('/contact-requests/{contactRequest}', [ContactRequestController::class, 'get']);
-Route::put('/contact-requests/{contactRequest}', [ContactRequestController::class, 'put']);
-
-// fixme these routes should probs not be public
-
-
-Route::get('/fix-totalPoints', [ScoreController::class, 'fix_totalPoints']);
+// Public on purpose (decided 2026-11-17, work/todo/bug-api-unauthenticated-routes.txt): the pdf server fetches
+// the html server-to-server without a session. Hashid-only access is accepted here, NOT token-gated.
+Route::get('/download-collection-html/{collection}', [CollectionController::class, 'showCollectionQuestionsHtml']);
+Route::get('/download-appendixes-html/{collection}', [CollectionController::class, 'showCollectionAppendixesHtml']);
+Route::get('/download-topic-appendixes-html/{topic}', [TopicController::class, 'html']);
 
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])
     ->middleware('guest');
@@ -89,52 +69,9 @@ Route::post('/login', [AuthenticatedSessionController::class, 'store'])
 Route::post('/token', [BoomAuthController::class, 'store'])
     ->middleware('guest');
 
-Route::get('/test', [TestController::class, 'show']);
-Route::get('/topics/{topic}', [TopicController::class, 'show']);
-
-Route::post('/annotations/{stream}', [AnnotationController::class, 'addAnnotation']);
-Route::get('/annotations-create-exams', [AnnotationController::class, 'createExams']);
-Route::get('/annotations/{stream}', [AnnotationController::class, 'index']);
-Route::get('/annotations/{stream}/types', [AnnotationController::class, 'types']);
-Route::get('/annotations/{stream}/types/{type}', [AnnotationController::class, 'type']);
-Route::get('/annotations/{stream}/oefensets', [AnnotationController::class, 'oefensets']);
-Route::get('/annotations/{stream}/examens', [AnnotationController::class, 'examens']);
-Route::get('/annotations/{stream}/{annotation}', [AnnotationController::class, 'get']);
-
-Route::get('/download-collection/{collection}', [CollectionController::class, 'showCollectionQuestionsDocument']);
-Route::get('/download-collection-corrections/{collection}', [CollectionController::class, 'showCollectionCorrectionsDocument']);
-Route::get('/download-collection-html/{collection}', [CollectionController::class, 'showCollectionQuestionsHtml']);
-Route::get('/download-collection-pdf/{collection}', [CollectionController::class, 'showCollectionQuestionsPdf']);
-
-Route::get('/download-appendixes-html/{collection}', [CollectionController::class, 'showCollectionAppendixesHtml']);
-Route::get('/download-appendixes-pdf/{collection}', [CollectionController::class, 'showCollectionAppendixesPdf']);
-
-Route::get('/download-topic-appendixes-html/{topic}', [TopicController::class, 'html']);
-Route::get('/download-topic-appendixes-pdf/{topic}', [TopicController::class, 'pdf']);
-
-Route::get('/collections/{collection}/{topic?}', [CollectionController::class, 'show']);
-Route::post('/collections/{collection}/{question}/elaborations', [CollectionController::class, 'storeElaboration']);
-
+// activity tracking is posted from the app also when not logged in (store() handles a null user)
 Route::get('/log', [ActivityLogController::class, 'index']);
 Route::post('/log', [ActivityLogController::class, 'store']);
-
-Route::get('/streams/', [StreamController::class, 'index']);
-Route::get('/streams/{stream}/formuleblad', [StreamController::class, 'formuleblad']);
-Route::get('/streams/{stream}/all-questions', [StreamController::class, 'allQuestions']);
-Route::get('/streams/{stream}/exams', [StreamController::class, 'exams']);
-
-Route::put('/annotation-question/{annotation}/{year}/{term}/{number}', [AnnotationController::class, 'putQuestion']);
-Route::delete('/annotation-question/{annotation}/{year}/{term}/{number}', [AnnotationController::class, 'deleteQuestion']);
-
-
-Route::get('/score', [ScoreController::class, 'loadAll']);
-Route::put('/score', [ScoreController::class, 'saveAll']);
-
-Route::get('/streams/{stream}/scores', [ScoreController::class, 'getStreamScores']);
-Route::post('/streams/{stream}/scores', [ScoreController::class, 'postStreamScore']);
-
-Route::get('/streams/{stream}', [ScoreController::class, 'getStreamScores']);
-Route::post('/streams/{stream}/{question}', [ScoreController::class, 'postStreamScore']);
 
 Route::post('/register', [RegistrationController::class, 'register']);
 // FROZEN (2026-10-25): leerling registration with a Mollie payment is not used (no MOLLIE_API_KEY on production); see RegistrationController
@@ -150,14 +87,66 @@ Route::get('/invite-status', [LicenseController::class, 'getInviteStatus']);
 Route::post('/invite-account', [LicenseController::class, 'postInviteAccount']);
 Route::post('/invite-ok', [LicenseController::class, 'postInviteOk']);
 
+Route::group(['middleware' => 'auth:sanctum'], function () {
+
+    // moved here from the public section on 2026-11-17 (work/todo/bug-api-unauthenticated-routes.txt);
+    // the app calls these with the session cookie (axios withCredentials = true)
+
+    Route::get('/log/collection/{collection}', [ActivityLogController::class, 'collectionSummary']);
+    Route::get('/log/latest/{privilege}', [ActivityLogController::class, 'latestActivity']);
+    Route::get('/activity_summary/{collection}', [CollectionController::class, 'activity_summary']);
+
+    Route::post('/feedback', [FeedbackController::class, 'post']);
+    Route::get('/feedback', [FeedbackController::class, 'streams']);
+    Route::get('/feedback/{stream}', [FeedbackController::class, 'exams']);
+    Route::get('/feedback/{stream}/{exam}', [FeedbackController::class, 'questions']);
+    Route::get('/feedback/{stream}/{exam}/{question}', [FeedbackController::class, 'parts']);
+
+    Route::post('/contact-requests', [ContactRequestController::class, 'store']);
+    Route::get('/contact-requests', [ContactRequestController::class, 'index'])->middleware('role:admin');
+    Route::get('/contact-requests/{contactRequest}', [ContactRequestController::class, 'get'])->middleware('role:admin');
+    Route::put('/contact-requests/{contactRequest}', [ContactRequestController::class, 'put'])->middleware('role:admin');
+
+    Route::get('/topics/{topic}', [TopicController::class, 'show']);
+
+    Route::get('/download-collection/{collection}', [CollectionController::class, 'showCollectionQuestionsDocument']);
+    Route::get('/download-collection-corrections/{collection}', [CollectionController::class, 'showCollectionCorrectionsDocument']);
+    Route::get('/download-collection-pdf/{collection}', [CollectionController::class, 'showCollectionQuestionsPdf']);
+    Route::get('/download-appendixes-pdf/{collection}', [CollectionController::class, 'showCollectionAppendixesPdf']);
+    Route::get('/download-topic-appendixes-pdf/{topic}', [TopicController::class, 'pdf']);
+
+    Route::get('/collections/{collection}/{topic?}', [CollectionController::class, 'show']);
+    Route::post('/collections/{collection}/{question}/elaborations', [CollectionController::class, 'storeElaboration']);
+
+    Route::get('/streams/', [StreamController::class, 'index']);
+    Route::get('/streams/{stream}/formuleblad', [StreamController::class, 'formuleblad']);
+    Route::get('/streams/{stream}/exams', [StreamController::class, 'exams']);
+    Route::get('/streams/{stream}/scores', [ScoreController::class, 'getStreamScores']);
+    Route::post('/streams/{stream}/scores', [ScoreController::class, 'postStreamScore']);
+    Route::get('/streams/{stream}', [ScoreController::class, 'getStreamScores']);
+    Route::post('/streams/{stream}/{question}', [ScoreController::class, 'postStreamScore']);
+
+    Route::get('/score', [ScoreController::class, 'loadAll']);
+    Route::put('/score', [ScoreController::class, 'saveAll']);
+
     Route::get('/user/switch', [UserSwitchController::class, 'getUsers']);
     Route::post('/user/switch', [UserSwitchController::class, 'switchToUser']);
 
     Route::get('/privileges/{privilege}/scores', [ScoreController::class, 'getPrivilegeScores']);
 
-    Route::get('/activity_summary/{collection}', [CollectionController::class, 'activity_summary']);
-
-Route::group(['middleware' => 'auth:sanctum'], function () {
+    Route::group(['middleware' => 'role:admin,author'], function () {
+        Route::post('/annotations/{stream}', [AnnotationController::class, 'addAnnotation']);
+        Route::get('/annotations-create-exams', [AnnotationController::class, 'createExams']);
+        Route::get('/annotations/{stream}', [AnnotationController::class, 'index']);
+        Route::get('/annotations/{stream}/types', [AnnotationController::class, 'types']);
+        Route::get('/annotations/{stream}/types/{type}', [AnnotationController::class, 'type']);
+        Route::get('/annotations/{stream}/oefensets', [AnnotationController::class, 'oefensets']);
+        Route::get('/annotations/{stream}/examens', [AnnotationController::class, 'examens']);
+        Route::get('/annotations/{stream}/{annotation}', [AnnotationController::class, 'get']);
+        Route::put('/annotation-question/{annotation}/{year}/{term}/{number}', [AnnotationController::class, 'putQuestion']);
+        Route::delete('/annotation-question/{annotation}/{year}/{term}/{number}', [AnnotationController::class, 'deleteQuestion']);
+        Route::get('/streams/{stream}/all-questions', [StreamController::class, 'allQuestions']);
+    });
 
 
     Route::get('/licenses', [LicenseController::class, 'index']);
