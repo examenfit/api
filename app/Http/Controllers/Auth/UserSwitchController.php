@@ -32,7 +32,9 @@ class UserSwitchController extends Controller
         ->where('email', $request->email)
         ->first();
 
-      Auth::login($login);
+      // the route runs under auth:sanctum, which makes 'sanctum' the default guard for the request;
+      // the switch must log in on the session guard, so name it explicitly (RequestGuard has no login())
+      Auth::guard('web')->login($login);
 
       $login->load([
         'seats.groups',

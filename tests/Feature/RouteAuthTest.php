@@ -127,4 +127,18 @@ class RouteAuthTest extends TestCase
 
         $this->actingAs($admin, 'sanctum')->getJson('/api/contact-requests')->assertOk();
     }
+
+    public function test_user_switch_logs_in_as_linked_user_on_the_web_guard(): void
+    {
+        // regression: with auth:sanctum the default guard is sanctum's RequestGuard, which has no
+        // login() — the switch must use the session guard explicitly (staging 500, 2026-11-18)
+        $docent = User::factory()->create(['role' => 'docent', 'link' => 'link-1']);
+        $demo = User::factory()->create(['role' => 'leerling', 'link' => 'link-1']);
+
+        $this->actingAs($docent, 'sanctum')
+            ->postJson('/api/user/switch', ['email' => $demo->email])
+            ->assertOk();
+
+        $this->assertAuthenticatedAs($demo, 'web');
+    }
 }
