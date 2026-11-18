@@ -19,21 +19,16 @@ class RouteAuthTest extends TestCase
         return [
             ['GET', '/api/log/collection/abc'],
             ['GET', '/api/log/latest/abc'],
-            ['GET', '/api/activity_summary/abc'],
             ['GET', '/api/feedback'],
             ['POST', '/api/feedback'],
             ['POST', '/api/contact-requests'],
             ['GET', '/api/contact-requests'],
-            ['GET', '/api/topics/abc'],
             ['GET', '/api/download-collection/abc'],
             ['GET', '/api/download-collection-corrections/abc'],
             ['GET', '/api/download-collection-pdf/abc'],
             ['GET', '/api/download-appendixes-pdf/abc'],
             ['GET', '/api/download-topic-appendixes-pdf/abc'],
-            ['GET', '/api/collections/abc'],
-            ['POST', '/api/collections/abc/def/elaborations'],
             ['GET', '/api/streams/'],
-            ['GET', '/api/streams/abc/formuleblad'],
             ['GET', '/api/streams/abc/exams'],
             ['GET', '/api/streams/abc/scores'],
             ['GET', '/api/streams/abc'],
@@ -69,12 +64,23 @@ class RouteAuthTest extends TestCase
         $this->json($method, $uri)->assertNotFound();
     }
 
-    public function test_pdf_server_html_routes_stay_public(): void
+    public function test_public_practicing_routes_are_not_behind_auth(): void
     {
-        // decided 2026-11-17: not token-gated; without a session they reach model binding and 404 on the dummy id
-        $this->getJson('/api/download-collection-html/abc')->assertNotFound();
-        $this->getJson('/api/download-appendixes-html/abc')->assertNotFound();
-        $this->getJson('/api/download-topic-appendixes-html/abc')->assertNotFound();
+        // decided 2026-11-17: the pdf server fetches the html routes server-to-server; the practicing pages
+        // /student/*, /a/* and /c/* call the others without a login. Without auth they reach model binding
+        // and 404 on the dummy id (a 401 would mean auth was added again).
+        foreach ([
+            '/api/download-collection-html/abc',
+            '/api/download-appendixes-html/abc',
+            '/api/download-topic-appendixes-html/abc',
+            '/api/collections/abc',
+            '/api/topics/abc',
+            '/api/activity_summary/abc',
+            '/api/streams/abc/formuleblad',
+        ] as $uri) {
+            $this->getJson($uri)->assertNotFound();
+        }
+        $this->postJson('/api/collections/abc/def/elaborations')->assertNotFound();
     }
 
     public function test_activity_log_stays_public_for_anonymous_tracking(): void

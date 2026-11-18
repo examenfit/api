@@ -65,6 +65,14 @@ Route::get('/download-collection-html/{collection}', [CollectionController::clas
 Route::get('/download-appendixes-html/{collection}', [CollectionController::class, 'showCollectionAppendixesHtml']);
 Route::get('/download-topic-appendixes-html/{topic}', [TopicController::class, 'html']);
 
+// Public on purpose: the practicing pages /student/*, /a/* and /c/* are reachable without login and call these.
+// activity_summary returns aggregate device/session counts only (no emails); elaborations accepts only jpg/png.
+Route::get('/collections/{collection}/{topic?}', [CollectionController::class, 'show']);
+Route::post('/collections/{collection}/{question}/elaborations', [CollectionController::class, 'storeElaboration']);
+Route::get('/topics/{topic}', [TopicController::class, 'show']);
+Route::get('/activity_summary/{collection}', [CollectionController::class, 'activity_summary']);
+Route::get('/streams/{stream}/formuleblad', [StreamController::class, 'formuleblad']);
+
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])
     ->middleware('guest');
 
@@ -96,7 +104,6 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 
     Route::get('/log/collection/{collection}', [ActivityLogController::class, 'collectionSummary']);
     Route::get('/log/latest/{privilege}', [ActivityLogController::class, 'latestActivity']);
-    Route::get('/activity_summary/{collection}', [CollectionController::class, 'activity_summary']);
 
     Route::post('/feedback', [FeedbackController::class, 'post']);
     Route::get('/feedback', [FeedbackController::class, 'streams']);
@@ -109,19 +116,13 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
     Route::get('/contact-requests/{contactRequest}', [ContactRequestController::class, 'get'])->middleware('role:admin');
     Route::put('/contact-requests/{contactRequest}', [ContactRequestController::class, 'put'])->middleware('role:admin');
 
-    Route::get('/topics/{topic}', [TopicController::class, 'show']);
-
     Route::get('/download-collection/{collection}', [CollectionController::class, 'showCollectionQuestionsDocument']);
     Route::get('/download-collection-corrections/{collection}', [CollectionController::class, 'showCollectionCorrectionsDocument']);
     Route::get('/download-collection-pdf/{collection}', [CollectionController::class, 'showCollectionQuestionsPdf']);
     Route::get('/download-appendixes-pdf/{collection}', [CollectionController::class, 'showCollectionAppendixesPdf']);
     Route::get('/download-topic-appendixes-pdf/{topic}', [TopicController::class, 'pdf']);
 
-    Route::get('/collections/{collection}/{topic?}', [CollectionController::class, 'show']);
-    Route::post('/collections/{collection}/{question}/elaborations', [CollectionController::class, 'storeElaboration']);
-
     Route::get('/streams/', [StreamController::class, 'index']);
-    Route::get('/streams/{stream}/formuleblad', [StreamController::class, 'formuleblad']);
     Route::get('/streams/{stream}/exams', [StreamController::class, 'exams']);
     Route::get('/streams/{stream}/scores', [ScoreController::class, 'getStreamScores']);
     Route::post('/streams/{stream}/scores', [ScoreController::class, 'postStreamScore']);
