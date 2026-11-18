@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
@@ -140,5 +141,20 @@ class RouteAuthTest extends TestCase
             ->assertOk();
 
         $this->assertAuthenticatedAs($demo, 'web');
+    }
+
+    public function test_annotation_oefensets_and_examens_have_no_role_gate(): void
+    {
+        // the zelf-oefenen pages (/zelf-oefenen/per-onderwerp, /hele-examens) call these as any logged-in
+        // user (docent got 403 on staging, 2026-11-18); the admin annotation routes keep role:admin,author
+        $router = app('router');
+        foreach (['api/annotations/x/oefensets', 'api/annotations/x/examens'] as $uri) {
+            $route = $router->getRoutes()->match(Request::create('/' . $uri, 'GET'));
+            $this->assertNotContains('role:admin,author', $route->gatherMiddleware(), $uri);
+        }
+        foreach (['api/annotations/x', 'api/annotations-create-exams', 'api/streams/x/all-questions'] as $uri) {
+            $route = $router->getRoutes()->match(Request::create('/' . $uri, 'GET'));
+            $this->assertContains('role:admin,author', $route->gatherMiddleware(), $uri);
+        }
     }
 }

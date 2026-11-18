@@ -139,14 +139,17 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 
     Route::get('/privileges/{privilege}/scores', [ScoreController::class, 'getPrivilegeScores']);
 
+    // read by the zelf-oefenen pages (/zelf-oefenen/per-onderwerp, /hele-examens) for any logged-in
+    // user, so NO role gate here — only auth:sanctum (staging 403 for docent, 2026-11-18)
+    Route::get('/annotations/{stream}/oefensets', [AnnotationController::class, 'oefensets']);
+    Route::get('/annotations/{stream}/examens', [AnnotationController::class, 'examens']);
+
     Route::group(['middleware' => 'role:admin,author'], function () {
         Route::post('/annotations/{stream}', [AnnotationController::class, 'addAnnotation']);
         Route::get('/annotations-create-exams', [AnnotationController::class, 'createExams']);
         Route::get('/annotations/{stream}', [AnnotationController::class, 'index']);
         Route::get('/annotations/{stream}/types', [AnnotationController::class, 'types']);
         Route::get('/annotations/{stream}/types/{type}', [AnnotationController::class, 'type']);
-        Route::get('/annotations/{stream}/oefensets', [AnnotationController::class, 'oefensets']);
-        Route::get('/annotations/{stream}/examens', [AnnotationController::class, 'examens']);
         Route::get('/annotations/{stream}/{annotation}', [AnnotationController::class, 'get']);
         Route::put('/annotation-question/{annotation}/{year}/{term}/{number}', [AnnotationController::class, 'putQuestion']);
         Route::delete('/annotation-question/{annotation}/{year}/{term}/{number}', [AnnotationController::class, 'deleteQuestion']);
