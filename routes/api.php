@@ -73,6 +73,14 @@ Route::get('/topics/{topic}', [TopicController::class, 'show']);
 Route::get('/activity_summary/{collection}', [CollectionController::class, 'activity_summary']);
 Route::get('/streams/{stream}/formuleblad', [StreamController::class, 'formuleblad']);
 
+// Public on purpose: the feedback widget sits on the public practicing pages (/student/*, /a/*, /c/*).
+// The GETs return only catalog labels; POST stores a feedback text (creator resolved or NULL).
+Route::post('/feedback', [FeedbackController::class, 'post']);
+Route::get('/feedback', [FeedbackController::class, 'streams']);
+Route::get('/feedback/{stream}', [FeedbackController::class, 'exams']);
+Route::get('/feedback/{stream}/{exam}', [FeedbackController::class, 'questions']);
+Route::get('/feedback/{stream}/{exam}/{question}', [FeedbackController::class, 'parts']);
+
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])
     ->middleware('guest');
 
@@ -104,12 +112,6 @@ Route::group(['middleware' => 'auth:sanctum'], function () {
 
     Route::get('/log/collection/{collection}', [ActivityLogController::class, 'collectionSummary']);
     Route::get('/log/latest/{privilege}', [ActivityLogController::class, 'latestActivity']);
-
-    Route::post('/feedback', [FeedbackController::class, 'post']);
-    Route::get('/feedback', [FeedbackController::class, 'streams']);
-    Route::get('/feedback/{stream}', [FeedbackController::class, 'exams']);
-    Route::get('/feedback/{stream}/{exam}', [FeedbackController::class, 'questions']);
-    Route::get('/feedback/{stream}/{exam}/{question}', [FeedbackController::class, 'parts']);
 
     Route::post('/contact-requests', [ContactRequestController::class, 'store']);
     Route::get('/contact-requests', [ContactRequestController::class, 'index'])->middleware('role:admin');

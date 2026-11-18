@@ -19,8 +19,6 @@ class RouteAuthTest extends TestCase
         return [
             ['GET', '/api/log/collection/abc'],
             ['GET', '/api/log/latest/abc'],
-            ['GET', '/api/feedback'],
-            ['POST', '/api/feedback'],
             ['POST', '/api/contact-requests'],
             ['GET', '/api/contact-requests'],
             ['GET', '/api/download-collection/abc'],
@@ -81,6 +79,20 @@ class RouteAuthTest extends TestCase
             $this->getJson($uri)->assertNotFound();
         }
         $this->postJson('/api/collections/abc/def/elaborations')->assertNotFound();
+
+        // feedback sits on the public practicing pages: catalog labels and a feedback POST, no auth
+        $this->getJson('/api/feedback')->assertOk();
+        $this->postJson('/api/feedback', [
+            'feedback' => 'test',
+            'collection' => null,
+            'stream' => null,
+            'exam' => null,
+            'question' => null,
+            'part' => null,
+        ])->assertOk();
+        foreach (['/api/feedback/abc', '/api/feedback/abc/def', '/api/feedback/abc/def/ghi'] as $uri) {
+            $this->assertNotEquals(401, $this->getJson($uri)->getStatusCode());
+        }
     }
 
     public function test_activity_log_stays_public_for_anonymous_tracking(): void
