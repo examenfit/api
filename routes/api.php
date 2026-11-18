@@ -57,6 +57,8 @@ use App\Http\Controllers\Admin\ChapterController as AdminChapterController;
 // the pdf server posts its disk usage from cron; no session, no csrf: a token in the header (config/pdf_generator.php)
 Route::post('/pdf-generator/disk-usage', [PdfDiskUsageController::class, 'store'])->middleware('throttle:60,1');
 
+Route::group(['middleware' => ['web']], function () {
+
 // Public on purpose (decided 2026-11-17, work/todo/bug-api-unauthenticated-routes.txt): the pdf server fetches
 // the html server-to-server without a session. Hashid-only access is accepted here, NOT token-gated.
 Route::get('/download-collection-html/{collection}', [CollectionController::class, 'showCollectionQuestionsHtml']);

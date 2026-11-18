@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 // 2026-11-17 (work/todo/bug-api-unauthenticated-routes.txt): routes that were public before must now answer
@@ -46,7 +47,7 @@ class RouteAuthTest extends TestCase
         ];
     }
 
-    /** @dataProvider protectedRoutesProvider */
+    #[DataProvider('protectedRoutesProvider')]
     public function test_protected_routes_require_authentication(string $method, string $uri): void
     {
         $this->json($method, $uri)->assertUnauthorized();
@@ -62,7 +63,7 @@ class RouteAuthTest extends TestCase
         ];
     }
 
-    /** @dataProvider deletedRoutesProvider */
+    #[DataProvider('deletedRoutesProvider')]
     public function test_deleted_routes_are_gone(string $method, string $uri): void
     {
         $this->json($method, $uri)->assertNotFound();
@@ -97,8 +98,9 @@ class RouteAuthTest extends TestCase
     {
         $leerling = User::factory()->create(['role' => 'leerling']);
 
-        $this->actingAs($leerling, 'sanctum')->getJson('/api/annotations/abc')->assertForbidden();
+        // routes without model binding, so the role check (not a 404) decides
         $this->actingAs($leerling, 'sanctum')->getJson('/api/contact-requests')->assertForbidden();
+        $this->actingAs($leerling, 'sanctum')->getJson('/api/annotations-create-exams')->assertForbidden();
     }
 
     public function test_admin_can_read_contact_requests(): void
